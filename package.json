@@ -11,11 +11,20 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "dev:api": "pnpm --filter @reset/api dev",
+    "dev:web": "pnpm --filter @reset/web dev",
+    "dev:booking": "pnpm --filter @reset/booking dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
+    "db:up": "docker compose up -d postgres redis mailhog",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d postgres redis mailhog",
+    "db:migrate": "pnpm --filter @reset/api prisma:migrate",
+    "db:seed": "pnpm --filter @reset/api prisma:seed",
+    "db:studio": "pnpm --filter @reset/api prisma:studio",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {
