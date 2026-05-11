@@ -6,6 +6,7 @@ import { loggerOptions } from './lib/logger.js';
 import { registerHelmet } from './plugins/helmet.js';
 import { registerCors } from './plugins/cors.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
+import prismaPlugin from './plugins/prisma.js';
 import { registerRoutes } from './routes/index.js';
 
 export async function buildApp() {
@@ -13,6 +14,7 @@ export async function buildApp() {
   await app.register(sensible);
   await registerHelmet(app);
   await registerCors(app);
+  await app.register(prismaPlugin);
   registerErrorHandler(app);
   await registerRoutes(app);
   return app;
