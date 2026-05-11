@@ -2,14 +2,14 @@ import { pathToFileURL } from 'node:url';
 import Fastify from 'fastify';
 import sensible from '@fastify/sensible';
 import { env } from './env.js';
-import { logger } from './lib/logger.js';
+import { loggerOptions } from './lib/logger.js';
 import { registerHelmet } from './plugins/helmet.js';
 import { registerCors } from './plugins/cors.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import { registerRoutes } from './routes/index.js';
 
 export async function buildApp() {
-  const app = Fastify({ loggerInstance: logger, trustProxy: true });
+  const app = Fastify({ logger: loggerOptions, trustProxy: true });
   await app.register(sensible);
   await registerHelmet(app);
   await registerCors(app);

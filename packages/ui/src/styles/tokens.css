@@ -1,0 +1,47 @@
+@layer base {
+  :root {
+    --primary: 29 158 117;
+    --primary-dark: 15 110 86;
+    --primary-light: 225 245 238;
+    --primary-lightest: 242 250 246;
+
+    --secondary: 83 74 183;
+    --secondary-light: 238 237 254;
+
+    --info: 24 95 165;
+    --info-light: 230 241 251;
+    --info-dark: 12 68 124;
+
+    --warning: 186 117 23;
+    --warning-light: 250 238 218;
+    --warning-dark: 133 79 11;
+
+    --danger: 226 75 74;
+    --danger-light: 252 235 235;
+    --danger-dark: 121 31 31;
+
+    --pink: 212 83 126;
+    --pink-light: 252 224 233;
+    --pink-dark: 163 58 92;
+
+    --bg: 250 250 247;
+    --bg-secondary: 241 239 232;
+    --surface: 255 255 255;
+
+    --text: 44 44 42;
+    --text-secondary: 95 94 90;
+    --text-tertiary: 136 135 128;
+
+    --border: 211 209 199;
+    --border-light: 229 227 219;
+
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+}
