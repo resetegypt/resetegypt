@@ -1,0 +1,22 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "loading": "Chargement…",
+    "search": "Rechercher",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "app": {
+    "title": "Reset Egypt",
+    "subtitle": "Centre d'auriculothérapie laser",
+    "tagline": "Application métier — Phase 1 (cadrage)"
+  },
+  "languages": {
+    "fr": "Français",
+    "ar": "العربية",
+    "en": "English"
+  }
+}

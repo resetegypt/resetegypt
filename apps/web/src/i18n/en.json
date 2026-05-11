@@ -1,0 +1,22 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "search": "Search",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "app": {
+    "title": "Reset Egypt",
+    "subtitle": "Laser auriculotherapy center",
+    "tagline": "Business app — Phase 1 (scaffolding)"
+  },
+  "languages": {
+    "fr": "Français",
+    "ar": "العربية",
+    "en": "English"
+  }
+}
