@@ -1,0 +1,307 @@
+// Reset Egypt — Prisma schema
+// Generated from spec docs/superpowers/specs/2026-05-11-reset-egypt-design.md (lines 441-682)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  passwordHash      String
+  role              Role     @default(SECRETARY)
+  firstName         String
+  lastName          String
+  phone             String?
+  preferredLanguage String   @default("fr")
+  isActive          Boolean  @default(true)
+  isLocked          Boolean  @default(false)
+  failedAttempts    Int      @default(0)
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  appointments        Appointment[]   @relation("PractitionerAppointments")
+  createdPatients     Patient[]       @relation("CreatedBy")
+  preferredByPatients Patient[]       @relation("PreferredPractitioner")
+  payments            Payment[]       @relation("PaymentCreatedBy")
+  auditLogs           AuditLog[]
+  systemSettings      SystemSetting[]
+}
+
+enum Role {
+  ADMIN
+  PRACTITIONER
+  SECRETARY
+}
+
+model Patient {
+  id                      String        @id @default(uuid())
+  firstName               String
+  lastName                String
+  dateOfBirth             DateTime?
+  age                     Int?
+  gender                  Gender?
+  phone                   String        @unique
+  whatsapp                String?
+  email                   String?
+  address                 String?
+  governorate             String?
+  profession              String?
+  maritalStatus           String?
+  acquisitionSource       String[]
+  primaryAddiction        Addiction
+  previousAttempts        String?
+  motivationLevel         String?
+  emergencyContact        Json?
+  consents                Json
+  preferredLanguage       String        @default("fr")
+  preferredPractitionerId String?
+  preferredPractitioner   User?         @relation("PreferredPractitioner", fields: [preferredPractitionerId], references: [id])
+  createdById             String
+  createdBy               User          @relation("CreatedBy", fields: [createdById], references: [id])
+  status                  PatientStatus @default(ACTIVE)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+  payments       Payment[]
+  messages       Message[]
+
+  @@index([phone])
+  @@index([lastName, firstName])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Addiction {
+  TOBACCO
+  DRUGS
+  ALCOHOL
+  SUGAR
+  STRESS
+}
+
+enum PatientStatus {
+  ACTIVE
+  ARCHIVED
+  LOST
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  patientId      String
+  patient        Patient           @relation(fields: [patientId], references: [id])
+  practitionerId String
+  practitioner   User              @relation("PractitionerAppointments", fields: [practitionerId], references: [id])
+  scheduledAt    DateTime
+  duration       Int               @default(40)
+  service        Addiction
+  visitType      VisitType
+  status         AppointmentStatus @default(SCHEDULED)
+  source         String
+  price          Decimal           @db.Decimal(10, 2)
+  notes          String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  medicalRecord MedicalRecord?
+  payment       Payment?
+
+  @@index([scheduledAt])
+  @@index([practitionerId, scheduledAt])
+  @@index([patientId, scheduledAt])
+}
+
+enum VisitType {
+  FIRST
+  FOLLOWUP
+  CONSOLIDATION
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+}
+
+model MedicalRecord {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  patientId     String
+  patient       Patient     @relation(fields: [patientId], references: [id])
+
+  yearsOfAddiction Int?
+  dailyQuantity    String?
+  previousMethods  String[]
+  longestQuit      String?
+
+  triggers           String[]
+  consumptionMoments String?
+
+  stressScore     Int?
+  anxietyScore    Int?
+  cravingScore    Int?
+  sleepScore      Int?
+  motivationScore Int?
+
+  contraindications String[]
+  medications       String?
+  allergies         String?
+
+  weight Float?
+  height Float?
+  bmi    Float?
+  spo2   Int?
+
+  fagerstromScore    Int?
+  auditScore         Int?
+  duditScore         Int?
+  yfasScore          Int?
+  hadAnxietyScore    Int?
+  hadDepressionScore Int?
+
+  auricularPoints String?
+  laserDuration   Int?
+  nextSession     String?
+
+  privateNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  appointmentId  String?       @unique
+  appointment    Appointment?  @relation(fields: [appointmentId], references: [id])
+  patientId      String
+  patient        Patient       @relation(fields: [patientId], references: [id])
+  invoiceNumber  String        @unique
+  items          Json
+  subtotal       Decimal       @db.Decimal(10, 2)
+  discount       Decimal       @default(0) @db.Decimal(10, 2)
+  vat            Decimal       @db.Decimal(10, 2)
+  total          Decimal       @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod
+  paymentRef     String?
+  etaUuid        String?
+  etaHash        String?
+  etaSubmittedAt DateTime?
+  pdfUrl         String?
+  createdAt      DateTime      @default(now())
+  createdById    String
+  createdBy      User          @relation("PaymentCreatedBy", fields: [createdById], references: [id])
+
+  @@index([patientId, createdAt])
+  @@index([invoiceNumber])
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  VODAFONE_CASH
+  INSTAPAY
+  FAWRY
+  BANK_TRANSFER
+}
+
+model Message {
+  id           String        @id @default(uuid())
+  patientId    String?
+  patient      Patient?      @relation(fields: [patientId], references: [id])
+  externalId   String?
+  channel      Channel
+  direction    Direction
+  fromAddress  String
+  toAddress    String
+  content      String
+  status       MessageStatus @default(SENT)
+  isAuto       Boolean       @default(false)
+  templateName String?
+  attachments  Json?
+  language     String        @default("fr")
+  createdAt    DateTime      @default(now())
+  readAt       DateTime?
+
+  @@index([patientId, createdAt])
+  @@index([channel, createdAt])
+}
+
+enum Channel {
+  WHATSAPP
+  INSTAGRAM
+  MESSENGER
+  EMAIL
+  SMS
+}
+
+enum Direction {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model AutomationWorkflow {
+  id        String   @id @default(uuid())
+  name      String
+  trigger   String
+  isActive  Boolean  @default(true)
+  steps     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  resource  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+}
+
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+  updatedBy   User?    @relation(fields: [updatedById], references: [id])
+}
+
+model IpWhitelist {
+  id          String   @id @default(uuid())
+  ipAddress   String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
