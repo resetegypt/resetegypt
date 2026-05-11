@@ -7,6 +7,7 @@ import { registerHelmet } from './plugins/helmet.js';
 import { registerCors } from './plugins/cors.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import prismaPlugin from './plugins/prisma.js';
+import authPlugin from './plugins/auth.js';
 import { registerRoutes } from './routes/index.js';
 
 export async function buildApp() {
@@ -15,6 +16,7 @@ export async function buildApp() {
   await registerHelmet(app);
   await registerCors(app);
   await app.register(prismaPlugin);
+  await app.register(authPlugin);
   registerErrorHandler(app);
   await registerRoutes(app);
   return app;

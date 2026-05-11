@@ -1,64 +1,60 @@
-import { useTranslation } from 'react-i18next';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@reset/ui';
-import { SUPPORTED_LANGUAGES, type Language } from './i18n';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore, defaultRouteForRole } from './lib/auth';
+import { LoginPage } from './pages/LoginPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { UsersPage } from './pages/admin/UsersPage';
+import { AuditPage } from './pages/admin/AuditPage';
+import { PatientsListPage } from './pages/patients/PatientsListPage';
+import { PatientIntakePage } from './pages/patients/PatientIntakePage';
+import { PatientDetailPage } from './pages/patients/PatientDetailPage';
+import { ClinicalFormPage } from './pages/patients/ClinicalFormPage';
+import { AgendaPage } from './pages/agenda/AgendaPage';
+import { NewAppointmentPage } from './pages/agenda/NewAppointmentPage';
+import { PaymentPage } from './pages/payment/PaymentPage';
+import { StatsPage } from './pages/stats/StatsPage';
+import { InboxPage } from './pages/inbox/InboxPage';
+import { AppShell } from './components/AppShell';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export function App() {
-  const { t, i18n } = useTranslation();
+  const init = useAuthStore((s) => s.init);
+  const user = useAuthStore((s) => s.user);
 
-  const switchLang = (lng: Language) => i18n.changeLanguage(lng);
+  useEffect(() => {
+    init();
+  }, [init]);
 
   return (
-    <div className="min-h-screen bg-bg p-8 max-w-3xl mx-auto space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-primary">{t('app.title')}</h1>
-        <p className="text-text-secondary">{t('app.subtitle')}</p>
-        <Badge variant="info">{t('app.tagline')}</Badge>
-      </header>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Langue / اللغة / Language</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-2 flex-wrap">
-          {SUPPORTED_LANGUAGES.map((lng) => (
-            <Button
-              key={lng}
-              variant={i18n.language === lng ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => switchLang(lng)}
-            >
-              {t(`languages.${lng}`)}
-            </Button>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>API status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ApiStatus />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function ApiStatus() {
-  const url = '/api/health';
-  return (
-    <div className="text-sm space-y-2">
-      <p className="text-text-secondary">
-        Vérification :{' '}
-        <a href={url} target="_blank" rel="noreferrer" className="text-info underline">
-          {url}
-        </a>
-      </p>
-      <p className="text-text-tertiary">
-        Ouvre ce lien — tu dois voir{' '}
-        <code className="bg-bg-secondary px-1 rounded">{`{"status":"ok",...}`}</code>
-      </p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppShell />}>
+            <Route index element={user?.role === 'ADMIN' ? <Navigate to="/admin/dashboard" replace /> : <DashboardPage />} />
+            <Route path="agenda" element={<AgendaPage />} />
+            <Route path="appointments/new" element={<NewAppointmentPage />} />
+            <Route path="patients" element={<PatientsListPage />} />
+            <Route path="patients/intake" element={<PatientIntakePage />} />
+            <Route path="patients/:id" element={<PatientDetailPage />} />
+            <Route path="patients/:id/clinical" element={<ClinicalFormPage />} />
+            <Route path="payment/:appointmentId" element={<PaymentPage />} />
+            <Route path="inbox" element={<InboxPage />} />
+            <Route path="stats" element={<StatsPage />} />
+          </Route>
+        </Route>
+        <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+          <Route element={<AppShell />}>
+            <Route path="admin/dashboard" element={<StatsPage />} />
+            <Route path="admin/users" element={<UsersPage />} />
+            <Route path="admin/audit" element={<AuditPage />} />
+          </Route>
+        </Route>
+        <Route
+          path="*"
+          element={user ? <Navigate to={defaultRouteForRole(user.role)} replace /> : <Navigate to="/login" replace />}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }

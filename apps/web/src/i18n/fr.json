@@ -12,11 +12,52 @@
   "app": {
     "title": "Reset Egypt",
     "subtitle": "Centre d'auriculothérapie laser",
-    "tagline": "Application métier — Phase 1 (cadrage)"
+    "tagline": "Application métier"
   },
   "languages": {
     "fr": "Français",
     "ar": "العربية",
     "en": "English"
+  },
+  "auth": {
+    "login": "Connexion",
+    "loginSubtitle": "Espace staff Reset Egypt",
+    "email": "Email",
+    "password": "Mot de passe",
+    "rememberMe": "Rester connecté 7 jours",
+    "signIn": "Se connecter",
+    "logout": "Se déconnecter",
+    "devCredentialsHint": "Dev : direction@reset-egypt.com / TempPass123!"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "agenda": "Agenda",
+    "newAppointment": "Nouveau RDV",
+    "inbox": "Inbox",
+    "patients": "Patients",
+    "intake": "Fiche d'accueil",
+    "stats": "Statistiques",
+    "adminUsers": "Gestion comptes",
+    "auditLogs": "Journal d'audit",
+    "logout": "Déconnexion"
+  },
+  "dashboard": {
+    "greeting": "Bonjour",
+    "appointmentsToday": "Rendez-vous du jour",
+    "openAgenda": "Ouvrir l'agenda",
+    "noAppointmentsToday": "Aucun rendez-vous aujourd'hui",
+    "quickActions": "Actions rapides",
+    "kpi": {
+      "appointments": "RDV aujourd'hui",
+      "messages": "Demandes en attente",
+      "reminders": "Relances à envoyer",
+      "revenue": "Recettes du jour"
+    },
+    "action": {
+      "newPatient": "Fiche patient",
+      "newAppointment": "Nouveau RDV",
+      "patients": "Liste patients",
+      "inbox": "Inbox"
+    }
   }
 }

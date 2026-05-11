@@ -12,11 +12,52 @@
   "app": {
     "title": "Reset Egypt",
     "subtitle": "Laser auriculotherapy center",
-    "tagline": "Business app — Phase 1 (scaffolding)"
+    "tagline": "Business app"
   },
   "languages": {
     "fr": "Français",
     "ar": "العربية",
     "en": "English"
+  },
+  "auth": {
+    "login": "Sign in",
+    "loginSubtitle": "Reset Egypt staff portal",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Stay signed in for 7 days",
+    "signIn": "Sign in",
+    "logout": "Sign out",
+    "devCredentialsHint": "Dev: direction@reset-egypt.com / TempPass123!"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "agenda": "Calendar",
+    "newAppointment": "New booking",
+    "inbox": "Inbox",
+    "patients": "Patients",
+    "intake": "Intake form",
+    "stats": "Stats",
+    "adminUsers": "User management",
+    "auditLogs": "Audit log",
+    "logout": "Sign out"
+  },
+  "dashboard": {
+    "greeting": "Hi",
+    "appointmentsToday": "Today's appointments",
+    "openAgenda": "Open calendar",
+    "noAppointmentsToday": "No appointments today",
+    "quickActions": "Quick actions",
+    "kpi": {
+      "appointments": "Appointments today",
+      "messages": "Pending messages",
+      "reminders": "Reminders to send",
+      "revenue": "Today's revenue"
+    },
+    "action": {
+      "newPatient": "New patient",
+      "newAppointment": "New appointment",
+      "patients": "Patient list",
+      "inbox": "Inbox"
+    }
   }
 }

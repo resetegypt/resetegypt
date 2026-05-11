@@ -12,11 +12,52 @@
   "app": {
     "title": "ريسيت إيجيبت",
     "subtitle": "مركز العلاج بالليزر للأذن",
-    "tagline": "تطبيق إدارة — المرحلة 1 (الإعداد)"
+    "tagline": "تطبيق إدارة"
   },
   "languages": {
     "fr": "Français",
     "ar": "العربية",
     "en": "English"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "loginSubtitle": "بوابة موظفي ريسيت إيجيبت",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "rememberMe": "البقاء متصلاً 7 أيام",
+    "signIn": "دخول",
+    "logout": "تسجيل الخروج",
+    "devCredentialsHint": "تطوير: direction@reset-egypt.com / TempPass123!"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "agenda": "التقويم",
+    "newAppointment": "موعد جديد",
+    "inbox": "صندوق الوارد",
+    "patients": "المرضى",
+    "intake": "ورقة الاستقبال",
+    "stats": "الإحصائيات",
+    "adminUsers": "إدارة الحسابات",
+    "auditLogs": "سجل التدقيق",
+    "logout": "خروج"
+  },
+  "dashboard": {
+    "greeting": "مرحبًا",
+    "appointmentsToday": "مواعيد اليوم",
+    "openAgenda": "فتح التقويم",
+    "noAppointmentsToday": "لا مواعيد اليوم",
+    "quickActions": "إجراءات سريعة",
+    "kpi": {
+      "appointments": "مواعيد اليوم",
+      "messages": "رسائل معلقة",
+      "reminders": "تذكيرات",
+      "revenue": "إيراد اليوم"
+    },
+    "action": {
+      "newPatient": "مريض جديد",
+      "newAppointment": "موعد جديد",
+      "patients": "قائمة المرضى",
+      "inbox": "صندوق الوارد"
+    }
   }
 }
