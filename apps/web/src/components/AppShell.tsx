@@ -45,19 +45,23 @@ export function AppShell() {
   return (
     <div className="min-h-screen grid grid-cols-[260px_1fr]">
       <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
-        <div className="p-5 border-b border-border bg-primary text-primary-light">
-          <BrandMark variant="wordmark" size="md" />
-          <div className="text-[10px] text-primary-light/70 mt-1 tracking-[0.25em] font-medium">YOURSELF</div>
-        </div>
-        <div className="p-3 border-b border-border flex items-center gap-3">
-          <Avatar>
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">
-              {user.firstName} {user.lastName}
+        {/* Bandeau bleu royal — identité de marque + infos utilisateur connecté */}
+        <div className="bg-primary text-primary-light px-5 pt-5 pb-4 border-b border-primary-dark">
+          <div className="flex items-center justify-between">
+            <BrandMark variant="wordmark" size="md" />
+            <span className="text-[9px] text-primary-light/60 tracking-[0.3em] font-medium ml-2">YOURSELF</span>
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <Avatar className="ring-2 ring-primary-light/30">
+              <AvatarFallback className="bg-primary-light/20 text-primary-light font-semibold">{initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-white truncate">
+                {user.firstName} {user.lastName}
+              </div>
+              <div className="text-[11px] text-primary-light/80 truncate">{user.email}</div>
+              <div className="mt-1"><RoleBadge role={user.role} /></div>
             </div>
-            <RoleBadge role={user.role} />
           </div>
         </div>
         <nav className="flex-1 py-2">
