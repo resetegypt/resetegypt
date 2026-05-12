@@ -102,22 +102,66 @@ export function StatsPage() {
             <CardTitle>📈 {t('stats.revenueChart')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-end gap-1 h-32" dir="ltr">
-              {data.revenueByDay.map((d) => (
-                <div
-                  key={d.day}
-                  className="flex-1 bg-primary rounded-t hover:bg-primary-dark transition-colors relative group"
-                  style={{ height: `${(d.total / maxDayRevenue) * 100}%` }}
-                  title={`${d.day} — ${d.total.toLocaleString(i18n.language)} EGP`}
-                />
-              ))}
-            </div>
-            <div className="flex justify-between text-[10px] text-text-tertiary mt-2" dir="ltr">
-              {data.revenueByDay[0] && <span>{data.revenueByDay[0].day}</span>}
-              {data.revenueByDay[data.revenueByDay.length - 1] && (
-                <span>{data.revenueByDay[data.revenueByDay.length - 1]!.day}</span>
-              )}
-            </div>
+            {data.revenueByDay.length === 0 ? (
+              <p className="text-sm text-text-secondary py-8 text-center">
+                {t('stats.noDataPeriod')}
+              </p>
+            ) : data.revenueByDay.length < 3 ? (
+              /* 1–2 jours : on affiche des stats au lieu d'un graphique vide */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" dir="ltr">
+                {data.revenueByDay.map((d) => (
+                  <div
+                    key={d.day}
+                    className="bg-primary-lightest border border-primary-light rounded-lg p-4"
+                  >
+                    <div className="text-xs text-text-secondary">
+                      {new Date(d.day).toLocaleDateString(i18n.language, {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                      })}
+                    </div>
+                    <div className="text-2xl font-bold text-primary-dark mt-1" data-numeric>
+                      {d.total.toLocaleString(i18n.language)}{' '}
+                      <span className="text-sm font-medium text-text-secondary">EGP</span>
+                    </div>
+                  </div>
+                ))}
+                {data.revenueByDay.length === 1 && (
+                  <div className="bg-bg-secondary border border-border-light rounded-lg p-4 flex items-center justify-center text-xs text-text-tertiary italic">
+                    {t('stats.singleDayHint', 'Une seule journée avec encaissement sur la période — sélectionnez une période plus large pour voir une tendance.')}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* 3+ jours : graphique en barres avec largeur capée */
+              <>
+                <div className="flex items-end justify-center gap-2 h-40 px-2" dir="ltr">
+                  {data.revenueByDay.map((d) => {
+                    const heightPct = Math.max(2, (d.total / maxDayRevenue) * 100);
+                    return (
+                      <div
+                        key={d.day}
+                        className="flex-1 max-w-[48px] flex flex-col items-center group"
+                      >
+                        <div className="text-[10px] text-text-tertiary mb-1 group-hover:text-primary font-medium tabular-nums">
+                          {d.total > 0 ? d.total.toLocaleString(i18n.language) : ''}
+                        </div>
+                        <div
+                          className="w-full bg-primary rounded-t hover:bg-primary-dark transition-colors min-h-[2px]"
+                          style={{ height: `${heightPct}%` }}
+                          title={`${d.day} — ${d.total.toLocaleString(i18n.language)} EGP`}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between text-[10px] text-text-tertiary mt-2 px-2" dir="ltr">
+                  <span>{data.revenueByDay[0]!.day}</span>
+                  <span>{data.revenueByDay[data.revenueByDay.length - 1]!.day}</span>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
