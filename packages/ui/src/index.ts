@@ -6,5 +6,4 @@ export * from './components/Toast.js';
 export * from './components/Avatar.js';
 export * from './components/Badge.js';
 export * from './components/Chip.js';
-export * from './components/BrandMark.js';
 export { cn } from './lib/cn.js';

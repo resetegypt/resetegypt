@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Avatar, AvatarFallback, Badge, BrandMark, Button } from '@reset/ui';
+import { Avatar, AvatarFallback, Badge, Button } from '@reset/ui';
 import { useAuthStore } from '../lib/auth';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
@@ -47,9 +47,9 @@ export function AppShell() {
       <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
         {/* Bandeau bleu royal — identité de marque + infos utilisateur connecté */}
         <div className="bg-primary text-primary-light px-5 pt-5 pb-4 border-b border-primary-dark">
-          <div className="flex items-center justify-between">
-            <BrandMark variant="wordmark" size="md" />
-            <span className="text-[9px] text-primary-light/60 tracking-[0.3em] font-medium ml-2">YOURSELF</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl font-extrabold tracking-tight text-primary-light">Reset</span>
+            <span className="text-[10px] text-primary-light/70 tracking-[0.3em] font-medium ml-2">EGYPT</span>
           </div>
           <div className="mt-4 flex items-center gap-3">
             <Avatar className="ring-2 ring-primary-light/30">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, BrandMark, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { LANGUAGES, type Lang } from './i18n';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -92,8 +92,9 @@ export function App() {
     <div className="min-h-screen bg-bg">
       <header className="bg-primary text-primary-light border-b border-primary-dark">
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3 text-primary-light">
-            <BrandMark variant="wordmark" size="md" tagline="YOURSELF" />
+          <div className="flex items-baseline gap-3 text-primary-light">
+            <span className="text-3xl font-extrabold tracking-tight">Reset</span>
+            <span className="text-[10px] tracking-[0.4em] font-medium opacity-80">EGYPT</span>
           </div>
           <div className="flex gap-1">
             {LANGUAGES.map((lng) => (
