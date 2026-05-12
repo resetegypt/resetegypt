@@ -34,6 +34,7 @@
     "nodemailer": "^8.0.7",
     "pino": "^9.1.0",
     "pino-pretty": "^11.0.0",
+    "resend": "^6.12.3",
     "zod": "^3.22.0"
   },
   "devDependencies": {

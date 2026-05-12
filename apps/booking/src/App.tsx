@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { LANGUAGES, type Lang } from './i18n';
 
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+const apiUrl = (path: string) => (API_BASE ? `${API_BASE}${path}` : path);
+
 type Step = 1 | 2 | 3 | 4 | 'success';
 
 const SERVICE_IDS = ['TOBACCO', 'DRUGS', 'ALCOHOL', 'SUGAR', 'STRESS'] as const;
@@ -54,7 +57,7 @@ export function App() {
     setSubmitting(true);
     setError('');
     try {
-      const res = await fetch('/api/booking', {
+      const res = await fetch(apiUrl('/booking'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -395,7 +398,7 @@ function StepDateTime({
   async function loadSlots(d: string) {
     setLoading(true);
     try {
-      const res = await fetch(`/api/booking/slots?date=${d}`);
+      const res = await fetch(apiUrl(`/booking/slots?date=${d}`));
       const data = await res.json();
       setSlots(data.slots);
     } finally {

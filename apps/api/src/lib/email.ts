@@ -1,13 +1,25 @@
+import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
 import pino from 'pino';
 import { env } from '../env.js';
 
 const logger = pino({ level: 'info' });
 
-let cached: { transporter: Transporter | null; verified: boolean } | null = null;
+let resendClient: Resend | null = null;
+let smtpTransporter: { transporter: Transporter | null; verified: boolean } | null = null;
 
-async function getTransporter(): Promise<{ transporter: Transporter | null; verified: boolean }> {
-  if (cached) return cached;
+function getResend(): Resend | null {
+  if (resendClient) return resendClient;
+  if (env.RESEND_API_KEY) {
+    resendClient = new Resend(env.RESEND_API_KEY);
+    logger.info('Resend client initialized');
+    return resendClient;
+  }
+  return null;
+}
+
+async function getSmtpTransporter(): Promise<{ transporter: Transporter | null; verified: boolean }> {
+  if (smtpTransporter) return smtpTransporter;
   const transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
@@ -20,13 +32,10 @@ async function getTransporter(): Promise<{ transporter: Transporter | null; veri
     verified = true;
     logger.info({ host: env.SMTP_HOST, port: env.SMTP_PORT }, 'SMTP transporter verified');
   } catch (err) {
-    logger.warn(
-      { err, host: env.SMTP_HOST, port: env.SMTP_PORT },
-      'SMTP not reachable — email send will fall back to log-only mock mode',
-    );
+    logger.warn({ err }, 'SMTP not reachable — falls back to mock');
   }
-  cached = { transporter, verified };
-  return cached;
+  smtpTransporter = { transporter, verified };
+  return smtpTransporter;
 }
 
 export interface EmailMessage {
@@ -40,31 +49,58 @@ export interface EmailMessage {
 export interface EmailResult {
   sent: boolean;
   mocked: boolean;
+  provider: 'resend' | 'smtp' | 'mock';
   messageId?: string;
   error?: string;
 }
 
-const FROM_ADDRESS = 'Reset Egypt <noreply@reset-egypt.com>';
-
 export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
-  const { transporter, verified } = await getTransporter();
+  // Préférence : Resend (si configuré) — production grade
+  const resend = getResend();
+  if (resend) {
+    try {
+      const result = await resend.emails.send({
+        from: env.SMTP_FROM,
+        to: msg.to,
+        subject: msg.subject,
+        html: msg.html,
+        text: msg.text,
+        attachments: msg.attachments?.map((a) => ({
+          filename: a.filename,
+          content: typeof a.content === 'string' ? Buffer.from(a.content) : a.content,
+        })),
+      });
+      if (result.error) {
+        logger.error({ err: result.error }, 'Resend send failed');
+        return { sent: false, mocked: false, provider: 'resend', error: result.error.message };
+      }
+      logger.info({ to: msg.to, id: result.data?.id }, 'email sent via Resend');
+      return { sent: true, mocked: false, provider: 'resend', messageId: result.data?.id };
+    } catch (err) {
+      logger.error({ err }, 'Resend exception');
+      // Fall through to SMTP
+    }
+  }
+
+  // Fallback : SMTP (MailHog en dev)
+  const { transporter, verified } = await getSmtpTransporter();
   if (!transporter || !verified) {
     logger.info({ to: msg.to, subject: msg.subject }, '[MOCK EMAIL] would send');
-    return { sent: true, mocked: true };
+    return { sent: true, mocked: true, provider: 'mock' };
   }
   try {
     const info = await transporter.sendMail({
-      from: FROM_ADDRESS,
+      from: env.SMTP_FROM,
       to: msg.to,
       subject: msg.subject,
       html: msg.html,
       text: msg.text,
       attachments: msg.attachments,
     });
-    logger.info({ to: msg.to, messageId: info.messageId }, 'email sent');
-    return { sent: true, mocked: false, messageId: info.messageId };
+    logger.info({ to: msg.to, messageId: info.messageId }, 'email sent via SMTP');
+    return { sent: true, mocked: false, provider: 'smtp', messageId: info.messageId };
   } catch (err) {
-    logger.error({ err, to: msg.to }, 'email send failed');
-    return { sent: false, mocked: false, error: (err as Error).message };
+    logger.error({ err }, 'SMTP send failed');
+    return { sent: false, mocked: false, provider: 'smtp', error: (err as Error).message };
   }
 }

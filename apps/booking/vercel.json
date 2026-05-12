@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "pnpm install --frozen-lockfile=false && pnpm --filter @reset/booking build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install --frozen-lockfile=false",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://api.reset-egypt.com/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "regions": ["fra1"]
+}

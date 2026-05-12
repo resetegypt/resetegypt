@@ -1,3 +1,8 @@
+// API base URL :
+// - En dev : vide → utilise le proxy Vite (/api → :3001)
+// - En prod : VITE_API_URL définie sur Vercel (ex: https://api.reset-egypt.com)
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -8,11 +13,18 @@ export class ApiError extends Error {
   }
 }
 
-export async function api<T = unknown>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const url = path.startsWith('/api') ? path : `/api${path.startsWith('/') ? path : '/' + path}`;
+export async function api<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
+  let url: string;
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    url = path;
+  } else if (API_BASE) {
+    // Prod : appel direct cross-origin (https://api.reset-egypt.com/...)
+    url = `${API_BASE}${path.startsWith('/') ? path : '/' + path}`;
+  } else {
+    // Dev : proxy Vite /api/...
+    url = path.startsWith('/api') ? path : `/api${path.startsWith('/') ? path : '/' + path}`;
+  }
+
   const res = await fetch(url, {
     credentials: 'include',
     headers: {
@@ -22,7 +34,15 @@ export async function api<T = unknown>(
     ...init,
   });
   const text = await res.text();
-  const data = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
+  const data = text
+    ? (() => {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return text;
+        }
+      })()
+    : null;
   if (!res.ok) throw new ApiError(res.status, data);
   return data as T;
 }

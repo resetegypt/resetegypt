@@ -84,11 +84,18 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       { expiresIn: rememberMe ? '7d' : '8h' },
     );
 
+    // Cookie partagé entre sous-domaines en prod (api.reset-egypt.com ↔ app.reset-egypt.com)
+    const cookieDomain =
+      env.NODE_ENV === 'production' && env.APP_URL.includes('reset-egypt.com')
+        ? '.reset-egypt.com'
+        : undefined;
+
     reply.setCookie(SESSION_COOKIE_NAME, token, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
+      domain: cookieDomain,
       maxAge: rememberMe ? SESSION_MAX_AGE_SEC * 7 : SESSION_MAX_AGE_SEC,
     });
 
@@ -107,7 +114,11 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.post('/auth/logout', { onRequest: [app.authenticate] }, async (req, reply) => {
-    reply.clearCookie(SESSION_COOKIE_NAME, { path: '/' });
+    const cookieDomain =
+      env.NODE_ENV === 'production' && env.APP_URL.includes('reset-egypt.com')
+        ? '.reset-egypt.com'
+        : undefined;
+    reply.clearCookie(SESSION_COOKIE_NAME, { path: '/', domain: cookieDomain });
     await recordAudit(app.prisma, req, {
       userId: req.currentUser?.sub,
       action: 'logout',

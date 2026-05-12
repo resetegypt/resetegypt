@@ -5,9 +5,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Supabase: DATABASE_URL = pooler port 6543 (?pgbouncer=true&connection_limit=1)
+//           DIRECT_URL   = direct port 5432 (utilisé uniquement pour les migrations)
+// En local sans Supabase, mettre la même valeur dans les deux.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
