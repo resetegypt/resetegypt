@@ -10,5 +10,21 @@
   }
   html[dir='rtl'] {
     font-family: theme('fontFamily.arabic');
+    /* Cairo a un x-height légèrement plus petit qu'Inter — on remonte un peu */
+    font-size: 105%;
+    line-height: 1.65;
+  }
+  html[dir='rtl'] input,
+  html[dir='rtl'] select,
+  html[dir='rtl'] textarea,
+  html[dir='rtl'] button {
+    font-family: theme('fontFamily.arabic');
+  }
+  /* Garde l'alignement gauche pour les valeurs monétaires et nombres */
+  html[dir='rtl'] .font-mono,
+  html[dir='rtl'] [data-numeric] {
+    direction: ltr;
+    text-align: right;
+    unicode-bidi: embed;
   }
 }

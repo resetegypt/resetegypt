@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogTitle, DialogTrigger, Input } from '@reset/ui';
 import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
@@ -18,15 +19,22 @@ interface UserRow {
 }
 
 export function UsersPage() {
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const { data, refetch } = useQuery({
     queryKey: ['users', search],
-    queryFn: () => apiGet<{ users: UserRow[] }>(`/users${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+    queryFn: () =>
+      apiGet<{ users: UserRow[] }>(
+        `/users${search ? `?search=${encodeURIComponent(search)}` : ''}`,
+      ),
   });
   const { data: kpis } = useQuery({
     queryKey: ['admin', 'kpis'],
-    queryFn: () => apiGet<{ total: number; active: number; locked: number; recentFailed: number }>('/admin/kpis'),
+    queryFn: () =>
+      apiGet<{ total: number; active: number; locked: number; recentFailed: number }>(
+        '/admin/kpis',
+      ),
   });
 
   const unlockMut = useMutation({
@@ -40,43 +48,49 @@ export function UsersPage() {
   return (
     <>
       <PageHeader
-        title="Gestion des comptes"
-        subtitle="Administration des utilisateurs et permissions"
+        title={t('users.title')}
+        subtitle={t('users.subtitle')}
         actions={<CreateUserDialog onCreated={() => refetch()} />}
       />
       <div className="p-7 space-y-6 max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent>
-              <p className="text-xs text-text-secondary">Total comptes</p>
-              <p className="text-3xl font-bold">{kpis?.total ?? '–'}</p>
+              <p className="text-xs text-text-secondary">{t('users.kpi.total')}</p>
+              <p className="text-3xl font-bold" data-numeric>{kpis?.total ?? '–'}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <p className="text-xs text-text-secondary">Actifs</p>
-              <p className="text-3xl font-bold text-primary-dark">{kpis?.active ?? '–'}</p>
+              <p className="text-xs text-text-secondary">{t('users.kpi.active')}</p>
+              <p className="text-3xl font-bold text-primary-dark" data-numeric>
+                {kpis?.active ?? '–'}
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <p className="text-xs text-text-secondary">Verrouillés</p>
-              <p className="text-3xl font-bold text-danger-dark">{kpis?.locked ?? '–'}</p>
+              <p className="text-xs text-text-secondary">{t('users.kpi.locked')}</p>
+              <p className="text-3xl font-bold text-danger-dark" data-numeric>
+                {kpis?.locked ?? '–'}
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <p className="text-xs text-text-secondary">Échecs 24h</p>
-              <p className="text-3xl font-bold text-warning-dark">{kpis?.recentFailed ?? '–'}</p>
+              <p className="text-xs text-text-secondary">{t('users.kpi.failedAttempts')}</p>
+              <p className="text-3xl font-bold text-warning-dark" data-numeric>
+                {kpis?.recentFailed ?? '–'}
+              </p>
             </CardContent>
           </Card>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>👤 Utilisateurs</CardTitle>
+            <CardTitle>👤 {t('users.list')}</CardTitle>
             <Input
-              placeholder="Rechercher nom ou email…"
+              placeholder={t('users.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-xs"
@@ -86,12 +100,12 @@ export function UsersPage() {
             <table className="w-full text-sm">
               <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
                 <tr>
-                  <th className="text-left px-4 py-2">Nom</th>
-                  <th className="text-left px-4 py-2">Email</th>
-                  <th className="text-left px-4 py-2">Rôle</th>
-                  <th className="text-left px-4 py-2">Statut</th>
-                  <th className="text-left px-4 py-2">Dernière connexion</th>
-                  <th className="text-right px-4 py-2">Actions</th>
+                  <th className="text-start px-4 py-2">{t('users.columns.name')}</th>
+                  <th className="text-start px-4 py-2">{t('users.columns.email')}</th>
+                  <th className="text-start px-4 py-2">{t('users.columns.role')}</th>
+                  <th className="text-start px-4 py-2">{t('users.columns.status')}</th>
+                  <th className="text-start px-4 py-2">{t('users.columns.lastLogin')}</th>
+                  <th className="text-end px-4 py-2">{t('users.columns.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -104,25 +118,29 @@ export function UsersPage() {
                     <td className="px-4 py-3">
                       <Badge
                         variant={
-                          u.role === 'ADMIN' ? 'danger' : u.role === 'PRACTITIONER' ? 'success' : 'info'
+                          u.role === 'ADMIN'
+                            ? 'danger'
+                            : u.role === 'PRACTITIONER'
+                              ? 'success'
+                              : 'info'
                         }
                       >
-                        {u.role}
+                        {t(`roles.${u.role}`)}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
                       {u.isLocked ? (
-                        <Badge variant="danger">Verrouillé</Badge>
+                        <Badge variant="danger">{t('users.locked')}</Badge>
                       ) : u.isActive ? (
-                        <Badge variant="success">Actif</Badge>
+                        <Badge variant="success">{t('users.active')}</Badge>
                       ) : (
-                        <Badge variant="neutral">Désactivé</Badge>
+                        <Badge variant="neutral">{t('users.disabled')}</Badge>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-text-tertiary">
-                      {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : '—'}
+                    <td className="px-4 py-3 text-xs text-text-tertiary" data-numeric>
+                      {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString(i18n.language) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       {u.isLocked && (
                         <Button
                           size="sm"
@@ -130,7 +148,7 @@ export function UsersPage() {
                           onClick={() => unlockMut.mutate(u.id)}
                           disabled={unlockMut.isPending}
                         >
-                          Déverrouiller
+                          {t('users.unlock')}
                         </Button>
                       )}
                     </td>
@@ -146,6 +164,7 @@ export function UsersPage() {
 }
 
 function CreateUserDialog({ onCreated }: { onCreated: () => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     email: '',
@@ -164,35 +183,57 @@ function CreateUserDialog({ onCreated }: { onCreated: () => void }) {
       onCreated();
       setForm({ email: '', firstName: '', lastName: '', role: 'SECRETARY', password: '' });
     } catch (e) {
-      setErr((e as { message?: string }).message ?? 'Erreur');
+      setErr((e as { message?: string }).message ?? 'Error');
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>➕ Nouveau compte</Button>
+        <Button>➕ {t('users.newAccount')}</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>Créer un compte</DialogTitle>
+        <DialogTitle>{t('users.createDialog.title')}</DialogTitle>
         <div className="space-y-3 mt-4">
-          <Input placeholder="Prénom" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-          <Input placeholder="Nom" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-          <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <Input
+            placeholder={t('users.createDialog.firstName')}
+            value={form.firstName}
+            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+          />
+          <Input
+            placeholder={t('users.createDialog.lastName')}
+            value={form.lastName}
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+          />
+          <Input
+            type="email"
+            placeholder={t('users.createDialog.email')}
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
           <select
             className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
             value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value as typeof form.role })}
+            onChange={(e) =>
+              setForm({ ...form, role: e.target.value as typeof form.role })
+            }
           >
-            <option value="SECRETARY">SECRETARY</option>
-            <option value="PRACTITIONER">PRACTITIONER</option>
-            <option value="ADMIN">ADMIN</option>
+            <option value="SECRETARY">{t('roles.SECRETARY')}</option>
+            <option value="PRACTITIONER">{t('roles.PRACTITIONER')}</option>
+            <option value="ADMIN">{t('roles.ADMIN')}</option>
           </select>
-          <Input type="password" placeholder="Mot de passe (min 8)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <Input
+            type="password"
+            placeholder={t('users.createDialog.password')}
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
           {err && <div className="text-sm text-danger">{err}</div>}
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
-            <Button onClick={submit}>Créer</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              {t('users.createDialog.cancel')}
+            </Button>
+            <Button onClick={submit}>{t('users.createDialog.create')}</Button>
           </div>
         </div>
       </DialogContent>

@@ -108,13 +108,10 @@ export function AppShell() {
 }
 
 function RoleBadge({ role }: { role: 'ADMIN' | 'PRACTITIONER' | 'SECRETARY' }) {
-  const config = {
-    ADMIN: { variant: 'danger' as const, label: 'ADMIN' },
-    PRACTITIONER: { variant: 'success' as const, label: 'PRATICIEN' },
-    SECRETARY: { variant: 'info' as const, label: 'SECRÉTAIRE' },
-  };
-  const { variant, label } = config[role];
-  return <Badge variant={variant}>{label}</Badge>;
+  const { t } = useTranslation();
+  const variant =
+    role === 'ADMIN' ? 'danger' : role === 'PRACTITIONER' ? 'success' : 'info';
+  return <Badge variant={variant}>{t(`roles.${role}`)}</Badge>;
 }
 
 export function PageHeader({

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
@@ -16,38 +17,42 @@ interface PatientRow {
   createdAt: string;
 }
 
-const ADDICTION_LABEL: Record<string, string> = {
-  TOBACCO: '🚬 Tabac',
-  DRUGS: '💊 Drogue',
-  ALCOHOL: '🍷 Alcool',
-  SUGAR: '🍬 Sucre',
-  STRESS: '😰 Stress',
+const ADDICTION_ICON: Record<string, string> = {
+  TOBACCO: '🚬',
+  DRUGS: '💊',
+  ALCOHOL: '🍷',
+  SUGAR: '🍬',
+  STRESS: '😰',
 };
 
 export function PatientsListPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const { data } = useQuery({
     queryKey: ['patients', search],
-    queryFn: () => apiGet<{ patients: PatientRow[] }>(`/patients${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+    queryFn: () =>
+      apiGet<{ patients: PatientRow[] }>(
+        `/patients${search ? `?search=${encodeURIComponent(search)}` : ''}`,
+      ),
   });
 
   return (
     <>
       <PageHeader
-        title="Patients"
-        subtitle={`${data?.patients.length ?? 0} patients`}
+        title={t('patients.title')}
+        subtitle={t('patients.subtitle', { count: data?.patients.length ?? 0 })}
         actions={
           <Link to="/patients/intake">
-            <Button>➕ Nouveau patient</Button>
+            <Button>➕ {t('patients.newPatient')}</Button>
           </Link>
         }
       />
       <div className="p-7 max-w-7xl">
         <Card>
           <CardHeader>
-            <CardTitle>👥 Liste</CardTitle>
+            <CardTitle>👥 {t('patients.list')}</CardTitle>
             <Input
-              placeholder="Rechercher nom ou téléphone…"
+              placeholder={t('patients.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-xs"
@@ -57,12 +62,12 @@ export function PatientsListPage() {
             <table className="w-full text-sm">
               <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
                 <tr>
-                  <th className="text-left px-4 py-2">Nom</th>
-                  <th className="text-left px-4 py-2">Téléphone</th>
-                  <th className="text-left px-4 py-2">Âge</th>
-                  <th className="text-left px-4 py-2">Suivi</th>
-                  <th className="text-left px-4 py-2">Statut</th>
-                  <th className="text-right px-4 py-2">Actions</th>
+                  <th className="text-start px-4 py-2">{t('patients.columns.name')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.columns.phone')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.columns.age')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.columns.followup')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.columns.status')}</th>
+                  <th className="text-end px-4 py-2">{t('patients.columns.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -73,15 +78,23 @@ export function PatientsListPage() {
                         {p.firstName} {p.lastName}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-text-secondary font-mono text-xs">{p.phone}</td>
-                    <td className="px-4 py-3 text-text-secondary">{p.age ?? '—'}</td>
-                    <td className="px-4 py-3">{ADDICTION_LABEL[p.primaryAddiction] ?? p.primaryAddiction}</td>
+                    <td className="px-4 py-3 text-text-secondary font-mono text-xs" data-numeric>
+                      {p.phone}
+                    </td>
+                    <td className="px-4 py-3 text-text-secondary" data-numeric>
+                      {p.age ?? '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      {ADDICTION_ICON[p.primaryAddiction]} {t(`addiction.${p.primaryAddiction}`)}
+                    </td>
                     <td className="px-4 py-3">
                       <Badge variant={p.status === 'ACTIVE' ? 'success' : 'neutral'}>{p.status}</Badge>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <Link to={`/patients/${p.id}`}>
-                        <Button size="sm" variant="outline">Voir</Button>
+                        <Button size="sm" variant="outline">
+                          {t('common.view')}
+                        </Button>
                       </Link>
                     </td>
                   </tr>
@@ -89,7 +102,7 @@ export function PatientsListPage() {
                 {data && data.patients.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-12 text-center text-text-secondary">
-                      Aucun patient trouvé.
+                      {t('patients.empty')}
                     </td>
                   </tr>
                 )}

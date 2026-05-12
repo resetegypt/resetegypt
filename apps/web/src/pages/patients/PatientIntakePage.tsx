@@ -1,22 +1,24 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { ADDICTIONS, type Addiction } from '@reset/shared';
 import { apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
-const ADDICTION_LABEL: Record<Addiction, string> = {
-  TOBACCO: '🚬 Tabac',
-  DRUGS: '💊 Drogue',
-  ALCOHOL: '🍷 Alcool',
-  SUGAR: '🍬 Sucre',
-  STRESS: '😰 Stress',
+const ADDICTION_ICON: Record<Addiction, string> = {
+  TOBACCO: '🚬',
+  DRUGS: '💊',
+  ALCOHOL: '🍷',
+  SUGAR: '🍬',
+  STRESS: '😰',
 };
 
 const GOVERNORATES = ['Le Caire', 'Gizeh', 'Alexandrie', 'New Cairo', 'Charm el-Cheikh', 'Autre'];
-const SOURCES = ['Instagram', 'Facebook', 'Google', 'Bouche-à-oreille', 'Médecin', 'Autre'];
+const SOURCE_KEYS = ['instagram', 'facebook', 'google', 'wordOfMouth', 'doctor', 'other'] as const;
 
 export function PatientIntakePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     firstName: '',
@@ -54,11 +56,11 @@ export function PatientIntakePage() {
     e.preventDefault();
     setError('');
     if (!consents.data || !consents.nonMedical) {
-      setError('Les consentements obligatoires doivent être acceptés.');
+      setError(t('patients.intake.consentsRequired'));
       return;
     }
     if (!form.primaryAddiction) {
-      setError('Sélectionne un type d\'addiction.');
+      setError(t('patients.intake.addictionRequired'));
       return;
     }
     setSubmitting(true);
@@ -93,7 +95,7 @@ export function PatientIntakePage() {
       });
       navigate(`/patients/${res.patient.id}`);
     } catch (err) {
-      setError((err as { message?: string }).message ?? 'Erreur lors de la création');
+      setError((err as { message?: string }).message ?? 'Error');
     } finally {
       setSubmitting(false);
     }
@@ -101,40 +103,49 @@ export function PatientIntakePage() {
 
   return (
     <>
-      <PageHeader
-        title="Fiche d'accueil patient"
-        subtitle="Étape 1 — Remplie par la secrétaire à l'arrivée"
-      />
+      <PageHeader title={t('patients.intake.title')} subtitle={t('patients.intake.subtitle')} />
       <form onSubmit={submit} className="p-7 space-y-4 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle>🆔 Identité</CardTitle>
+            <CardTitle>🆔 {t('patients.intake.identity')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <FieldLabel label="Prénom *">
-                <Input required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+              <FieldLabel label={`${t('patients.intake.firstName')} *`}>
+                <Input
+                  required
+                  value={form.firstName}
+                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                />
               </FieldLabel>
-              <FieldLabel label="Nom *">
-                <Input required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+              <FieldLabel label={`${t('patients.intake.lastName')} *`}>
+                <Input
+                  required
+                  value={form.lastName}
+                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                />
               </FieldLabel>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <FieldLabel label="Date de naissance">
-                <Input type="date" value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} />
+              <FieldLabel label={t('patients.intake.dateOfBirth')}>
+                <Input
+                  type="date"
+                  value={form.dateOfBirth}
+                  onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })}
+                />
               </FieldLabel>
-              <FieldLabel label="Sexe">
+              <FieldLabel label={t('patients.intake.gender')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.gender}
                   onChange={(e) => setForm({ ...form, gender: e.target.value })}
                 >
                   <option value="">—</option>
-                  <option value="MALE">Homme</option>
-                  <option value="FEMALE">Femme</option>
+                  <option value="MALE">{t('patients.intake.male')}</option>
+                  <option value="FEMALE">{t('patients.intake.female')}</option>
                 </select>
               </FieldLabel>
-              <FieldLabel label="Langue préférée">
+              <FieldLabel label={t('patients.intake.preferredLanguage')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.preferredLanguage}
@@ -151,25 +162,41 @@ export function PatientIntakePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>📞 Coordonnées</CardTitle>
+            <CardTitle>📞 {t('patients.intake.contact')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <FieldLabel label="Téléphone * (format +20...)">
-                <Input required placeholder="+201xxxxxxxxx" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <FieldLabel label={`${t('patients.intake.phoneFormat')} *`}>
+                <Input
+                  required
+                  placeholder="+201xxxxxxxxx"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
               </FieldLabel>
-              <FieldLabel label="WhatsApp">
-                <Input placeholder="+20..." value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} />
+              <FieldLabel label={t('patients.intake.whatsapp')}>
+                <Input
+                  placeholder="+20…"
+                  value={form.whatsapp}
+                  onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+                />
               </FieldLabel>
             </div>
-            <FieldLabel label="Email">
-              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <FieldLabel label={t('patients.intake.email')}>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </FieldLabel>
             <div className="grid grid-cols-2 gap-3">
-              <FieldLabel label="Adresse">
-                <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              <FieldLabel label={t('patients.intake.address')}>
+                <Input
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
               </FieldLabel>
-              <FieldLabel label="Gouvernorat">
+              <FieldLabel label={t('patients.intake.governorate')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.governorate}
@@ -182,18 +209,21 @@ export function PatientIntakePage() {
                 </select>
               </FieldLabel>
             </div>
-            <FieldLabel label="Profession">
-              <Input value={form.profession} onChange={(e) => setForm({ ...form, profession: e.target.value })} />
+            <FieldLabel label={t('patients.intake.profession')}>
+              <Input
+                value={form.profession}
+                onChange={(e) => setForm({ ...form, profession: e.target.value })}
+              />
             </FieldLabel>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>🎯 Motif de consultation</CardTitle>
+            <CardTitle>🎯 {t('patients.intake.consultationReason')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <FieldLabel label="Type d'addiction *">
+            <FieldLabel label={`${t('patients.intake.addictionType')} *`}>
               <div className="flex gap-2 flex-wrap">
                 {ADDICTIONS.map((a) => (
                   <Chip
@@ -201,43 +231,47 @@ export function PatientIntakePage() {
                     active={form.primaryAddiction === a}
                     onClick={() => setForm({ ...form, primaryAddiction: a })}
                   >
-                    {ADDICTION_LABEL[a]}
+                    {ADDICTION_ICON[a]} {t(`addiction.${a}`)}
                   </Chip>
                 ))}
               </div>
             </FieldLabel>
             <div className="grid grid-cols-2 gap-3">
-              <FieldLabel label="Tentatives précédentes">
+              <FieldLabel label={t('patients.intake.previousAttempts')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.previousAttempts}
                   onChange={(e) => setForm({ ...form, previousAttempts: e.target.value })}
                 >
                   <option value="">—</option>
-                  <option>Aucune</option>
-                  <option>1 fois</option>
-                  <option>2-3 fois</option>
-                  <option>+ de 3 fois</option>
+                  <option>{t('patients.intake.attempts.none')}</option>
+                  <option>{t('patients.intake.attempts.one')}</option>
+                  <option>{t('patients.intake.attempts.two_three')}</option>
+                  <option>{t('patients.intake.attempts.more')}</option>
                 </select>
               </FieldLabel>
-              <FieldLabel label="Niveau de motivation">
+              <FieldLabel label={t('patients.intake.motivationLevel')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.motivationLevel}
                   onChange={(e) => setForm({ ...form, motivationLevel: e.target.value })}
                 >
                   <option value="">—</option>
-                  <option value="high">Élevé · Très motivé</option>
-                  <option value="medium">Moyen · Hésitant</option>
-                  <option value="low">Faible</option>
+                  <option value="high">{t('patients.intake.motivation.high')}</option>
+                  <option value="medium">{t('patients.intake.motivation.medium')}</option>
+                  <option value="low">{t('patients.intake.motivation.low')}</option>
                 </select>
               </FieldLabel>
             </div>
-            <FieldLabel label="Source d'acquisition (multi)">
+            <FieldLabel label={t('patients.intake.acquisitionSource')}>
               <div className="flex gap-2 flex-wrap">
-                {SOURCES.map((s) => (
-                  <Chip key={s} active={form.acquisitionSource.includes(s)} onClick={() => toggleSource(s)}>
-                    {s}
+                {SOURCE_KEYS.map((k) => (
+                  <Chip
+                    key={k}
+                    active={form.acquisitionSource.includes(k)}
+                    onClick={() => toggleSource(k)}
+                  >
+                    {t(`patients.intake.sources.${k}`)}
                   </Chip>
                 ))}
               </div>
@@ -247,37 +281,58 @@ export function PatientIntakePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>🆘 Contact d'urgence</CardTitle>
+            <CardTitle>🆘 {t('patients.intake.emergencyContact')}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
-            <FieldLabel label="Nom">
-              <Input value={form.emergencyContactName} onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })} />
+            <FieldLabel label={t('patients.intake.emergencyName')}>
+              <Input
+                value={form.emergencyContactName}
+                onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
+              />
             </FieldLabel>
-            <FieldLabel label="Téléphone">
-              <Input value={form.emergencyContactPhone} onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })} />
+            <FieldLabel label={t('patients.intake.emergencyPhone')}>
+              <Input
+                value={form.emergencyContactPhone}
+                onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
+              />
             </FieldLabel>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>🛡️ Consentements</CardTitle>
+            <CardTitle>🛡️ {t('patients.intake.consents')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <label className="flex gap-2 items-start cursor-pointer">
-              <input type="checkbox" className="mt-1" checked={consents.data} onChange={(e) => setConsents({ ...consents, data: e.target.checked })} />
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={consents.data}
+                onChange={(e) => setConsents({ ...consents, data: e.target.checked })}
+              />
               <span>
-                J'accepte que mes données personnelles soient enregistrées par Reset Egypt conformément à la loi 151/2020. <span className="text-danger">*</span>
+                {t('patients.intake.consent1')} <span className="text-danger">*</span>
               </span>
             </label>
             <label className="flex gap-2 items-start cursor-pointer">
-              <input type="checkbox" className="mt-1" checked={consents.sms} onChange={(e) => setConsents({ ...consents, sms: e.target.checked })} />
-              <span>J'autorise Reset à m'envoyer des SMS et messages WhatsApp pour les rappels.</span>
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={consents.sms}
+                onChange={(e) => setConsents({ ...consents, sms: e.target.checked })}
+              />
+              <span>{t('patients.intake.consent2')}</span>
             </label>
             <label className="flex gap-2 items-start cursor-pointer">
-              <input type="checkbox" className="mt-1" checked={consents.nonMedical} onChange={(e) => setConsents({ ...consents, nonMedical: e.target.checked })} />
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={consents.nonMedical}
+                onChange={(e) => setConsents({ ...consents, nonMedical: e.target.checked })}
+              />
               <span>
-                Je reconnais que Reset est un centre de bien-être non médical. <span className="text-danger">*</span>
+                {t('patients.intake.consent3')} <span className="text-danger">*</span>
               </span>
             </label>
           </CardContent>
@@ -286,8 +341,12 @@ export function PatientIntakePage() {
         {error && <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>}
 
         <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>Annuler</Button>
-          <Button type="submit" disabled={submitting}>{submitting ? 'Enregistrement…' : 'Enregistrer'}</Button>
+          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? t('patients.intake.submitting') : t('patients.intake.submit')}
+          </Button>
         </div>
       </form>
     </>

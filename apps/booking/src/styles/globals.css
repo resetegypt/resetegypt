@@ -3,3 +3,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: theme('fontFamily.sans');
+  }
+  html[dir='rtl'] {
+    font-family: theme('fontFamily.arabic');
+    font-size: 105%;
+    line-height: 1.65;
+  }
+  html[dir='rtl'] input,
+  html[dir='rtl'] select,
+  html[dir='rtl'] textarea,
+  html[dir='rtl'] button {
+    font-family: theme('fontFamily.arabic');
+  }
+  html[dir='rtl'] .font-mono,
+  html[dir='rtl'] [data-numeric] {
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+}

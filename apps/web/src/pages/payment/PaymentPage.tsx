@@ -1,28 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
 const PAYMENT_METHODS = [
-  { value: 'CASH', label: '💵 Espèces' },
-  { value: 'CARD', label: '💳 Carte bancaire' },
-  { value: 'VODAFONE_CASH', label: '📱 Vodafone Cash' },
-  { value: 'INSTAPAY', label: '⚡ Instapay' },
-  { value: 'FAWRY', label: '🏦 Fawry' },
-  { value: 'BANK_TRANSFER', label: '🔄 Virement' },
+  { value: 'CASH', icon: '💵' },
+  { value: 'CARD', icon: '💳' },
+  { value: 'VODAFONE_CASH', icon: '📱' },
+  { value: 'INSTAPAY', icon: '⚡' },
+  { value: 'FAWRY', icon: '🏦' },
+  { value: 'BANK_TRANSFER', icon: '🔄' },
 ] as const;
 
-const SERVICE_LABEL: Record<string, string> = {
-  TOBACCO: 'Sevrage tabagique',
-  DRUGS: 'Sevrage drogues',
-  ALCOHOL: 'Sevrage alcool',
-  SUGAR: 'Sucre',
-  STRESS: 'Stress / anxiété',
-};
-
 export function PaymentPage() {
+  const { t, i18n } = useTranslation();
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const navigate = useNavigate();
 
@@ -43,7 +37,9 @@ export function PaymentPage() {
     enabled: !!appointmentId,
   });
 
-  const [items, setItems] = useState<Array<{ description: string; quantity: number; unitPrice: number }>>([]);
+  const [items, setItems] = useState<
+    Array<{ description: string; quantity: number; unitPrice: number }>
+  >([]);
   const [discount, setDiscount] = useState(0);
   const [method, setMethod] = useState<(typeof PAYMENT_METHODS)[number]['value']>('VODAFONE_CASH');
   const [paymentRef, setPaymentRef] = useState('');
@@ -59,41 +55,20 @@ export function PaymentPage() {
   const [emailMessage, setEmailMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [emailSending, setEmailSending] = useState(false);
 
-  async function handleEmail() {
-    if (!success) return;
-    setEmailSending(true);
-    setEmailMessage(null);
-    try {
-      const target = emailTo || data?.appointment.patient.email;
-      const res = await apiPost<{ to: string; mocked: boolean }>(
-        `/payments/${success.id}/email`,
-        target ? { to: target } : {},
-      );
-      setEmailMessage({
-        ok: true,
-        text: res.mocked
-          ? `✓ Email "envoyé" en mode mock (SMTP non configuré). Destinataire : ${res.to}`
-          : `✓ Facture envoyée à ${res.to}`,
-      });
-    } catch {
-      setEmailMessage({ ok: false, text: "Erreur lors de l'envoi. Vérifie l'adresse." });
-    } finally {
-      setEmailSending(false);
-    }
-  }
-
   useEffect(() => {
     if (data?.appointment && items.length === 0) {
       const a = data.appointment;
+      const visitLabel = t(`dashboard.visitType.${a.visitType}`);
+      const serviceLabel = t(`addiction.${a.service}`);
       setItems([
         {
-          description: `Séance ${a.visitType === 'FIRST' ? '1ère' : 'suivi'} · ${SERVICE_LABEL[a.service]} · Auriculothérapie + photobiomodulation`,
+          description: `${visitLabel} · ${serviceLabel}`,
           quantity: 1,
           unitPrice: Number(a.price),
         },
       ]);
     }
-  }, [data, items.length]);
+  }, [data, items.length, t]);
 
   const subtotalRaw = items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0);
   const subtotal = subtotalRaw - discount;
@@ -128,37 +103,68 @@ export function PaymentPage() {
         total: Number(res.payment.total),
       });
     } catch (err) {
-      setError((err as { message?: string }).message ?? 'Erreur');
+      setError((err as { message?: string }).message ?? 'Error');
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (!data) return <div className="p-7">Chargement…</div>;
+  async function handleEmail() {
+    if (!success) return;
+    setEmailSending(true);
+    setEmailMessage(null);
+    try {
+      const target = emailTo || data?.appointment.patient.email;
+      const res = await apiPost<{ to: string; mocked: boolean }>(
+        `/payments/${success.id}/email`,
+        target ? { to: target } : {},
+      );
+      setEmailMessage({
+        ok: true,
+        text: res.mocked
+          ? t('payment.success.emailMocked', { to: res.to })
+          : t('payment.success.emailSent', { to: res.to }),
+      });
+    } catch {
+      setEmailMessage({ ok: false, text: t('payment.success.emailError') });
+    } finally {
+      setEmailSending(false);
+    }
+  }
+
+  if (!data) return <div className="p-7">{t('common.loading')}</div>;
 
   if (success) {
     const patientEmail = data?.appointment.patient.email;
+    const methodLabel = t(`payment.methods.${method}`);
     return (
       <>
-        <PageHeader title="Encaissement validé" subtitle={`Facture ${success.invoiceNumber}`} />
+        <PageHeader
+          title={t('payment.success.title')}
+          subtitle={t('payment.success.subtitle', { invoice: success.invoiceNumber })}
+        />
         <div className="p-7 max-w-2xl space-y-4">
           <Card>
             <CardContent className="space-y-4 text-center py-8">
               <div className="text-6xl">✅</div>
-              <h2 className="text-xl font-bold text-primary-dark">Paiement enregistré</h2>
-              <p className="text-text-secondary">
-                <strong>{success.total.toLocaleString()} EGP</strong> encaissé via{' '}
-                {PAYMENT_METHODS.find((m) => m.value === method)?.label}
+              <h2 className="text-xl font-bold text-primary-dark">
+                {t('payment.success.paymentRecorded')}
+              </h2>
+              <p className="text-text-secondary" data-numeric>
+                {t('payment.success.paidVia', {
+                  amount: success.total.toLocaleString(i18n.language),
+                  method: methodLabel,
+                })}
               </p>
-              <div className="bg-bg-secondary rounded p-4 text-sm text-left space-y-1">
+              <div className="bg-bg-secondary rounded p-4 text-sm text-start space-y-1">
                 <p>
-                  <strong>Facture :</strong> {success.invoiceNumber}
+                  <strong>{t('payment.success.invoiceLabel')}</strong> {success.invoiceNumber}
                 </p>
-                <p className="font-mono text-xs">
-                  <strong>UUID ETA :</strong> {success.etaUuid}
+                <p className="font-mono text-xs" data-numeric>
+                  <strong>{t('payment.success.uuidEtaLabel')}</strong> {success.etaUuid}
                 </p>
                 <p className="text-text-tertiary text-xs italic">
-                  ⚠️ ETA mocké en développement. Branchement réel : Phase 6.5.
+                  {t('payment.success.etaMockedNote')}
                 </p>
               </div>
             </CardContent>
@@ -166,27 +172,30 @@ export function PaymentPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>📧 Envoyer la facture au patient</CardTitle>
+              <CardTitle>📧 {t('payment.success.emailToPatient')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {patientEmail ? (
                 <p className="text-sm text-text-secondary">
-                  Email du patient : <strong>{patientEmail}</strong>
+                  {t('payment.success.patientEmailLabel')} <strong>{patientEmail}</strong>
                 </p>
               ) : (
                 <p className="text-sm text-warning-dark">
-                  ⚠️ Aucun email enregistré. Saisis-en un :
+                  {t('payment.success.noEmailWarning')}
                 </p>
               )}
               <div className="flex gap-2">
                 <Input
                   type="email"
-                  placeholder={patientEmail ?? 'patient@example.com'}
+                  placeholder={patientEmail ?? t('payment.success.emailPlaceholder')}
                   value={emailTo}
                   onChange={(e) => setEmailTo(e.target.value)}
                 />
-                <Button onClick={handleEmail} disabled={emailSending || (!emailTo && !patientEmail)}>
-                  {emailSending ? 'Envoi…' : '✉️ Envoyer'}
+                <Button
+                  onClick={handleEmail}
+                  disabled={emailSending || (!emailTo && !patientEmail)}
+                >
+                  {emailSending ? t('payment.success.sending') : `✉️ ${t('payment.success.sendEmail')}`}
                 </Button>
               </div>
               {emailMessage && (
@@ -201,14 +210,14 @@ export function PaymentPage() {
                 </div>
               )}
               <p className="text-xs text-text-tertiary">
-                💡 Tu peux aussi{' '}
+                {t('payment.success.printableLinkPrefix')}{' '}
                 <a
                   href={`/api/payments/${success.id}/invoice.html`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-info underline"
                 >
-                  visualiser/imprimer la facture
+                  {t('payment.success.printableLinkText')}
                 </a>
                 .
               </p>
@@ -216,15 +225,18 @@ export function PaymentPage() {
           </Card>
 
           <Card>
-            <CardContent className="flex gap-2 justify-between">
+            <CardContent className="flex gap-2 justify-between flex-wrap">
               <Button variant="outline" onClick={() => navigate('/accounting')}>
-                📊 Voir la comptabilité
+                📊 {t('payment.success.viewAccounting')}
               </Button>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => navigate(`/patients/${data.appointment.patientId}`)}>
-                  Dossier patient
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/patients/${data.appointment.patientId}`)}
+                >
+                  {t('payment.success.patientFile')}
                 </Button>
-                <Button onClick={() => navigate('/agenda')}>Agenda</Button>
+                <Button onClick={() => navigate('/agenda')}>{t('payment.success.calendar')}</Button>
               </div>
             </CardContent>
           </Card>
@@ -238,32 +250,51 @@ export function PaymentPage() {
   return (
     <>
       <PageHeader
-        title="Encaissement"
-        subtitle={`${a.patient.firstName} ${a.patient.lastName} · ${SERVICE_LABEL[a.service]}`}
+        title={t('payment.title')}
+        subtitle={`${a.patient.firstName} ${a.patient.lastName} · ${t(`addiction.${a.service}`)}`}
       />
       <div className="p-7 space-y-4 max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle>🧾 Articles facturables</CardTitle>
+            <CardTitle>🧾 {t('payment.items')}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {items.map((it, idx) => (
-              <div key={idx} className="px-4 py-3 border-b border-border last:border-0 grid grid-cols-[1fr_80px_120px_40px] gap-2 items-center">
+              <div
+                key={idx}
+                className="px-4 py-3 border-b border-border last:border-0 grid grid-cols-[1fr_80px_120px_40px] gap-2 items-center"
+              >
                 <Input
                   value={it.description}
-                  onChange={(e) => setItems(items.map((x, i) => (i === idx ? { ...x, description: e.target.value } : x)))}
+                  onChange={(e) =>
+                    setItems(
+                      items.map((x, i) => (i === idx ? { ...x, description: e.target.value } : x)),
+                    )
+                  }
                 />
                 <Input
                   type="number"
                   value={it.quantity}
-                  onChange={(e) => setItems(items.map((x, i) => (i === idx ? { ...x, quantity: Number(e.target.value) } : x)))}
+                  onChange={(e) =>
+                    setItems(
+                      items.map((x, i) =>
+                        i === idx ? { ...x, quantity: Number(e.target.value) } : x,
+                      ),
+                    )
+                  }
                   className="text-center"
                 />
                 <Input
                   type="number"
                   value={it.unitPrice}
-                  onChange={(e) => setItems(items.map((x, i) => (i === idx ? { ...x, unitPrice: Number(e.target.value) } : x)))}
-                  className="text-right"
+                  onChange={(e) =>
+                    setItems(
+                      items.map((x, i) =>
+                        i === idx ? { ...x, unitPrice: Number(e.target.value) } : x,
+                      ),
+                    )
+                  }
+                  className="text-end"
                 />
                 <Button
                   type="button"
@@ -275,22 +306,32 @@ export function PaymentPage() {
                 </Button>
               </div>
             ))}
-            <div className="px-4 py-2 flex gap-2">
+            <div className="px-4 py-2 flex gap-2 flex-wrap">
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setItems([...items, { description: 'Forfait 5 séances', quantity: 1, unitPrice: 6000 }])}
+                onClick={() =>
+                  setItems([
+                    ...items,
+                    { description: t('payment.addPackage5'), quantity: 1, unitPrice: 6000 },
+                  ])
+                }
               >
-                ➕ Forfait 5 séances
+                ➕ {t('payment.addPackage5')}
               </Button>
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setItems([...items, { description: 'Carte fidélité', quantity: 1, unitPrice: 12000 }])}
+                onClick={() =>
+                  setItems([
+                    ...items,
+                    { description: t('payment.addLoyaltyCard'), quantity: 1, unitPrice: 12000 },
+                  ])
+                }
               >
-                ➕ Carte fidélité
+                ➕ {t('payment.addLoyaltyCard')}
               </Button>
             </div>
           </CardContent>
@@ -298,54 +339,60 @@ export function PaymentPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>💰 Total</CardTitle>
+            <CardTitle>💰 {t('payment.totals')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Sous-total brut</span>
-              <span className="font-mono">{subtotalRaw.toLocaleString()} EGP</span>
+              <span>{t('payment.subtotalGross')}</span>
+              <span className="font-mono" data-numeric>
+                {subtotalRaw.toLocaleString(i18n.language)} EGP
+              </span>
             </div>
             <div className="flex justify-between text-sm items-center">
-              <span>Remise</span>
+              <span>{t('payment.discount')}</span>
               <Input
                 type="number"
                 value={discount}
                 onChange={(e) => setDiscount(Number(e.target.value))}
-                className="w-32 text-right"
+                className="w-32 text-end"
               />
             </div>
             <div className="flex justify-between text-sm">
-              <span>Sous-total HT</span>
-              <span className="font-mono">{subtotal.toLocaleString()} EGP</span>
+              <span>{t('payment.subtotalHT')}</span>
+              <span className="font-mono" data-numeric>
+                {subtotal.toLocaleString(i18n.language)} EGP
+              </span>
             </div>
             <div className="flex justify-between text-sm text-text-secondary">
-              <span>TVA 14%</span>
-              <span className="font-mono">{Math.round(vat).toLocaleString()} EGP</span>
+              <span>{t('payment.vat14')}</span>
+              <span className="font-mono" data-numeric>
+                {Math.round(vat).toLocaleString(i18n.language)} EGP
+              </span>
             </div>
             <div className="flex justify-between text-lg pt-2 border-t border-border">
-              <strong>Total TTC</strong>
-              <strong className="font-mono text-primary-dark">{Math.round(total).toLocaleString()} EGP</strong>
+              <strong>{t('payment.totalTTC')}</strong>
+              <strong className="font-mono text-primary-dark" data-numeric>
+                {Math.round(total).toLocaleString(i18n.language)} EGP
+              </strong>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>💳 Mode de paiement</CardTitle>
+            <CardTitle>💳 {t('payment.method')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex gap-2 flex-wrap">
               {PAYMENT_METHODS.map((m) => (
                 <Chip key={m.value} active={method === m.value} onClick={() => setMethod(m.value)}>
-                  {m.label}
+                  {m.icon} {t(`payment.methods.${m.value}`)}
                 </Chip>
               ))}
             </div>
             {['CARD', 'VODAFONE_CASH', 'INSTAPAY', 'FAWRY', 'BANK_TRANSFER'].includes(method) && (
               <div>
-                <label className="block text-xs font-medium mb-1">
-                  Référence (n° transaction / téléphone / IBAN)
-                </label>
+                <label className="block text-xs font-medium mb-1">{t('payment.paymentRef')}</label>
                 <Input value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)} />
               </div>
             )}
@@ -354,35 +401,34 @@ export function PaymentPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>📄 Aperçu facture (ETA Egypt)</CardTitle>
+            <CardTitle>📄 {t('payment.invoicePreview')}</CardTitle>
           </CardHeader>
           <CardContent className="p-6 bg-bg-secondary text-sm">
             <div className="flex justify-between mb-4">
               <div>
                 <strong className="text-base">RESET</strong>
-                <p className="text-xs text-text-tertiary">Auriculothérapie & laser non-invasif</p>
-                <p className="text-xs text-text-tertiary">N° fiscal (TIN) : xxx-xxx-xxx (à remplir)</p>
+                <p className="text-xs text-text-tertiary">{t('app.subtitle')}</p>
               </div>
-              <div className="text-right">
-                <Badge variant="info">FACTURE ÉLECTRONIQUE</Badge>
-                <p className="text-xs mt-1">À générer après encaissement</p>
+              <div className="text-end">
+                <Badge variant="info">{t('payment.electronicInvoice')}</Badge>
+                <p className="text-xs mt-1">{t('payment.generatedAfter')}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 mb-3 text-xs">
               <div>
-                <p className="text-text-tertiary uppercase text-[10px]">Émetteur</p>
+                <p className="text-text-tertiary uppercase text-[10px]">{t('payment.issuer')}</p>
                 <strong>Reset Egypt</strong>
-                <p className="text-text-secondary">N Teseen, New Cairo, Le Caire</p>
+                <p className="text-text-secondary">N Teseen, New Cairo</p>
               </div>
               <div>
-                <p className="text-text-tertiary uppercase text-[10px]">Patient</p>
-                <strong>{a.patient.firstName} {a.patient.lastName}</strong>
-                <p className="text-text-secondary">{a.patient.phone}</p>
+                <p className="text-text-tertiary uppercase text-[10px]">{t('payment.patient')}</p>
+                <strong>
+                  {a.patient.firstName} {a.patient.lastName}
+                </strong>
+                <p className="text-text-secondary" data-numeric>{a.patient.phone}</p>
               </div>
             </div>
-            <p className="text-xs text-text-tertiary mt-3 italic">
-              UUID ETA généré après "Encaisser". Mock en développement.
-            </p>
+            <p className="text-xs text-text-tertiary mt-3 italic">{t('payment.etaMockNote')}</p>
           </CardContent>
         </Card>
 
@@ -390,10 +436,12 @@ export function PaymentPage() {
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-            Annuler
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleEncaisser} disabled={submitting || items.length === 0}>
-            {submitting ? 'Encaissement…' : `✓ Encaisser ${Math.round(total).toLocaleString()} EGP`}
+            {submitting
+              ? t('payment.cashing')
+              : `✓ ${t('payment.cashButton', { amount: Math.round(total).toLocaleString(i18n.language) })}`}
           </Button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
@@ -43,15 +44,16 @@ interface PatientDetail {
   }>;
 }
 
-const ADDICTION_LABEL: Record<string, string> = {
-  TOBACCO: '🚬 Tabac',
-  DRUGS: '💊 Drogue',
-  ALCOHOL: '🍷 Alcool',
-  SUGAR: '🍬 Sucre',
-  STRESS: '😰 Stress',
+const ADDICTION_ICON: Record<string, string> = {
+  TOBACCO: '🚬',
+  DRUGS: '💊',
+  ALCOHOL: '🍷',
+  SUGAR: '🍬',
+  STRESS: '😰',
 };
 
 export function PatientDetailPage() {
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const { data } = useQuery({
     queryKey: ['patient', id],
@@ -59,17 +61,18 @@ export function PatientDetailPage() {
     enabled: !!id,
   });
 
-  if (!data) return <div className="p-7">Chargement…</div>;
+  if (!data) return <div className="p-7">{t('common.loading')}</div>;
   const { patient, stats, evolution } = data;
   const initials = patient.firstName.charAt(0) + patient.lastName.charAt(0);
 
-  // Evolution score: average of (stress + anxiety + craving) decrease
   const first = evolution[0];
   const last = evolution[evolution.length - 1];
   let evolutionScore: number | null = null;
   if (first && last && evolution.length > 1) {
-    const initial = (first.stressScore ?? 0) + (first.anxietyScore ?? 0) + (first.cravingScore ?? 0);
-    const current = (last.stressScore ?? 0) + (last.anxietyScore ?? 0) + (last.cravingScore ?? 0);
+    const initial =
+      (first.stressScore ?? 0) + (first.anxietyScore ?? 0) + (first.cravingScore ?? 0);
+    const current =
+      (last.stressScore ?? 0) + (last.anxietyScore ?? 0) + (last.cravingScore ?? 0);
     if (initial > 0) evolutionScore = Math.round(((initial - current) / initial) * 100);
   }
 
@@ -77,11 +80,11 @@ export function PatientDetailPage() {
     <>
       <PageHeader
         title={`${patient.firstName} ${patient.lastName}`}
-        subtitle={`${patient.age ?? '—'} ans · ${patient.governorate ?? ''} · Patient depuis ${new Date(patient.createdAt).toLocaleDateString()}`}
+        subtitle={`${patient.age ? t('patients.detail.yearsOld', { age: patient.age }) : '—'} · ${patient.governorate ?? ''} · ${t('patients.detail.patientSince', { date: new Date(patient.createdAt).toLocaleDateString(i18n.language) })}`}
         actions={
           <>
             <Button variant="outline" size="sm" asChild>
-              <a href={`tel:${patient.phone}`}>📞 Appeler</a>
+              <a href={`tel:${patient.phone}`}>📞 {t('patients.detail.call')}</a>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <a
@@ -89,11 +92,13 @@ export function PatientDetailPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                💬 WhatsApp
+                💬 {t('patients.detail.whatsapp')}
               </a>
             </Button>
             <Button asChild>
-              <Link to={`/appointments/new?patientId=${patient.id}`}>➕ Nouveau RDV</Link>
+              <Link to={`/appointments/new?patientId=${patient.id}`}>
+                ➕ {t('patients.detail.newAppointment')}
+              </Link>
             </Button>
           </>
         }
@@ -107,17 +112,23 @@ export function PatientDetailPage() {
             <div className="flex-1">
               <div className="flex gap-2 flex-wrap items-center">
                 <Badge variant={patient.status === 'ACTIVE' ? 'success' : 'neutral'}>
-                  {patient.status === 'ACTIVE' ? 'Suivi en cours' : patient.status}
+                  {patient.status === 'ACTIVE'
+                    ? t('patients.detail.followingIn')
+                    : patient.status}
                 </Badge>
-                <Badge variant="warning">{ADDICTION_LABEL[patient.primaryAddiction]}</Badge>
+                <Badge variant="warning">
+                  {ADDICTION_ICON[patient.primaryAddiction]} {t(`addiction.${patient.primaryAddiction}`)}
+                </Badge>
                 {patient.preferredPractitioner && (
                   <Badge variant="info">
-                    Dr. {patient.preferredPractitioner.firstName} {patient.preferredPractitioner.lastName}
+                    Dr. {patient.preferredPractitioner.firstName}{' '}
+                    {patient.preferredPractitioner.lastName}
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-text-secondary mt-1">
-                📞 {patient.phone} {patient.email ? ` · ✉️ ${patient.email}` : ''}
+              <p className="text-sm text-text-secondary mt-1" data-numeric>
+                📞 {patient.phone}
+                {patient.email ? ` · ✉️ ${patient.email}` : ''}
               </p>
             </div>
           </CardContent>
@@ -126,28 +137,32 @@ export function PatientDetailPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent>
-              <p className="text-xs text-text-secondary">📋 Séances</p>
-              <p className="text-3xl font-bold">{stats.sessionsCount}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">💰 Total payé</p>
-              <p className="text-3xl font-bold">{stats.totalPaid.toLocaleString()} EGP</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">⏱️ Ancienneté</p>
-              <p className="text-3xl font-bold">
-                {weeksBetween(patient.createdAt, new Date().toISOString())} sem.
+              <p className="text-xs text-text-secondary">📋 {t('patients.detail.kpi.sessions')}</p>
+              <p className="text-3xl font-bold" data-numeric>
+                {stats.sessionsCount}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <p className="text-xs text-text-secondary">📈 Évolution</p>
-              <p className="text-3xl font-bold text-primary-dark">
+              <p className="text-xs text-text-secondary">💰 {t('patients.detail.kpi.totalPaid')}</p>
+              <p className="text-3xl font-bold" data-numeric>
+                {stats.totalPaid.toLocaleString(i18n.language)} EGP
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <p className="text-xs text-text-secondary">⏱️ {t('patients.detail.kpi.duration')}</p>
+              <p className="text-3xl font-bold" data-numeric>
+                {weeksBetween(patient.createdAt, new Date().toISOString())} {t('patients.detail.weeks')}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <p className="text-xs text-text-secondary">📈 {t('patients.detail.kpi.evolution')}</p>
+              <p className="text-3xl font-bold text-primary-dark" data-numeric>
                 {evolutionScore !== null ? `+${evolutionScore}%` : '—'}
               </p>
             </CardContent>
@@ -156,43 +171,54 @@ export function PatientDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>📜 Historique des séances</CardTitle>
+            <CardTitle>📜 {t('patients.detail.history')}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <table className="w-full text-sm">
               <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
                 <tr>
-                  <th className="text-left px-4 py-2">Date</th>
-                  <th className="text-left px-4 py-2">Praticien</th>
-                  <th className="text-left px-4 py-2">Type</th>
-                  <th className="text-left px-4 py-2">Statut</th>
-                  <th className="text-right px-4 py-2">Montant</th>
-                  <th className="text-right px-4 py-2">Actions</th>
+                  <th className="text-start px-4 py-2">{t('patients.detail.columns.date')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.detail.columns.practitioner')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.detail.columns.type')}</th>
+                  <th className="text-start px-4 py-2">{t('patients.detail.columns.status')}</th>
+                  <th className="text-end px-4 py-2">{t('patients.detail.columns.amount')}</th>
+                  <th className="text-end px-4 py-2">{t('patients.detail.columns.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {patient.appointments.map((a) => (
                   <tr key={a.id}>
-                    <td className="px-4 py-2">{new Date(a.scheduledAt).toLocaleString()}</td>
+                    <td className="px-4 py-2" data-numeric>
+                      {new Date(a.scheduledAt).toLocaleString(i18n.language)}
+                    </td>
                     <td className="px-4 py-2 text-text-secondary">Dr. {a.practitioner.firstName}</td>
                     <td className="px-4 py-2">
-                      {ADDICTION_LABEL[a.service]} · {a.visitType === 'FIRST' ? '1ère' : 'Suivi'}
+                      {ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)} ·{' '}
+                      {t(`dashboard.visitType.${a.visitType}`)}
                     </td>
                     <td className="px-4 py-2">
-                      <Badge variant={statusVariant(a.status)}>{a.status}</Badge>
+                      <Badge variant={statusVariant(a.status)}>{t(`appointmentStatus.${a.status}`)}</Badge>
                     </td>
-                    <td className="px-4 py-2 text-right font-mono text-xs">
-                      {a.payment ? `${Number(a.payment.total).toLocaleString()} EGP` : `${Number(a.price).toLocaleString()} (à encaisser)`}
+                    <td className="px-4 py-2 text-end font-mono text-xs" data-numeric>
+                      {a.payment
+                        ? `${Number(a.payment.total).toLocaleString(i18n.language)} EGP`
+                        : `${Number(a.price).toLocaleString(i18n.language)} (${t('patients.detail.toCash')})`}
                     </td>
-                    <td className="px-4 py-2 text-right space-x-1">
+                    <td className="px-4 py-2 text-end space-x-1">
                       {!a.medicalRecord && a.status !== 'CANCELLED' && (
-                        <Link to={`/patients/${patient.id}/clinical?appointmentId=${a.id}`}>
-                          <Button size="sm" variant="outline">Fiche clinique</Button>
+                        <Link
+                          to={`/patients/${patient.id}/clinical?appointmentId=${a.id}`}
+                        >
+                          <Button size="sm" variant="outline">
+                            {t('patients.detail.clinicalForm')}
+                          </Button>
                         </Link>
                       )}
                       {!a.payment && a.status !== 'CANCELLED' && (
                         <Link to={`/payment/${a.id}`}>
-                          <Button size="sm" variant="outline">Encaisser</Button>
+                          <Button size="sm" variant="outline">
+                            {t('patients.detail.cash')}
+                          </Button>
                         </Link>
                       )}
                     </td>

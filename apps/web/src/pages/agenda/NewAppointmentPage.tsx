@@ -1,17 +1,18 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { ADDICTIONS, type Addiction } from '@reset/shared';
 import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
-const ADDICTION_LABEL: Record<Addiction, string> = {
-  TOBACCO: '🚬 Tabac',
-  DRUGS: '💊 Drogue',
-  ALCOHOL: '🍷 Alcool',
-  SUGAR: '🍬 Sucre',
-  STRESS: '😰 Stress',
+const ADDICTION_ICON: Record<Addiction, string> = {
+  TOBACCO: '🚬',
+  DRUGS: '💊',
+  ALCOHOL: '🍷',
+  SUGAR: '🍬',
+  STRESS: '😰',
 };
 
 const PRICE: Record<Addiction, { FIRST: number; FOLLOWUP: number }> = {
@@ -23,6 +24,7 @@ const PRICE: Record<Addiction, { FIRST: number; FOLLOWUP: number }> = {
 };
 
 export function NewAppointmentPage() {
+  const { t, i18n } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const initialPatientId = params.get('patientId') ?? '';
@@ -42,7 +44,10 @@ export function NewAppointmentPage() {
 
   const { data: practitionersData } = useQuery({
     queryKey: ['practitioners'],
-    queryFn: () => apiGet<{ practitioners: Array<{ id: string; firstName: string; lastName: string }> }>('/practitioners'),
+    queryFn: () =>
+      apiGet<{ practitioners: Array<{ id: string; firstName: string; lastName: string }> }>(
+        '/practitioners',
+      ),
   });
 
   useEffect(() => {
@@ -53,9 +58,20 @@ export function NewAppointmentPage() {
 
   const { data: patientsData } = useQuery({
     queryKey: ['patients-search', patientSearch],
-    queryFn: () => apiGet<{ patients: Array<{ id: string; firstName: string; lastName: string; phone: string; primaryAddiction: string }> }>(
-      patientSearch ? `/patients?search=${encodeURIComponent(patientSearch)}` : '/patients',
-    ),
+    queryFn: () =>
+      apiGet<{
+        patients: Array<{
+          id: string;
+          firstName: string;
+          lastName: string;
+          phone: string;
+          primaryAddiction: string;
+        }>;
+      }>(
+        patientSearch
+          ? `/patients?search=${encodeURIComponent(patientSearch)}`
+          : '/patients',
+      ),
     enabled: !initialPatientId,
   });
 
@@ -65,14 +81,14 @@ export function NewAppointmentPage() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!patientId || !practitionerId) {
-      setError('Patient et praticien obligatoires');
+      setError(t('newAppointment.errPatientPractitionerRequired'));
       return;
     }
     setSubmitting(true);
     setError('');
     try {
       const scheduledAt = new Date(`${date}T${time}:00`).toISOString();
-      const res = await apiPost<{ appointment: { id: string } }>('/appointments', {
+      await apiPost<{ appointment: { id: string } }>('/appointments', {
         patientId,
         practitionerId,
         scheduledAt,
@@ -82,10 +98,13 @@ export function NewAppointmentPage() {
         notes: notes || undefined,
       });
       navigate(`/patients/${patientId}`);
-      void res;
     } catch (err) {
       const msg = (err as { payload?: { error?: string } }).payload?.error;
-      setError(msg === 'TimeSlotConflict' ? 'Conflit de créneau' : 'Erreur lors de la création');
+      setError(
+        msg === 'TimeSlotConflict'
+          ? t('newAppointment.errSlotConflict')
+          : t('newAppointment.errGeneric'),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -93,21 +112,21 @@ export function NewAppointmentPage() {
 
   return (
     <>
-      <PageHeader title="Nouveau rendez-vous" subtitle="Création manuelle (secrétaire)" />
+      <PageHeader title={t('newAppointment.title')} subtitle={t('newAppointment.subtitle')} />
       <form onSubmit={submit} className="p-7 space-y-4 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle>👤 Patient</CardTitle>
+            <CardTitle>👤 {t('newAppointment.patient')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {initialPatientId ? (
               <p className="text-sm">
-                <strong>Patient sélectionné depuis la fiche</strong> · ID {initialPatientId}
+                <strong>{t('newAppointment.patientSelectedFromFile')}</strong> · ID {initialPatientId}
               </p>
             ) : (
               <>
                 <Input
-                  placeholder="Rechercher par nom ou téléphone…"
+                  placeholder={t('newAppointment.patientSearchPlaceholder')}
                   value={patientSearch}
                   onChange={(e) => setPatientSearch(e.target.value)}
                 />
@@ -117,26 +136,33 @@ export function NewAppointmentPage() {
                       key={p.id}
                       type="button"
                       onClick={() => setPatientId(p.id)}
-                      className={`w-full text-left px-3 py-2 text-sm border-b border-border-light last:border-0 ${
+                      className={`w-full text-start px-3 py-2 text-sm border-b border-border-light last:border-0 ${
                         patientId === p.id ? 'bg-info-light' : 'hover:bg-bg-secondary'
                       }`}
                     >
-                      <strong>{p.firstName} {p.lastName}</strong> · {p.phone} ·{' '}
-                      <span className="text-text-tertiary">{p.primaryAddiction}</span>
+                      <strong>
+                        {p.firstName} {p.lastName}
+                      </strong>{' '}
+                      · <span data-numeric>{p.phone}</span> ·{' '}
+                      <span className="text-text-tertiary">
+                        {ADDICTION_ICON[p.primaryAddiction as Addiction]}{' '}
+                        {t(`addiction.${p.primaryAddiction}`)}
+                      </span>
                     </button>
                   ))}
                   {patientsData && patientsData.patients.length === 0 && (
                     <p className="px-3 py-4 text-sm text-text-secondary">
-                      Aucun patient trouvé.{' '}
+                      {t('newAppointment.noPatientFound')}{' '}
                       <Link to="/patients/intake" className="text-info underline">
-                        Créer une fiche d'accueil
+                        {t('newAppointment.createIntakeLink')}
                       </Link>
                     </p>
                   )}
                 </div>
                 {selectedPatient && (
                   <p className="text-sm">
-                    ✓ <strong>{selectedPatient.firstName} {selectedPatient.lastName}</strong> sélectionné
+                    ✓ <strong>{selectedPatient.firstName} {selectedPatient.lastName}</strong>{' '}
+                    {t('newAppointment.patientSelected')}
                   </p>
                 )}
               </>
@@ -146,38 +172,45 @@ export function NewAppointmentPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>🩺 Service & praticien</CardTitle>
+            <CardTitle>🩺 {t('newAppointment.serviceTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="block text-xs font-medium mb-1">Service</label>
+              <label className="block text-xs font-medium mb-1">{t('newAppointment.service')}</label>
               <div className="flex gap-2 flex-wrap">
                 {ADDICTIONS.map((a) => (
                   <Chip key={a} active={service === a} onClick={() => setService(a)}>
-                    {ADDICTION_LABEL[a]}
+                    {ADDICTION_ICON[a]} {t(`addiction.${a}`)}
                   </Chip>
                 ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium mb-1">Type de visite</label>
+                <label className="block text-xs font-medium mb-1">{t('newAppointment.visitType')}</label>
                 <div className="flex gap-2">
                   <Chip active={visitType === 'FIRST'} onClick={() => setVisitType('FIRST')}>
-                    1ère séance
+                    {t('newAppointment.firstSession')}
                   </Chip>
-                  <Chip active={visitType === 'FOLLOWUP'} onClick={() => setVisitType('FOLLOWUP')}>
-                    Suivi
+                  <Chip
+                    active={visitType === 'FOLLOWUP'}
+                    onClick={() => setVisitType('FOLLOWUP')}
+                  >
+                    {t('newAppointment.followup')}
                   </Chip>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">Tarif (auto)</label>
-                <Input readOnly value={`${price.toLocaleString()} EGP`} className="bg-bg-secondary" />
+                <label className="block text-xs font-medium mb-1">{t('newAppointment.price')}</label>
+                <Input
+                  readOnly
+                  value={`${price.toLocaleString(i18n.language)} EGP`}
+                  className="bg-bg-secondary"
+                />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">Praticien</label>
+              <label className="block text-xs font-medium mb-1">{t('newAppointment.practitioner')}</label>
               <select
                 className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                 value={practitionerId}
@@ -195,31 +228,37 @@ export function NewAppointmentPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>📅 Date & créneau</CardTitle>
+            <CardTitle>📅 {t('newAppointment.dateTime')}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium mb-1">Date</label>
+              <label className="block text-xs font-medium mb-1">{t('newAppointment.date')}</label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">Heure (créneau de 40 min)</label>
-              <Input type="time" step={2400} value={time} onChange={(e) => setTime(e.target.value)} required />
-              <p className="text-xs text-text-tertiary mt-1">10:00 → 22:00, 18 créneaux/jour</p>
+              <label className="block text-xs font-medium mb-1">{t('newAppointment.timeSlot')}</label>
+              <Input
+                type="time"
+                step={2400}
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                required
+              />
+              <p className="text-xs text-text-tertiary mt-1">{t('newAppointment.slotInfo')}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>📝 Notes</CardTitle>
+            <CardTitle>📝 {t('newAppointment.notes')}</CardTitle>
           </CardHeader>
           <CardContent>
             <textarea
               className="w-full rounded border border-border bg-surface p-3 text-sm min-h-[80px]"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes pour le praticien (optionnel)"
+              placeholder={t('newAppointment.notesPlaceholder')}
             />
           </CardContent>
         </Card>
@@ -228,10 +267,10 @@ export function NewAppointmentPage() {
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-            Annuler
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Création…' : '✓ Créer le RDV'}
+            {submitting ? t('newAppointment.creating') : `✓ ${t('newAppointment.create')}`}
           </Button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
@@ -9,7 +10,17 @@ interface PatientLite {
   patient: { firstName: string; lastName: string; primaryAddiction: string };
 }
 
+const CONTRAINDICATIONS = [
+  { key: 'pacemaker', warn: true },
+  { key: 'epilepsy', warn: true },
+  { key: 'pregnancy', warn: true },
+  { key: 'diabetes', warn: false },
+  { key: 'hypertension', warn: false },
+  { key: 'autoimmune', warn: false },
+] as const;
+
 export function ClinicalFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [params] = useSearchParams();
   const appointmentId = params.get('appointmentId');
@@ -44,7 +55,7 @@ export function ClinicalFormPage() {
     privateNotes: '',
     auricularPoints: '',
     laserDuration: 20,
-    nextSession: '1 semaine',
+    nextSession: 'week',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -52,14 +63,17 @@ export function ClinicalFormPage() {
   function toggle(field: keyof typeof form, value: string) {
     setForm((f) => {
       const arr = f[field] as string[];
-      return { ...f, [field]: arr.includes(value) ? arr.filter((x) => x !== value) : [...arr, value] };
+      return {
+        ...f,
+        [field]: arr.includes(value) ? arr.filter((x) => x !== value) : [...arr, value],
+      };
     });
   }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!appointmentId) {
-      setError('Aucun RDV sélectionné. Reviens depuis le dossier patient.');
+      setError(t('clinical.noAppointmentSelected'));
       return;
     }
     setSubmitting(true);
@@ -92,7 +106,7 @@ export function ClinicalFormPage() {
       });
       navigate(`/patients/${id}`);
     } catch (err) {
-      setError((err as { message?: string }).message ?? 'Erreur');
+      setError((err as { message?: string }).message ?? 'Error');
     } finally {
       setSubmitting(false);
     }
@@ -103,67 +117,83 @@ export function ClinicalFormPage() {
   return (
     <>
       <PageHeader
-        title="Fiche clinique"
+        title={t('clinical.title')}
         subtitle={
           pdata
-            ? `${pdata.patient.firstName} ${pdata.patient.lastName} · Étape 2 — Praticien`
-            : 'Chargement…'
+            ? t('clinical.subtitle', {
+                name: `${pdata.patient.firstName} ${pdata.patient.lastName}`,
+              })
+            : t('common.loading')
         }
       />
       <form onSubmit={submit} className="p-7 space-y-4 max-w-5xl">
         <Card>
           <CardHeader>
-            <CardTitle>📖 Anamnèse</CardTitle>
+            <CardTitle>📖 {t('clinical.anamnesis')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Depuis combien d'années ?">
-                <Input type="number" value={form.yearsOfAddiction} onChange={(e) => setForm({ ...form, yearsOfAddiction: e.target.value })} />
+              <Field label={t('clinical.years')}>
+                <Input
+                  type="number"
+                  value={form.yearsOfAddiction}
+                  onChange={(e) => setForm({ ...form, yearsOfAddiction: e.target.value })}
+                />
               </Field>
-              <Field label="Quantité quotidienne">
-                <Input value={form.dailyQuantity} onChange={(e) => setForm({ ...form, dailyQuantity: e.target.value })} placeholder="ex: 1 paquet/jour" />
+              <Field label={t('clinical.dailyQty')}>
+                <Input
+                  value={form.dailyQuantity}
+                  onChange={(e) => setForm({ ...form, dailyQuantity: e.target.value })}
+                  placeholder={t('clinical.dailyQtyPlaceholder')}
+                />
               </Field>
             </div>
-            <Field label="Tentatives précédentes">
+            <Field label={t('clinical.previousAttempts')}>
               <div className="flex gap-2">
-                {['Aucune', '1 fois', '2-3 fois', '+ de 3 fois'].map((v) => (
-                  <Chip key={v} active={form.previousMethods.includes(v)} onClick={() => toggle('previousMethods', v)}>
-                    {v}
+                {(['none', 'one', 'two_three', 'more'] as const).map((k) => (
+                  <Chip
+                    key={k}
+                    active={form.previousMethods.includes(k)}
+                    onClick={() => toggle('previousMethods', k)}
+                  >
+                    {t(`patients.intake.attempts.${k}`)}
                   </Chip>
                 ))}
               </div>
             </Field>
-            <Field label="Plus long arrêt">
-              <Input value={form.longestQuit} onChange={(e) => setForm({ ...form, longestQuit: e.target.value })} placeholder="ex: 3 mois" />
+            <Field label={t('clinical.longestQuit')}>
+              <Input
+                value={form.longestQuit}
+                onChange={(e) => setForm({ ...form, longestQuit: e.target.value })}
+                placeholder={t('clinical.longestQuitPlaceholder')}
+              />
             </Field>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>📊 Évaluations 0-10</CardTitle>
+            <CardTitle>📊 {t('clinical.evaluations')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {(
-              [
-                ['stress', 'Niveau de stress'],
-                ['anxiety', "Niveau d'anxiété"],
-                ['craving', 'Force des envies'],
-                ['sleep', 'Qualité du sommeil'],
-                ['motivation', 'Motivation à arrêter'],
-              ] as const
-            ).map(([key, label]) => (
+              ['stress', 'anxiety', 'craving', 'sleep', 'motivation'] as const
+            ).map((key) => (
               <div key={key} className="flex items-center gap-3">
-                <label className="text-xs font-medium w-44">{label}</label>
+                <label className="text-xs font-medium w-44">{t(`clinical.scales.${key}`)}</label>
                 <input
                   type="range"
                   min={0}
                   max={10}
                   value={form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: Number(e.target.value) } as typeof form)}
+                  onChange={(e) =>
+                    setForm({ ...form, [key]: Number(e.target.value) } as typeof form)
+                  }
                   className="flex-1"
                 />
-                <span className="text-lg font-bold w-8 text-center">{form[key]}</span>
+                <span className="text-lg font-bold w-8 text-center" data-numeric>
+                  {form[key]}
+                </span>
               </div>
             ))}
           </CardContent>
@@ -171,38 +201,35 @@ export function ClinicalFormPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>⚠️ Antécédents et contre-indications</CardTitle>
+            <CardTitle>⚠️ {t('clinical.antecedents')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-xs text-text-tertiary">
-              ℹ️ Le laser photobiomodulation est contre-indiqué dans certains cas
-            </p>
+            <p className="text-xs text-text-tertiary">{t('clinical.laserWarning')}</p>
             <div className="flex gap-2 flex-wrap">
-              {[
-                { v: 'Pacemaker', warn: true },
-                { v: 'Épilepsie', warn: true },
-                { v: 'Grossesse', warn: true },
-                { v: 'Diabète', warn: false },
-                { v: 'Hypertension', warn: false },
-                { v: 'Maladie auto-immune', warn: false },
-              ].map((c) => (
+              {CONTRAINDICATIONS.map((c) => (
                 <Chip
-                  key={c.v}
-                  active={form.contraindications.includes(c.v)}
+                  key={c.key}
+                  active={form.contraindications.includes(c.key)}
                   warn={c.warn}
-                  onClick={() => toggle('contraindications', c.v)}
+                  onClick={() => toggle('contraindications', c.key)}
                 >
                   {c.warn && '⚠️ '}
-                  {c.v}
+                  {t(`clinical.contraindications.${c.key}`)}
                 </Chip>
               ))}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Médicaments en cours">
-                <Input value={form.medications} onChange={(e) => setForm({ ...form, medications: e.target.value })} />
+              <Field label={t('clinical.currentMeds')}>
+                <Input
+                  value={form.medications}
+                  onChange={(e) => setForm({ ...form, medications: e.target.value })}
+                />
               </Field>
-              <Field label="Allergies">
-                <Input value={form.allergies} onChange={(e) => setForm({ ...form, allergies: e.target.value })} />
+              <Field label={t('clinical.allergies')}>
+                <Input
+                  value={form.allergies}
+                  onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+                />
               </Field>
             </div>
           </CardContent>
@@ -211,13 +238,11 @@ export function ClinicalFormPage() {
         {addiction === 'TOBACCO' && (
           <Card>
             <CardHeader>
-              <CardTitle>🚬 Test Fagerström (tabac)</CardTitle>
+              <CardTitle>🚬 {t('clinical.fagerstrom')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-xs text-text-tertiary">
-                Test de dépendance nicotinique. Score sur 10.
-              </p>
-              <Field label="Score Fagerström (0-10)">
+              <p className="text-xs text-text-tertiary">{t('clinical.fagerstromDesc')}</p>
+              <Field label={t('clinical.fagerstromScore')}>
                 <Input
                   type="number"
                   min={0}
@@ -227,7 +252,7 @@ export function ClinicalFormPage() {
                 />
               </Field>
               {form.fagerstrom > 6 && (
-                <Badge variant="warning">Dépendance forte — protocole intensif recommandé</Badge>
+                <Badge variant="warning">{t('clinical.strongDependence')}</Badge>
               )}
             </CardContent>
           </Card>
@@ -235,16 +260,24 @@ export function ClinicalFormPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>📏 Mesures objectives</CardTitle>
+            <CardTitle>📏 {t('clinical.measurements')}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-4 gap-3">
-            <Field label="Poids (kg)">
-              <Input type="number" value={form.weight} onChange={(e) => setForm({ ...form, weight: e.target.value })} />
+            <Field label={t('clinical.weight')}>
+              <Input
+                type="number"
+                value={form.weight}
+                onChange={(e) => setForm({ ...form, weight: e.target.value })}
+              />
             </Field>
-            <Field label="Taille (cm)">
-              <Input type="number" value={form.height} onChange={(e) => setForm({ ...form, height: e.target.value })} />
+            <Field label={t('clinical.height')}>
+              <Input
+                type="number"
+                value={form.height}
+                onChange={(e) => setForm({ ...form, height: e.target.value })}
+              />
             </Field>
-            <Field label="IMC (auto)">
+            <Field label={t('clinical.bmi')}>
               <Input
                 readOnly
                 value={
@@ -255,26 +288,30 @@ export function ClinicalFormPage() {
                 className="bg-bg-secondary"
               />
             </Field>
-            <Field label="SpO2 (%)">
-              <Input type="number" value={form.spo2} onChange={(e) => setForm({ ...form, spo2: e.target.value })} />
+            <Field label={t('clinical.spo2')}>
+              <Input
+                type="number"
+                value={form.spo2}
+                onChange={(e) => setForm({ ...form, spo2: e.target.value })}
+              />
             </Field>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>🎯 Plan thérapeutique</CardTitle>
+            <CardTitle>🎯 {t('clinical.treatmentPlan')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Points auriculaires ciblés">
+            <Field label={t('clinical.auricularPoints')}>
               <Input
                 value={form.auricularPoints}
                 onChange={(e) => setForm({ ...form, auricularPoints: e.target.value })}
-                placeholder="ex: Shenmen, Poumon, Bouche..."
+                placeholder={t('clinical.auricularPointsPlaceholder')}
               />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Durée laser (min)">
+              <Field label={t('clinical.laserDuration')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.laserDuration}
@@ -285,16 +322,16 @@ export function ClinicalFormPage() {
                   ))}
                 </select>
               </Field>
-              <Field label="Prochaine séance">
+              <Field label={t('clinical.nextSession')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                   value={form.nextSession}
                   onChange={(e) => setForm({ ...form, nextSession: e.target.value })}
                 >
-                  <option>1 semaine</option>
-                  <option>15 jours</option>
-                  <option>1 mois</option>
-                  <option>3 mois</option>
+                  <option value="week">{t('clinical.nextSessionOptions.week')}</option>
+                  <option value="twoWeeks">{t('clinical.nextSessionOptions.twoWeeks')}</option>
+                  <option value="month">{t('clinical.nextSessionOptions.month')}</option>
+                  <option value="threeMonths">{t('clinical.nextSessionOptions.threeMonths')}</option>
                 </select>
               </Field>
             </div>
@@ -303,14 +340,14 @@ export function ClinicalFormPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>🔒 Notes cliniques privées (praticien uniquement)</CardTitle>
+            <CardTitle>🔒 {t('clinical.privateNotes')}</CardTitle>
           </CardHeader>
           <CardContent>
             <textarea
               className="w-full min-h-[120px] rounded border border-border bg-surface p-3 text-sm"
               value={form.privateNotes}
               onChange={(e) => setForm({ ...form, privateNotes: e.target.value })}
-              placeholder="Observations, à compléter…"
+              placeholder={t('clinical.privateNotesPlaceholder')}
             />
           </CardContent>
         </Card>
@@ -319,10 +356,10 @@ export function ClinicalFormPage() {
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-            Annuler
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Enregistrement…' : '✓ Finaliser séance'}
+            {submitting ? t('clinical.saving') : `✓ ${t('clinical.finalize')}`}
           </Button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, Badge, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
@@ -37,7 +38,7 @@ const CHANNEL_ICON: Record<string, string> = {
   SMS: '📱',
 };
 
-const CHANNEL_COLOR: Record<string, string> = {
+const CHANNEL_COLOR: Record<string, 'success' | 'danger' | 'info' | 'warning' | 'neutral'> = {
   WHATSAPP: 'success',
   INSTAGRAM: 'danger',
   MESSENGER: 'info',
@@ -45,13 +46,8 @@ const CHANNEL_COLOR: Record<string, string> = {
   SMS: 'neutral',
 };
 
-const QUICK_TEMPLATES = [
-  'Bonjour, nous sommes situés à New Cairo, N Teseen. Souhaitez-vous prendre RDV ?',
-  'Nos tarifs : 1ère séance tabac 3500 EGP, suivi 1500 EGP. Plus d\'infos ?',
-  'Horaires : 7j/7 de 10h à 22h. Souhaitez-vous réserver ?',
-];
-
 export function InboxPage() {
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [reply, setReply] = useState('');
@@ -88,24 +84,28 @@ export function InboxPage() {
     },
   });
 
+  const QUICK_TEMPLATES = [
+    t('inbox.templatesContent.address'),
+    t('inbox.templatesContent.prices'),
+    t('inbox.templatesContent.hours'),
+  ];
+
   return (
     <>
-      <PageHeader title="Inbox unifiée" subtitle="WhatsApp · Instagram · Email · SMS" />
+      <PageHeader title={t('inbox.title')} subtitle={t('inbox.subtitle')} />
       <div className="grid grid-cols-[320px_1fr_280px] h-[calc(100vh-100px)]">
-        <aside className="border-r border-border bg-surface overflow-y-auto">
+        <aside className="border-e border-border bg-surface overflow-y-auto">
           <div className="p-3 border-b border-border">
-            <Input placeholder="Rechercher…" />
+            <Input placeholder={t('inbox.searchPlaceholder')} />
           </div>
           {conversationsData?.conversations.length === 0 && (
-            <p className="p-6 text-sm text-text-secondary text-center">
-              Aucune conversation. Les messages entrants apparaîtront ici (mock).
-            </p>
+            <p className="p-6 text-sm text-text-secondary text-center">{t('inbox.empty')}</p>
           )}
           {conversationsData?.conversations.map((c) => (
             <button
               key={c.key}
               onClick={() => setSelectedKey(c.key)}
-              className={`w-full text-left p-3 border-b border-border hover:bg-bg-secondary ${
+              className={`w-full text-start p-3 border-b border-border hover:bg-bg-secondary ${
                 selectedKey === c.key ? 'bg-info-light' : ''
               }`}
             >
@@ -117,8 +117,8 @@ export function InboxPage() {
                 {c.unread > 0 && <Badge variant="danger">{c.unread}</Badge>}
               </div>
               <p className="text-xs text-text-secondary truncate">{c.lastMessage}</p>
-              <p className="text-[10px] text-text-tertiary mt-1">
-                {new Date(c.lastAt).toLocaleString()}
+              <p className="text-[10px] text-text-tertiary mt-1" data-numeric>
+                {new Date(c.lastAt).toLocaleString(i18n.language)}
               </p>
             </button>
           ))}
@@ -157,20 +157,21 @@ export function InboxPage() {
                         }`}
                       >
                         {m.isAuto && (
-                          <p className="text-[9px] opacity-70 uppercase mb-1">Auto</p>
+                          <p className="text-[9px] opacity-70 uppercase mb-1">{t('inbox.auto')}</p>
                         )}
                         <p>{m.content}</p>
                         <p
                           className={`text-[10px] mt-1 ${m.direction === 'OUTBOUND' ? 'text-white/70' : 'text-text-tertiary'}`}
+                          data-numeric
                         >
-                          {new Date(m.createdAt).toLocaleTimeString()}
+                          {new Date(m.createdAt).toLocaleTimeString(i18n.language)}
                         </p>
                       </div>
                     </div>
                   ))}
                 {!msgsData?.messages.length && (
                   <p className="text-sm text-text-secondary text-center mt-12">
-                    Aucun message dans cette conversation.
+                    {t('inbox.noMessages')}
                   </p>
                 )}
               </div>
@@ -178,13 +179,13 @@ export function InboxPage() {
                 <div className="flex gap-1 flex-wrap">
                   {QUICK_TEMPLATES.map((tpl, i) => (
                     <Chip key={i} onClick={() => setReply(tpl)}>
-                      Template {i + 1}
+                      {t('inbox.templates')} {i + 1}
                     </Chip>
                   ))}
                 </div>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Tapez votre réponse…"
+                    placeholder={t('inbox.replyPlaceholder')}
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
                     onKeyDown={(e) => {
@@ -192,31 +193,31 @@ export function InboxPage() {
                     }}
                   />
                   <Button onClick={() => sendMut.mutate()} disabled={!reply.trim() || sendMut.isPending}>
-                    Envoyer
+                    {t('inbox.send')}
                   </Button>
                 </div>
               </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-text-secondary text-sm">
-              Sélectionne une conversation à gauche
+              {t('inbox.selectConversation')}
             </div>
           )}
         </section>
 
-        <aside className="border-l border-border bg-surface overflow-y-auto p-4">
+        <aside className="border-s border-border bg-surface overflow-y-auto p-4">
           {selected ? (
             <>
               <Card>
                 <CardHeader>
-                  <CardTitle>👤 Contact</CardTitle>
+                  <CardTitle>👤 {t('inbox.contact')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-xs">
                   <p>
-                    <strong>{selected.patientName ?? 'Inconnu'}</strong>
+                    <strong>{selected.patientName ?? t('inbox.unknown')}</strong>
                   </p>
-                  <p className="text-text-secondary">{selected.externalAddress}</p>
-                  <Badge variant={CHANNEL_COLOR[selected.channel] as 'success' | 'danger' | 'info' | 'warning' | 'neutral'}>
+                  <p className="text-text-secondary" data-numeric>{selected.externalAddress}</p>
+                  <Badge variant={CHANNEL_COLOR[selected.channel] ?? 'neutral'}>
                     {CHANNEL_ICON[selected.channel]} {selected.channel}
                   </Badge>
                 </CardContent>
@@ -224,17 +225,16 @@ export function InboxPage() {
               {selected.patientId && (
                 <div className="mt-3 space-y-2">
                   <Button variant="outline" size="sm" className="w-full" asChild>
-                    <a href={`/patients/${selected.patientId}`}>📋 Voir dossier patient</a>
+                    <a href={`/patients/${selected.patientId}`}>📋 {t('inbox.viewPatientFile')}</a>
                   </Button>
                   <Button variant="outline" size="sm" className="w-full" asChild>
-                    <a href={`/appointments/new?patientId=${selected.patientId}`}>➕ Créer RDV</a>
+                    <a href={`/appointments/new?patientId=${selected.patientId}`}>
+                      ➕ {t('inbox.createAppointment')}
+                    </a>
                   </Button>
                 </div>
               )}
-              <p className="text-xs text-text-tertiary mt-6">
-                ℹ️ Mock : les vrais channels (WhatsApp Business, Instagram, Email) sont
-                branchés en Phase 8 quand les credentials sont obtenus.
-              </p>
+              <p className="text-xs text-text-tertiary mt-6">{t('inbox.mockNote')}</p>
             </>
           ) : null}
         </aside>

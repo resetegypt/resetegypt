@@ -28,17 +28,17 @@ interface AppointmentRow {
   payment: { id: string; total: number; invoiceNumber: string } | null;
 }
 
-const SERVICE_LABEL: Record<string, string> = {
-  TOBACCO: '🚬 Tabac',
-  DRUGS: '💊 Drogue',
-  ALCOHOL: '🍷 Alcool',
-  SUGAR: '🍬 Sucre',
-  STRESS: '😰 Stress',
+const ADDICTION_ICON: Record<string, string> = {
+  TOBACCO: '🚬',
+  DRUGS: '💊',
+  ALCOHOL: '🍷',
+  SUGAR: '🍬',
+  STRESS: '😰',
 };
 
 export function DashboardPage() {
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -62,7 +62,7 @@ export function DashboardPage() {
   });
 
   const greeting = `${t('dashboard.greeting')}, ${user?.firstName}`;
-  const dateLabel = new Date().toLocaleDateString('fr-FR', {
+  const dateLabel = new Date().toLocaleDateString(i18n.language, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -71,7 +71,6 @@ export function DashboardPage() {
 
   const appointments = today?.appointments ?? [];
 
-  // Group by status — order: in progress, upcoming, completed, no-show/cancelled
   const inProgress = appointments.filter((a) => a.status === 'IN_PROGRESS');
   const upcoming = appointments
     .filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED')
@@ -89,7 +88,7 @@ export function DashboardPage() {
           <KPICard icon="📅" label={t('dashboard.kpi.appointments')} value={kpis?.todayAppointments ?? '–'} />
           <KPICard
             icon="💰"
-            label="À encaisser"
+            label={t('dashboard.kpi.toCash')}
             value={completedUnpaid.length}
             accent={completedUnpaid.length > 0 ? 'warning' : undefined}
           />
@@ -97,7 +96,7 @@ export function DashboardPage() {
           <KPICard
             icon="💵"
             label={t('dashboard.kpi.revenue')}
-            value={kpis ? `${kpis.todayRevenue.toLocaleString('fr-FR')} EGP` : '–'}
+            value={kpis ? `${kpis.todayRevenue.toLocaleString(i18n.language)} EGP` : '–'}
             accent="success"
           />
         </div>
@@ -106,10 +105,10 @@ export function DashboardPage() {
           <Card>
             <CardContent className="text-center py-12 text-text-secondary">
               <div className="text-5xl mb-3">📭</div>
-              <p>Aucun rendez-vous prévu aujourd'hui.</p>
+              <p>{t('dashboard.noAppointmentsToday')}</p>
               {user?.role !== 'PRACTITIONER' && (
                 <Link to="/appointments/new" className="inline-block mt-4">
-                  <Button>➕ Créer un RDV</Button>
+                  <Button>➕ {t('dashboard.createAppointment')}</Button>
                 </Link>
               )}
             </CardContent>
@@ -118,13 +117,13 @@ export function DashboardPage() {
           <div className="space-y-4">
             {inProgress.length > 0 && (
               <Section
-                title="🔵 En cours"
+                title={`🔵 ${t('dashboard.sections.inProgress')}`}
                 count={inProgress.length}
                 accent="info"
-                description="Séances actuellement en consultation"
+                description={t('dashboard.sections.inProgressDesc')}
               >
                 {inProgress.map((a) => (
-                  <AppointmentRow
+                  <AppointmentRowItem
                     key={a.id}
                     appointment={a}
                     onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
@@ -138,13 +137,13 @@ export function DashboardPage() {
 
             {upcoming.length > 0 && (
               <Section
-                title="🟠 À venir"
+                title={`🟠 ${t('dashboard.sections.upcoming')}`}
                 count={upcoming.length}
                 accent="warning"
-                description="RDV à confirmer / démarrer"
+                description={t('dashboard.sections.upcomingDesc')}
               >
                 {upcoming.map((a) => (
-                  <AppointmentRow
+                  <AppointmentRowItem
                     key={a.id}
                     appointment={a}
                     onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
@@ -158,13 +157,13 @@ export function DashboardPage() {
 
             {completed.length > 0 && (
               <Section
-                title="✅ Terminés"
+                title={`✅ ${t('dashboard.sections.completed')}`}
                 count={completed.length}
                 accent="success"
-                description={`${completedUnpaid.length} à encaisser`}
+                description={t('dashboard.sections.completedDesc', { count: completedUnpaid.length })}
               >
                 {completed.map((a) => (
-                  <AppointmentRow
+                  <AppointmentRowItem
                     key={a.id}
                     appointment={a}
                     onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
@@ -177,9 +176,13 @@ export function DashboardPage() {
             )}
 
             {archived.length > 0 && (
-              <Section title="⛔ No-show / Annulés" count={archived.length} accent="neutral">
+              <Section
+                title={`⛔ ${t('dashboard.sections.archived')}`}
+                count={archived.length}
+                accent="neutral"
+              >
                 {archived.map((a) => (
-                  <AppointmentRow
+                  <AppointmentRowItem
                     key={a.id}
                     appointment={a}
                     onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
@@ -201,22 +204,22 @@ export function DashboardPage() {
             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <Link to="/patients/intake">
                 <Button variant="outline" size="sm" className="w-full justify-start">
-                  📝 Fiche d'accueil
+                  📝 {t('dashboard.action.newPatient')}
                 </Button>
               </Link>
               <Link to="/appointments/new">
                 <Button variant="outline" size="sm" className="w-full justify-start">
-                  ➕ Nouveau RDV
+                  ➕ {t('dashboard.action.newAppointment')}
                 </Button>
               </Link>
               <Link to="/patients">
                 <Button variant="outline" size="sm" className="w-full justify-start">
-                  👥 Patients
+                  👥 {t('dashboard.action.patients')}
                 </Button>
               </Link>
               <Link to="/accounting">
                 <Button variant="outline" size="sm" className="w-full justify-start">
-                  💰 Comptabilité
+                  💰 {t('dashboard.action.accounting')}
                 </Button>
               </Link>
             </CardContent>
@@ -255,7 +258,7 @@ function Section({
   );
 }
 
-function AppointmentRow({
+function AppointmentRowItem({
   appointment,
   onUpdateStatus,
   onEncaisser,
@@ -268,8 +271,9 @@ function AppointmentRow({
   onViewInvoice: (payId: string) => void;
   role?: 'ADMIN' | 'PRACTITIONER' | 'SECRETARY';
 }) {
+  const { t, i18n } = useTranslation();
   const a = appointment;
-  const time = new Date(a.scheduledAt).toLocaleTimeString('fr-FR', {
+  const time = new Date(a.scheduledAt).toLocaleTimeString(i18n.language, {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -277,7 +281,12 @@ function AppointmentRow({
 
   return (
     <li className="flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/30">
-      <div className="font-mono text-sm font-semibold w-14 text-right text-text-secondary">{time}</div>
+      <div
+        className="font-mono text-sm font-semibold w-14 text-right text-text-secondary"
+        data-numeric
+      >
+        {time}
+      </div>
       <div className="flex-1 min-w-0">
         <Link
           to={`/patients/${a.patientId}`}
@@ -286,32 +295,45 @@ function AppointmentRow({
           {a.patientName}
         </Link>
         <p className="text-xs text-text-secondary truncate">
-          {SERVICE_LABEL[a.service] ?? a.service} ·{' '}
-          {a.visitType === 'FIRST' ? '1ère séance' : a.visitType === 'FOLLOWUP' ? 'Suivi' : 'Consolidation'} ·{' '}
-          {a.practitionerName}
+          {ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)} ·{' '}
+          {t(`dashboard.visitType.${a.visitType}`)} · {a.practitionerName}
         </p>
       </div>
       <StatusTag status={a.status} />
-      <div className="flex gap-1.5 items-center min-w-[200px] justify-end">
-        {/* Action buttons by status */}
+      <div className="flex gap-1.5 items-center min-w-[220px] justify-end flex-wrap">
         {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
           <>
-            <Button size="sm" variant="outline" onClick={() => onUpdateStatus('IN_PROGRESS')} title="Démarrer la séance">
-              ▶️ Démarrer
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onUpdateStatus('IN_PROGRESS')}
+              title={t('dashboard.actions.start')}
+            >
+              ▶️ {t('dashboard.actions.start')}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => onUpdateStatus('NO_SHOW')} title="Patient absent">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onUpdateStatus('NO_SHOW')}
+              title={t('dashboard.actions.noShow')}
+            >
               ❌
             </Button>
           </>
         )}
         {a.status === 'IN_PROGRESS' && (
           <>
-            <Button size="sm" variant="outline" onClick={() => onUpdateStatus('COMPLETED')} title="Marquer terminé">
-              ✓ Terminer
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onUpdateStatus('COMPLETED')}
+              title={t('dashboard.actions.complete')}
+            >
+              ✓ {t('dashboard.actions.complete')}
             </Button>
             {canCash && (
-              <Button size="sm" onClick={onEncaisser} title="Encaisser maintenant">
-                💰 Encaisser
+              <Button size="sm" onClick={onEncaisser} title={t('dashboard.actions.cash')}>
+                💰 {t('dashboard.actions.cash')}
               </Button>
             )}
           </>
@@ -319,15 +341,20 @@ function AppointmentRow({
         {a.status === 'COMPLETED' && (
           <>
             {a.payment ? (
-              <Button size="sm" variant="outline" onClick={() => onViewInvoice(a.payment!.id)} title="Voir facture">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onViewInvoice(a.payment!.id)}
+                title={t('dashboard.actions.viewInvoice')}
+              >
                 📄 {a.payment.invoiceNumber}
               </Button>
             ) : canCash ? (
-              <Button size="sm" onClick={onEncaisser} title="Encaisser">
-                💰 Encaisser {a.price.toLocaleString('fr-FR')} EGP
+              <Button size="sm" onClick={onEncaisser}>
+                💰 {t('dashboard.actions.cashAmount', { amount: a.price.toLocaleString(i18n.language) })}
               </Button>
             ) : (
-              <Badge variant="warning">À encaisser</Badge>
+              <Badge variant="warning">{t('dashboard.actions.toBeCashed')}</Badge>
             )}
           </>
         )}
@@ -340,19 +367,16 @@ function AppointmentRow({
 }
 
 function StatusTag({ status }: { status: string }) {
-  const map: Record<
-    string,
-    { variant: 'success' | 'warning' | 'info' | 'neutral' | 'danger'; label: string }
-  > = {
-    SCHEDULED: { variant: 'warning', label: 'À confirmer' },
-    CONFIRMED: { variant: 'success', label: 'Confirmé' },
-    IN_PROGRESS: { variant: 'info', label: 'En cours' },
-    COMPLETED: { variant: 'success', label: 'Terminé' },
-    NO_SHOW: { variant: 'danger', label: 'No-show' },
-    CANCELLED: { variant: 'neutral', label: 'Annulé' },
+  const { t } = useTranslation();
+  const map: Record<string, 'success' | 'warning' | 'info' | 'neutral' | 'danger'> = {
+    SCHEDULED: 'warning',
+    CONFIRMED: 'success',
+    IN_PROGRESS: 'info',
+    COMPLETED: 'success',
+    NO_SHOW: 'danger',
+    CANCELLED: 'neutral',
   };
-  const cfg = map[status] ?? { variant: 'neutral' as const, label: status };
-  return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
+  return <Badge variant={map[status] ?? 'neutral'}>{t(`appointmentStatus.${status}`)}</Badge>;
 }
 
 function KPICard({
@@ -377,7 +401,9 @@ function KPICard({
         <p className="text-xs text-text-secondary flex items-center gap-1">
           <span>{icon}</span> {label}
         </p>
-        <p className={`text-3xl font-bold ${accent ? colors[accent] : ''}`}>{value}</p>
+        <p className={`text-3xl font-bold ${accent ? colors[accent] : ''}`} data-numeric>
+          {value}
+        </p>
       </CardContent>
     </Card>
   );
