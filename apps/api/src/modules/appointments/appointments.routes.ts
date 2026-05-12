@@ -69,8 +69,10 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       where,
       orderBy: { scheduledAt: 'asc' },
       include: {
-        patient: { select: { firstName: true, lastName: true } },
+        patient: { select: { id: true, firstName: true, lastName: true, phone: true } },
         practitioner: { select: { firstName: true, lastName: true } },
+        payment: { select: { id: true, total: true, invoiceNumber: true } },
+        medicalRecord: { select: { id: true } },
       },
     });
 
@@ -78,11 +80,22 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       appointments: rows.map((a) => ({
         id: a.id,
         scheduledAt: a.scheduledAt.toISOString(),
+        patientId: a.patient.id,
         patientName: `${a.patient.firstName} ${a.patient.lastName}`,
+        patientPhone: a.patient.phone,
         service: a.service,
         visitType: a.visitType,
         practitionerName: `Dr. ${a.practitioner.firstName}`,
         status: a.status,
+        price: Number(a.price),
+        hasMedicalRecord: !!a.medicalRecord,
+        payment: a.payment
+          ? {
+              id: a.payment.id,
+              total: Number(a.payment.total),
+              invoiceNumber: a.payment.invoiceNumber,
+            }
+          : null,
       })),
     };
   });

@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
-import { Link } from 'react-router-dom';
-import { apiGet } from '../lib/api';
+import { apiGet, apiPatch } from '../lib/api';
 import { useAuthStore } from '../lib/auth';
 import { PageHeader } from '../components/AppShell';
 
@@ -13,35 +13,73 @@ interface DashboardKPIs {
   todayRevenue: number;
 }
 
-interface AppointmentItem {
+interface AppointmentRow {
   id: string;
   scheduledAt: string;
+  patientId: string;
   patientName: string;
+  patientPhone: string;
   service: string;
   visitType: string;
   practitionerName: string;
   status: string;
+  price: number;
+  hasMedicalRecord: boolean;
+  payment: { id: string; total: number; invoiceNumber: string } | null;
 }
+
+const SERVICE_LABEL: Record<string, string> = {
+  TOBACCO: '🚬 Tabac',
+  DRUGS: '💊 Drogue',
+  ALCOHOL: '🍷 Alcool',
+  SUGAR: '🍬 Sucre',
+  STRESS: '😰 Stress',
+};
 
 export function DashboardPage() {
   const { user } = useAuthStore();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
   const { data: kpis } = useQuery({
     queryKey: ['dashboard', 'kpis'],
     queryFn: () => apiGet<DashboardKPIs>('/stats/dashboard'),
   });
   const { data: today } = useQuery({
     queryKey: ['dashboard', 'today'],
-    queryFn: () => apiGet<{ appointments: AppointmentItem[] }>('/appointments/today'),
+    queryFn: () => apiGet<{ appointments: AppointmentRow[] }>('/appointments/today'),
+    refetchInterval: 30_000,
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      apiPatch(`/appointments/${id}`, { status }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['dashboard', 'today'] });
+      qc.invalidateQueries({ queryKey: ['dashboard', 'kpis'] });
+    },
   });
 
   const greeting = `${t('dashboard.greeting')}, ${user?.firstName}`;
-  const dateLabel = new Date().toLocaleDateString(undefined, {
+  const dateLabel = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
+
+  const appointments = today?.appointments ?? [];
+
+  // Group by status — order: in progress, upcoming, completed, no-show/cancelled
+  const inProgress = appointments.filter((a) => a.status === 'IN_PROGRESS');
+  const upcoming = appointments
+    .filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED')
+    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
+  const completed = appointments.filter((a) => a.status === 'COMPLETED');
+  const archived = appointments.filter((a) => a.status === 'NO_SHOW' || a.status === 'CANCELLED');
+
+  const completedUnpaid = completed.filter((a) => !a.payment);
 
   return (
     <>
@@ -49,88 +87,272 @@ export function DashboardPage() {
       <div className="p-7 space-y-6 max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard icon="📅" label={t('dashboard.kpi.appointments')} value={kpis?.todayAppointments ?? '–'} />
-          <KPICard icon="💬" label={t('dashboard.kpi.messages')} value={kpis?.pendingMessages ?? '–'} accent="warning" />
-          <KPICard icon="🔁" label={t('dashboard.kpi.reminders')} value={kpis?.remindersToSend ?? '–'} />
           <KPICard
             icon="💰"
+            label="À encaisser"
+            value={completedUnpaid.length}
+            accent={completedUnpaid.length > 0 ? 'warning' : undefined}
+          />
+          <KPICard icon="🔁" label={t('dashboard.kpi.reminders')} value={kpis?.remindersToSend ?? '–'} />
+          <KPICard
+            icon="💵"
             label={t('dashboard.kpi.revenue')}
-            value={kpis ? `${kpis.todayRevenue.toLocaleString()} EGP` : '–'}
+            value={kpis ? `${kpis.todayRevenue.toLocaleString('fr-FR')} EGP` : '–'}
             accent="success"
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>📅 {t('dashboard.appointmentsToday')}</CardTitle>
-              <Link to="/agenda">
-                <Button size="sm" variant="outline">
-                  {t('dashboard.openAgenda')} →
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent className="space-y-2 p-0">
-              {!today || today.appointments.length === 0 ? (
-                <p className="text-sm text-text-secondary p-6 text-center">
-                  {t('dashboard.noAppointmentsToday')}
-                </p>
-              ) : (
-                <ul className="divide-y divide-border">
-                  {today.appointments.map((a) => (
-                    <li key={a.id} className="flex items-center gap-3 px-4 py-3">
-                      <div className="font-mono text-sm font-semibold w-14 text-right">
-                        {formatTime(a.scheduledAt)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{a.patientName}</p>
-                        <p className="text-xs text-text-secondary truncate">
-                          {a.service} · {a.visitType === 'FIRST' ? '1ère séance' : 'Suivi'} ·{' '}
-                          {a.practitionerName}
-                        </p>
-                      </div>
-                      <StatusTag status={a.status} />
-                    </li>
-                  ))}
-                </ul>
+        {appointments.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12 text-text-secondary">
+              <div className="text-5xl mb-3">📭</div>
+              <p>Aucun rendez-vous prévu aujourd'hui.</p>
+              {user?.role !== 'PRACTITIONER' && (
+                <Link to="/appointments/new" className="inline-block mt-4">
+                  <Button>➕ Créer un RDV</Button>
+                </Link>
               )}
             </CardContent>
           </Card>
+        ) : (
+          <div className="space-y-4">
+            {inProgress.length > 0 && (
+              <Section
+                title="🔵 En cours"
+                count={inProgress.length}
+                accent="info"
+                description="Séances actuellement en consultation"
+              >
+                {inProgress.map((a) => (
+                  <AppointmentRow
+                    key={a.id}
+                    appointment={a}
+                    onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
+                    onEncaisser={() => navigate(`/payment/${a.id}`)}
+                    onViewInvoice={(payId) => navigate(`/payments/${payId}`)}
+                    role={user?.role}
+                  />
+                ))}
+              </Section>
+            )}
 
+            {upcoming.length > 0 && (
+              <Section
+                title="🟠 À venir"
+                count={upcoming.length}
+                accent="warning"
+                description="RDV à confirmer / démarrer"
+              >
+                {upcoming.map((a) => (
+                  <AppointmentRow
+                    key={a.id}
+                    appointment={a}
+                    onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
+                    onEncaisser={() => navigate(`/payment/${a.id}`)}
+                    onViewInvoice={(payId) => navigate(`/payments/${payId}`)}
+                    role={user?.role}
+                  />
+                ))}
+              </Section>
+            )}
+
+            {completed.length > 0 && (
+              <Section
+                title="✅ Terminés"
+                count={completed.length}
+                accent="success"
+                description={`${completedUnpaid.length} à encaisser`}
+              >
+                {completed.map((a) => (
+                  <AppointmentRow
+                    key={a.id}
+                    appointment={a}
+                    onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
+                    onEncaisser={() => navigate(`/payment/${a.id}`)}
+                    onViewInvoice={(payId) => navigate(`/payments/${payId}`)}
+                    role={user?.role}
+                  />
+                ))}
+              </Section>
+            )}
+
+            {archived.length > 0 && (
+              <Section title="⛔ No-show / Annulés" count={archived.length} accent="neutral">
+                {archived.map((a) => (
+                  <AppointmentRow
+                    key={a.id}
+                    appointment={a}
+                    onUpdateStatus={(status) => updateStatus.mutate({ id: a.id, status })}
+                    onEncaisser={() => navigate(`/payment/${a.id}`)}
+                    onViewInvoice={(payId) => navigate(`/payments/${payId}`)}
+                    role={user?.role}
+                  />
+                ))}
+              </Section>
+            )}
+          </div>
+        )}
+
+        {user?.role !== 'PRACTITIONER' && (
           <Card>
             <CardHeader>
               <CardTitle>⚡ {t('dashboard.quickActions')}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {user?.role !== 'PRACTITIONER' && (
-                <>
-                  <Link to="/patients/intake" className="block">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      📝 {t('dashboard.action.newPatient')}
-                    </Button>
-                  </Link>
-                  <Link to="/appointments/new" className="block">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      ➕ {t('dashboard.action.newAppointment')}
-                    </Button>
-                  </Link>
-                </>
-              )}
-              <Link to="/patients" className="block">
+            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <Link to="/patients/intake">
                 <Button variant="outline" size="sm" className="w-full justify-start">
-                  👥 {t('dashboard.action.patients')}
+                  📝 Fiche d'accueil
                 </Button>
               </Link>
-              <Link to="/inbox" className="block">
+              <Link to="/appointments/new">
                 <Button variant="outline" size="sm" className="w-full justify-start">
-                  📥 {t('dashboard.action.inbox')}
+                  ➕ Nouveau RDV
+                </Button>
+              </Link>
+              <Link to="/patients">
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  👥 Patients
+                </Button>
+              </Link>
+              <Link to="/accounting">
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  💰 Comptabilité
                 </Button>
               </Link>
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
     </>
   );
+}
+
+function Section({
+  title,
+  count,
+  accent,
+  description,
+  children,
+}: {
+  title: string;
+  count: number;
+  accent: 'info' | 'warning' | 'success' | 'neutral';
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          {title} <Badge variant={accent}>{count}</Badge>
+        </CardTitle>
+        {description && <span className="text-xs text-text-secondary">{description}</span>}
+      </CardHeader>
+      <CardContent className="p-0">
+        <ul className="divide-y divide-border">{children}</ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AppointmentRow({
+  appointment,
+  onUpdateStatus,
+  onEncaisser,
+  onViewInvoice,
+  role,
+}: {
+  appointment: AppointmentRow;
+  onUpdateStatus: (status: string) => void;
+  onEncaisser: () => void;
+  onViewInvoice: (payId: string) => void;
+  role?: 'ADMIN' | 'PRACTITIONER' | 'SECRETARY';
+}) {
+  const a = appointment;
+  const time = new Date(a.scheduledAt).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const canCash = role !== 'PRACTITIONER';
+
+  return (
+    <li className="flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/30">
+      <div className="font-mono text-sm font-semibold w-14 text-right text-text-secondary">{time}</div>
+      <div className="flex-1 min-w-0">
+        <Link
+          to={`/patients/${a.patientId}`}
+          className="text-sm font-medium hover:text-info truncate block"
+        >
+          {a.patientName}
+        </Link>
+        <p className="text-xs text-text-secondary truncate">
+          {SERVICE_LABEL[a.service] ?? a.service} ·{' '}
+          {a.visitType === 'FIRST' ? '1ère séance' : a.visitType === 'FOLLOWUP' ? 'Suivi' : 'Consolidation'} ·{' '}
+          {a.practitionerName}
+        </p>
+      </div>
+      <StatusTag status={a.status} />
+      <div className="flex gap-1.5 items-center min-w-[200px] justify-end">
+        {/* Action buttons by status */}
+        {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
+          <>
+            <Button size="sm" variant="outline" onClick={() => onUpdateStatus('IN_PROGRESS')} title="Démarrer la séance">
+              ▶️ Démarrer
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => onUpdateStatus('NO_SHOW')} title="Patient absent">
+              ❌
+            </Button>
+          </>
+        )}
+        {a.status === 'IN_PROGRESS' && (
+          <>
+            <Button size="sm" variant="outline" onClick={() => onUpdateStatus('COMPLETED')} title="Marquer terminé">
+              ✓ Terminer
+            </Button>
+            {canCash && (
+              <Button size="sm" onClick={onEncaisser} title="Encaisser maintenant">
+                💰 Encaisser
+              </Button>
+            )}
+          </>
+        )}
+        {a.status === 'COMPLETED' && (
+          <>
+            {a.payment ? (
+              <Button size="sm" variant="outline" onClick={() => onViewInvoice(a.payment!.id)} title="Voir facture">
+                📄 {a.payment.invoiceNumber}
+              </Button>
+            ) : canCash ? (
+              <Button size="sm" onClick={onEncaisser} title="Encaisser">
+                💰 Encaisser {a.price.toLocaleString('fr-FR')} EGP
+              </Button>
+            ) : (
+              <Badge variant="warning">À encaisser</Badge>
+            )}
+          </>
+        )}
+        {(a.status === 'NO_SHOW' || a.status === 'CANCELLED') && (
+          <span className="text-xs text-text-tertiary italic">—</span>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function StatusTag({ status }: { status: string }) {
+  const map: Record<
+    string,
+    { variant: 'success' | 'warning' | 'info' | 'neutral' | 'danger'; label: string }
+  > = {
+    SCHEDULED: { variant: 'warning', label: 'À confirmer' },
+    CONFIRMED: { variant: 'success', label: 'Confirmé' },
+    IN_PROGRESS: { variant: 'info', label: 'En cours' },
+    COMPLETED: { variant: 'success', label: 'Terminé' },
+    NO_SHOW: { variant: 'danger', label: 'No-show' },
+    CANCELLED: { variant: 'neutral', label: 'Annulé' },
+  };
+  const cfg = map[status] ?? { variant: 'neutral' as const, label: status };
+  return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
 }
 
 function KPICard({
@@ -159,21 +381,4 @@ function KPICard({
       </CardContent>
     </Card>
   );
-}
-
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-}
-
-function StatusTag({ status }: { status: string }) {
-  const map: Record<string, { variant: 'success' | 'warning' | 'info' | 'neutral' | 'danger'; label: string }> = {
-    SCHEDULED: { variant: 'neutral', label: 'À venir' },
-    CONFIRMED: { variant: 'success', label: 'Confirmé' },
-    IN_PROGRESS: { variant: 'info', label: 'En cours' },
-    COMPLETED: { variant: 'success', label: 'Terminé' },
-    NO_SHOW: { variant: 'danger', label: 'No-show' },
-    CANCELLED: { variant: 'neutral', label: 'Annulé' },
-  };
-  const cfg = map[status] ?? { variant: 'neutral' as const, label: status };
-  return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
 }
