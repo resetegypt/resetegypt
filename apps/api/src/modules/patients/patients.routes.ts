@@ -178,8 +178,12 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
 
   app.patch('/patients/:id', async (req) => {
     const id = (req.params as { id: string }).id;
-    const partial = createPatientSchema.partial().safeParse(req.body);
-    if (!partial.success) return { error: 'ValidationError' };
+    const updateSchema = createPatientSchema.partial().extend({
+      status: z.enum(['ACTIVE', 'ARCHIVED', 'LOST']).optional(),
+      preferredPractitionerId: z.string().uuid().nullable().optional(),
+    });
+    const partial = updateSchema.safeParse(req.body);
+    if (!partial.success) return { error: 'ValidationError', details: partial.error.flatten() };
     const data = partial.data;
     const updated = await app.prisma.patient.update({
       where: { id },
