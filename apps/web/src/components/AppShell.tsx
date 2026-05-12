@@ -46,7 +46,7 @@ export function AppShell() {
     <div className="min-h-screen grid grid-cols-[260px_1fr]">
       <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
         <div className="p-5 border-b border-border bg-primary text-primary-light">
-          <BrandMark variant="horizontal" className="scale-[0.6] origin-left -my-1 -mx-2" />
+          <BrandMark variant="wordmark" size="md" />
           <div className="text-[10px] text-primary-light/70 mt-1 tracking-[0.25em] font-medium">YOURSELF</div>
         </div>
         <div className="p-3 border-b border-border flex items-center gap-3">

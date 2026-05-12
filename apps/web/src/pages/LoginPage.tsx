@@ -36,7 +36,7 @@ export function LoginPage() {
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary-dark/40 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-secondary/20 blur-3xl" />
         <div className="relative z-10 text-center">
-          <BrandMark variant="stacked" tagline="YOURSELF" className="text-primary-light text-shadow-lg" />
+          <BrandMark variant="stacked" size="xl" tagline="YOURSELF" className="text-primary-light" />
           <p className="mt-10 text-primary-light/80 text-sm max-w-xs mx-auto leading-relaxed">
             {t('auth.heroTagline', "Plateforme métier — auriculothérapie laser, gestion patients et facturation conforme ETA.")}
           </p>
@@ -63,7 +63,7 @@ export function LoginPage() {
           </div>
           {/* Logo visible aussi en mobile (où le volet gauche est caché) */}
           <div className="lg:hidden flex justify-center text-primary">
-            <BrandMark variant="stacked" tagline="YOURSELF" className="scale-75" />
+            <BrandMark variant="stacked" size="md" tagline="YOURSELF" />
           </div>
           <Card>
             <CardContent className="pt-6">

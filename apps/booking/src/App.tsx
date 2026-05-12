@@ -93,7 +93,7 @@ export function App() {
       <header className="bg-primary text-primary-light border-b border-primary-dark">
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3 text-primary-light">
-            <BrandMark variant="horizontal" tagline="YOURSELF" className="scale-75 origin-left" />
+            <BrandMark variant="wordmark" size="md" tagline="YOURSELF" />
           </div>
           <div className="flex gap-1">
             {LANGUAGES.map((lng) => (
