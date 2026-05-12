@@ -1,10 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
+import { Badge, Button, Card, CardContent } from '@reset/ui';
 import { apiGet, apiPatch } from '../lib/api';
 import { useAuthStore } from '../lib/auth';
 import { PageHeader } from '../components/AppShell';
+import {
+  Calendar,
+  CircleDollarSign,
+  Bell,
+  TrendingUp,
+  Inbox as InboxIcon,
+  Play,
+  X,
+  Check,
+  ArrowRight,
+  ClipboardPlus,
+  CalendarPlus,
+  Users,
+  Wallet,
+  FileText,
+  Phone,
+  type LucideIcon,
+} from 'lucide-react';
 
 interface DashboardKPIs {
   todayAppointments: number;
@@ -28,12 +46,12 @@ interface AppointmentRow {
   payment: { id: string; total: number; invoiceNumber: string } | null;
 }
 
-const ADDICTION_ICON: Record<string, string> = {
-  TOBACCO: '🚬',
-  DRUGS: '💊',
-  ALCOHOL: '🍷',
-  SUGAR: '🍬',
-  STRESS: '😰',
+const SERVICE_DOT: Record<string, string> = {
+  TOBACCO: 'bg-amber-500',
+  DRUGS: 'bg-purple-500',
+  ALCOHOL: 'bg-rose-500',
+  SUGAR: 'bg-pink-400',
+  STRESS: 'bg-sky-500',
 };
 
 export function DashboardPage() {
@@ -70,54 +88,71 @@ export function DashboardPage() {
   });
 
   const appointments = today?.appointments ?? [];
-
   const inProgress = appointments.filter((a) => a.status === 'IN_PROGRESS');
   const upcoming = appointments
     .filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED')
     .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
   const completed = appointments.filter((a) => a.status === 'COMPLETED');
   const archived = appointments.filter((a) => a.status === 'NO_SHOW' || a.status === 'CANCELLED');
-
   const completedUnpaid = completed.filter((a) => !a.payment);
 
   return (
     <>
       <PageHeader title={greeting} subtitle={dateLabel} />
-      <div className="p-7 space-y-6 max-w-6xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard icon="📅" label={t('dashboard.kpi.appointments')} value={kpis?.todayAppointments ?? '–'} />
+      <div className="p-7 space-y-6 max-w-7xl">
+        {/* KPI grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard
-            icon="💰"
+            Icon={Calendar}
+            label={t('dashboard.kpi.appointments')}
+            value={kpis?.todayAppointments ?? 0}
+            tone="info"
+          />
+          <KPICard
+            Icon={CircleDollarSign}
             label={t('dashboard.kpi.toCash')}
             value={completedUnpaid.length}
-            accent={completedUnpaid.length > 0 ? 'warning' : undefined}
+            tone={completedUnpaid.length > 0 ? 'warning' : 'neutral'}
           />
-          <KPICard icon="🔁" label={t('dashboard.kpi.reminders')} value={kpis?.remindersToSend ?? '–'} />
           <KPICard
-            icon="💵"
+            Icon={Bell}
+            label={t('dashboard.kpi.reminders')}
+            value={kpis?.remindersToSend ?? 0}
+            tone="neutral"
+          />
+          <KPICard
+            Icon={TrendingUp}
             label={t('dashboard.kpi.revenue')}
-            value={kpis ? `${kpis.todayRevenue.toLocaleString(i18n.language)} EGP` : '–'}
-            accent="success"
+            value={kpis ? `${kpis.todayRevenue.toLocaleString(i18n.language)}` : '0'}
+            suffix="EGP"
+            tone="success"
           />
         </div>
 
         {appointments.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12 text-text-secondary">
-              <div className="text-5xl mb-3">📭</div>
-              <p>{t('dashboard.noAppointmentsToday')}</p>
-              {user?.role !== 'PRACTITIONER' && (
-                <Link to="/appointments/new" className="inline-block mt-4">
-                  <Button>➕ {t('dashboard.createAppointment')}</Button>
+          <EmptyState
+            Icon={InboxIcon}
+            title={t('dashboard.noAppointmentsToday')}
+            description={t(
+              'dashboard.noAppointmentsHint',
+              "Aucun rendez-vous prévu aujourd'hui — bonne journée !",
+            )}
+            cta={
+              user?.role !== 'PRACTITIONER' ? (
+                <Link to="/appointments/new">
+                  <Button>
+                    <CalendarPlus className="w-4 h-4 me-2" />
+                    {t('dashboard.createAppointment')}
+                  </Button>
                 </Link>
-              )}
-            </CardContent>
-          </Card>
+              ) : undefined
+            }
+          />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {inProgress.length > 0 && (
               <Section
-                title={`🔵 ${t('dashboard.sections.inProgress')}`}
+                title={t('dashboard.sections.inProgress')}
                 count={inProgress.length}
                 accent="info"
                 description={t('dashboard.sections.inProgressDesc')}
@@ -137,7 +172,7 @@ export function DashboardPage() {
 
             {upcoming.length > 0 && (
               <Section
-                title={`🟠 ${t('dashboard.sections.upcoming')}`}
+                title={t('dashboard.sections.upcoming')}
                 count={upcoming.length}
                 accent="warning"
                 description={t('dashboard.sections.upcomingDesc')}
@@ -157,10 +192,12 @@ export function DashboardPage() {
 
             {completed.length > 0 && (
               <Section
-                title={`✅ ${t('dashboard.sections.completed')}`}
+                title={t('dashboard.sections.completed')}
                 count={completed.length}
                 accent="success"
-                description={t('dashboard.sections.completedDesc', { count: completedUnpaid.length })}
+                description={t('dashboard.sections.completedDesc', {
+                  count: completedUnpaid.length,
+                })}
               >
                 {completed.map((a) => (
                   <AppointmentRowItem
@@ -177,7 +214,7 @@ export function DashboardPage() {
 
             {archived.length > 0 && (
               <Section
-                title={`⛔ ${t('dashboard.sections.archived')}`}
+                title={t('dashboard.sections.archived')}
                 count={archived.length}
                 accent="neutral"
               >
@@ -196,37 +233,77 @@ export function DashboardPage() {
           </div>
         )}
 
+        {/* Quick actions */}
         {user?.role !== 'PRACTITIONER' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>⚡ {t('dashboard.quickActions')}</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <Link to="/patients/intake">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  📝 {t('dashboard.action.newPatient')}
-                </Button>
-              </Link>
-              <Link to="/appointments/new">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  ➕ {t('dashboard.action.newAppointment')}
-                </Button>
-              </Link>
-              <Link to="/patients">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  👥 {t('dashboard.action.patients')}
-                </Button>
-              </Link>
-              <Link to="/accounting">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  💰 {t('dashboard.action.accounting')}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <div>
+            <h2 className="text-xs font-bold tracking-[0.15em] uppercase text-text-tertiary mb-3">
+              {t('dashboard.quickActions', 'Actions rapides')}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <QuickAction to="/patients/intake" Icon={ClipboardPlus} label={t('dashboard.action.newPatient')} />
+              <QuickAction to="/appointments/new" Icon={CalendarPlus} label={t('dashboard.action.newAppointment')} />
+              <QuickAction to="/patients" Icon={Users} label={t('dashboard.action.patients')} />
+              <QuickAction to="/accounting" Icon={Wallet} label={t('dashboard.action.accounting')} />
+            </div>
+          </div>
         )}
       </div>
     </>
+  );
+}
+
+// ============================================================================
+
+const KPI_TONES = {
+  info: {
+    iconBg: 'bg-info-light text-info-dark',
+    valueColor: 'text-text',
+  },
+  success: {
+    iconBg: 'bg-primary-lightest text-primary-dark',
+    valueColor: 'text-primary-dark',
+  },
+  warning: {
+    iconBg: 'bg-warning-light text-warning-dark',
+    valueColor: 'text-warning-dark',
+  },
+  neutral: {
+    iconBg: 'bg-bg-secondary text-text-secondary',
+    valueColor: 'text-text',
+  },
+} as const;
+
+function KPICard({
+  Icon,
+  label,
+  value,
+  suffix,
+  tone = 'neutral',
+}: {
+  Icon: LucideIcon;
+  label: string;
+  value: string | number;
+  suffix?: string;
+  tone?: keyof typeof KPI_TONES;
+}) {
+  const c = KPI_TONES[tone];
+  return (
+    <div className="rounded-xl border border-border bg-surface p-5 transition-all hover:border-primary/30 hover:shadow-sm">
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-medium text-text-secondary tracking-wide">{label}</p>
+        <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center`}>
+          <Icon className="w-4 h-4" />
+        </div>
+      </div>
+      <div className="mt-3 flex items-baseline gap-1.5">
+        <span className={`text-3xl font-bold tracking-tight ${c.valueColor}`} data-numeric>
+          {value}
+        </span>
+        {suffix && (
+          <span className="text-sm font-medium text-text-tertiary">{suffix}</span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -245,14 +322,17 @@ function Section({
 }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>
-          {title} <Badge variant={accent}>{count}</Badge>
-        </CardTitle>
-        {description && <span className="text-xs text-text-secondary">{description}</span>}
-      </CardHeader>
+      <div className="px-5 py-4 border-b border-border-light flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3 min-w-0">
+          <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+          <Badge variant={accent}>{count}</Badge>
+        </div>
+        {description && (
+          <span className="text-xs text-text-secondary truncate">{description}</span>
+        )}
+      </div>
       <CardContent className="p-0">
-        <ul className="divide-y divide-border">{children}</ul>
+        <ul className="divide-y divide-border-light">{children}</ul>
       </CardContent>
     </Card>
   );
@@ -278,29 +358,54 @@ function AppointmentRowItem({
     minute: '2-digit',
   });
   const canCash = role !== 'PRACTITIONER';
+  const initials = a.patientName
+    .split(' ')
+    .map((s) => s.charAt(0))
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
-    <li className="flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/30">
-      <div
-        className="font-mono text-sm font-semibold w-14 text-right text-text-secondary"
-        data-numeric
-      >
-        {time}
+    <li className="flex items-center gap-4 px-5 py-3.5 hover:bg-bg-secondary/40 transition-colors">
+      {/* Time gutter */}
+      <div className="flex flex-col items-end w-12 shrink-0">
+        <span className="font-mono text-sm font-semibold text-text" data-numeric>
+          {time}
+        </span>
       </div>
-      <div className="flex-1 min-w-0">
-        <Link
-          to={`/patients/${a.patientId}`}
-          className="text-sm font-medium hover:text-info truncate block"
-        >
-          {a.patientName}
-        </Link>
-        <p className="text-xs text-text-secondary truncate">
-          {ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)} ·{' '}
-          {t(`dashboard.visitType.${a.visitType}`)} · {a.practitionerName}
-        </p>
+
+      {/* Service color dot */}
+      <span
+        className={`w-1 h-10 rounded-full ${SERVICE_DOT[a.service] ?? 'bg-text-tertiary'}`}
+        aria-hidden="true"
+      />
+
+      {/* Avatar + name */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-light to-secondary text-primary-dark text-xs font-bold flex items-center justify-center shrink-0">
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <Link
+            to={`/patients/${a.patientId}`}
+            className="text-sm font-semibold hover:text-primary truncate block"
+          >
+            {a.patientName}
+          </Link>
+          <p className="text-xs text-text-secondary truncate flex items-center gap-1.5">
+            <span>{t(`addiction.${a.service}`)}</span>
+            <span className="text-text-tertiary">·</span>
+            <span>{t(`dashboard.visitType.${a.visitType}`)}</span>
+            <span className="text-text-tertiary">·</span>
+            <span>{a.practitionerName}</span>
+          </p>
+        </div>
       </div>
+
       <StatusTag status={a.status} />
-      <div className="flex gap-1.5 items-center min-w-[220px] justify-end flex-wrap">
+
+      {/* Actions */}
+      <div className="flex gap-1.5 items-center min-w-[200px] justify-end flex-wrap">
         {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
           <>
             <Button
@@ -309,16 +414,17 @@ function AppointmentRowItem({
               onClick={() => onUpdateStatus('IN_PROGRESS')}
               title={t('dashboard.actions.start')}
             >
-              ▶️ {t('dashboard.actions.start')}
+              <Play className="w-3.5 h-3.5 me-1" />
+              {t('dashboard.actions.start')}
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
+            <button
+              type="button"
               onClick={() => onUpdateStatus('NO_SHOW')}
               title={t('dashboard.actions.noShow')}
+              className="p-1.5 rounded-md text-text-tertiary hover:text-danger hover:bg-danger-light transition-colors"
             >
-              ❌
-            </Button>
+              <X className="w-4 h-4" />
+            </button>
           </>
         )}
         {a.status === 'IN_PROGRESS' && (
@@ -327,13 +433,14 @@ function AppointmentRowItem({
               size="sm"
               variant="outline"
               onClick={() => onUpdateStatus('COMPLETED')}
-              title={t('dashboard.actions.complete')}
             >
-              ✓ {t('dashboard.actions.complete')}
+              <Check className="w-3.5 h-3.5 me-1" />
+              {t('dashboard.actions.complete')}
             </Button>
             {canCash && (
-              <Button size="sm" onClick={onEncaisser} title={t('dashboard.actions.cash')}>
-                💰 {t('dashboard.actions.cash')}
+              <Button size="sm" onClick={onEncaisser}>
+                <Wallet className="w-3.5 h-3.5 me-1" />
+                {t('dashboard.actions.cash')}
               </Button>
             )}
           </>
@@ -345,13 +452,16 @@ function AppointmentRowItem({
                 size="sm"
                 variant="outline"
                 onClick={() => onViewInvoice(a.payment!.id)}
-                title={t('dashboard.actions.viewInvoice')}
               >
-                📄 {a.payment.invoiceNumber}
+                <FileText className="w-3.5 h-3.5 me-1" />
+                {a.payment.invoiceNumber}
               </Button>
             ) : canCash ? (
               <Button size="sm" onClick={onEncaisser}>
-                💰 {t('dashboard.actions.cashAmount', { amount: a.price.toLocaleString(i18n.language) })}
+                <Wallet className="w-3.5 h-3.5 me-1" />
+                {t('dashboard.actions.cashAmount', {
+                  amount: a.price.toLocaleString(i18n.language),
+                })}
               </Button>
             ) : (
               <Badge variant="warning">{t('dashboard.actions.toBeCashed')}</Badge>
@@ -379,32 +489,47 @@ function StatusTag({ status }: { status: string }) {
   return <Badge variant={map[status] ?? 'neutral'}>{t(`appointmentStatus.${status}`)}</Badge>;
 }
 
-function KPICard({
-  icon,
-  label,
-  value,
-  accent,
+function QuickAction({ to, Icon, label }: { to: string; Icon: LucideIcon; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="group flex items-center gap-3 rounded-xl border border-border bg-surface p-4 hover:border-primary/40 hover:bg-primary/[0.02] transition-all"
+    >
+      <div className="w-9 h-9 rounded-lg bg-primary-lightest text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+        <Icon className="w-4 h-4" />
+      </div>
+      <span className="text-sm font-medium text-text flex-1 truncate">{label}</span>
+      <ArrowRight className="w-4 h-4 text-text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+    </Link>
+  );
+}
+
+function EmptyState({
+  Icon,
+  title,
+  description,
+  cta,
 }: {
-  icon: string;
-  label: string;
-  value: string | number;
-  accent?: 'success' | 'warning' | 'danger';
+  Icon: LucideIcon;
+  title: string;
+  description?: string;
+  cta?: React.ReactNode;
 }) {
-  const colors = {
-    success: 'text-primary-dark',
-    warning: 'text-warning-dark',
-    danger: 'text-danger-dark',
-  };
   return (
     <Card>
-      <CardContent className="space-y-2">
-        <p className="text-xs text-text-secondary flex items-center gap-1">
-          <span>{icon}</span> {label}
-        </p>
-        <p className={`text-3xl font-bold ${accent ? colors[accent] : ''}`} data-numeric>
-          {value}
-        </p>
+      <CardContent className="text-center py-16">
+        <div className="w-16 h-16 rounded-2xl bg-bg-secondary text-text-tertiary mx-auto flex items-center justify-center mb-4">
+          <Icon className="w-8 h-8" />
+        </div>
+        <p className="text-base font-semibold text-text">{title}</p>
+        {description && (
+          <p className="text-sm text-text-secondary mt-1 max-w-sm mx-auto">{description}</p>
+        )}
+        {cta && <div className="mt-5">{cta}</div>}
       </CardContent>
     </Card>
   );
 }
+
+// Re-export utility used elsewhere
+export { Phone };

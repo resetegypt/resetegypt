@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
+import { TrendingUp, TrendingDown, Calendar, Users, FileText, type LucideIcon } from 'lucide-react';
 
 interface GlobalStats {
   period: string;
@@ -60,41 +61,42 @@ export function StatsPage() {
           </>
         }
       />
-      <div className="p-7 space-y-4 max-w-7xl">
+      <div className="p-7 space-y-5 max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">💰 {t('stats.kpi.revenue')}</p>
-              <p className="text-3xl font-bold" data-numeric>
-                {data.revenue.toLocaleString(i18n.language)}
-              </p>
-              <p
-                className={`text-xs mt-1 ${data.revenueChange >= 0 ? 'text-primary-dark' : 'text-danger-dark'}`}
-                data-numeric
-              >
-                {data.revenueChange >= 0 ? '↗' : '↘'} {Math.abs(data.revenueChange)}%{' '}
-                {t('stats.vsPrevious')}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">📅 {t('stats.kpi.appointments')}</p>
-              <p className="text-3xl font-bold" data-numeric>{data.appointments}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">👥 {t('stats.kpi.activePatients')}</p>
-              <p className="text-3xl font-bold" data-numeric>{data.patientsActive}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">🧾 {t('stats.kpi.invoices')}</p>
-              <p className="text-3xl font-bold" data-numeric>{data.paymentsCount}</p>
-            </CardContent>
-          </Card>
+          <StatsKPI
+            Icon={TrendingUp}
+            label={t('stats.kpi.revenue')}
+            value={data.revenue.toLocaleString(i18n.language)}
+            suffix="EGP"
+            tone="success"
+            trend={
+              data.revenueChange !== 0
+                ? {
+                    value: Math.abs(data.revenueChange),
+                    up: data.revenueChange >= 0,
+                    label: t('stats.vsPrevious'),
+                  }
+                : undefined
+            }
+          />
+          <StatsKPI
+            Icon={Calendar}
+            label={t('stats.kpi.appointments')}
+            value={data.appointments}
+            tone="info"
+          />
+          <StatsKPI
+            Icon={Users}
+            label={t('stats.kpi.activePatients')}
+            value={data.patientsActive}
+            tone="neutral"
+          />
+          <StatsKPI
+            Icon={FileText}
+            label={t('stats.kpi.invoices')}
+            value={data.paymentsCount}
+            tone="neutral"
+          />
         </div>
 
         <Card>
@@ -240,5 +242,61 @@ export function StatsPage() {
         </Card>
       </div>
     </>
+  );
+}
+
+const KPI_TONES = {
+  info: { iconBg: 'bg-info-light text-info-dark', valueColor: 'text-text' },
+  success: { iconBg: 'bg-primary-lightest text-primary-dark', valueColor: 'text-primary-dark' },
+  warning: { iconBg: 'bg-warning-light text-warning-dark', valueColor: 'text-warning-dark' },
+  neutral: { iconBg: 'bg-bg-secondary text-text-secondary', valueColor: 'text-text' },
+} as const;
+
+function StatsKPI({
+  Icon,
+  label,
+  value,
+  suffix,
+  tone = 'neutral',
+  trend,
+}: {
+  Icon: LucideIcon;
+  label: string;
+  value: string | number;
+  suffix?: string;
+  tone?: keyof typeof KPI_TONES;
+  trend?: { value: number; up: boolean; label: string };
+}) {
+  const c = KPI_TONES[tone];
+  const TrendIcon = trend?.up ? TrendingUp : TrendingDown;
+  return (
+    <div className="rounded-xl border border-border bg-surface p-5 transition-all hover:border-primary/30 hover:shadow-sm">
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-medium text-text-secondary tracking-wide">{label}</p>
+        <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center`}>
+          <Icon className="w-4 h-4" />
+        </div>
+      </div>
+      <div className="mt-3 flex items-baseline gap-1.5">
+        <span className={`text-3xl font-bold tracking-tight ${c.valueColor}`} data-numeric>
+          {value}
+        </span>
+        {suffix && <span className="text-sm font-medium text-text-tertiary">{suffix}</span>}
+      </div>
+      {trend && (
+        <div className="mt-2 flex items-center gap-1 text-xs">
+          <TrendIcon
+            className={`w-3.5 h-3.5 ${trend.up ? 'text-primary-dark' : 'text-danger-dark'}`}
+          />
+          <span
+            className={`font-semibold ${trend.up ? 'text-primary-dark' : 'text-danger-dark'}`}
+            data-numeric
+          >
+            {trend.value}%
+          </span>
+          <span className="text-text-tertiary">{trend.label}</span>
+        </div>
+      )}
+    </div>
   );
 }
