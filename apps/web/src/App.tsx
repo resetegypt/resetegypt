@@ -12,6 +12,8 @@ import { ClinicalFormPage } from './pages/patients/ClinicalFormPage';
 import { AgendaPage } from './pages/agenda/AgendaPage';
 import { NewAppointmentPage } from './pages/agenda/NewAppointmentPage';
 import { PaymentPage } from './pages/payment/PaymentPage';
+import { InvoicePage } from './pages/payment/InvoicePage';
+import { AccountingPage } from './pages/accounting/AccountingPage';
 import { StatsPage } from './pages/stats/StatsPage';
 import { InboxPage } from './pages/inbox/InboxPage';
 import { AppShell } from './components/AppShell';
@@ -39,6 +41,8 @@ export function App() {
             <Route path="patients/:id" element={<PatientDetailPage />} />
             <Route path="patients/:id/clinical" element={<ClinicalFormPage />} />
             <Route path="payment/:appointmentId" element={<PaymentPage />} />
+            <Route path="payments/:id" element={<InvoicePage />} />
+            <Route path="accounting" element={<AccountingPage />} />
             <Route path="inbox" element={<InboxPage />} />
             <Route path="stats" element={<StatsPage />} />
           </Route>

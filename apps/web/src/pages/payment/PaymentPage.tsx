@@ -50,10 +50,37 @@ export function PaymentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<{
+    id: string;
     invoiceNumber: string;
     etaUuid: string;
     total: number;
   } | null>(null);
+  const [emailTo, setEmailTo] = useState('');
+  const [emailMessage, setEmailMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [emailSending, setEmailSending] = useState(false);
+
+  async function handleEmail() {
+    if (!success) return;
+    setEmailSending(true);
+    setEmailMessage(null);
+    try {
+      const target = emailTo || data?.appointment.patient.email;
+      const res = await apiPost<{ to: string; mocked: boolean }>(
+        `/payments/${success.id}/email`,
+        target ? { to: target } : {},
+      );
+      setEmailMessage({
+        ok: true,
+        text: res.mocked
+          ? `✓ Email "envoyé" en mode mock (SMTP non configuré). Destinataire : ${res.to}`
+          : `✓ Facture envoyée à ${res.to}`,
+      });
+    } catch {
+      setEmailMessage({ ok: false, text: "Erreur lors de l'envoi. Vérifie l'adresse." });
+    } finally {
+      setEmailSending(false);
+    }
+  }
 
   useEffect(() => {
     if (data?.appointment && items.length === 0) {
@@ -79,7 +106,7 @@ export function PaymentPage() {
     setError('');
     try {
       const res = await apiPost<{
-        payment: { invoiceNumber: string; etaUuid: string; total: string };
+        payment: { id: string; invoiceNumber: string; etaUuid: string; total: string };
       }>('/payments', {
         appointmentId: data.appointment.id,
         patientId: data.appointment.patientId,
@@ -95,6 +122,7 @@ export function PaymentPage() {
         paymentRef: paymentRef || undefined,
       });
       setSuccess({
+        id: res.payment.id,
         invoiceNumber: res.payment.invoiceNumber,
         etaUuid: res.payment.etaUuid,
         total: Number(res.payment.total),
@@ -109,12 +137,13 @@ export function PaymentPage() {
   if (!data) return <div className="p-7">Chargement…</div>;
 
   if (success) {
+    const patientEmail = data?.appointment.patient.email;
     return (
       <>
         <PageHeader title="Encaissement validé" subtitle={`Facture ${success.invoiceNumber}`} />
-        <div className="p-7 max-w-2xl">
+        <div className="p-7 max-w-2xl space-y-4">
           <Card>
-            <CardContent className="space-y-4 text-center py-10">
+            <CardContent className="space-y-4 text-center py-8">
               <div className="text-6xl">✅</div>
               <h2 className="text-xl font-bold text-primary-dark">Paiement enregistré</h2>
               <p className="text-text-secondary">
@@ -132,11 +161,70 @@ export function PaymentPage() {
                   ⚠️ ETA mocké en développement. Branchement réel : Phase 6.5.
                 </p>
               </div>
-              <div className="flex gap-2 justify-center pt-4">
-                <Button variant="outline" onClick={() => navigate(`/patients/${data.appointment.patientId}`)}>
-                  Retour au dossier patient
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>📧 Envoyer la facture au patient</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {patientEmail ? (
+                <p className="text-sm text-text-secondary">
+                  Email du patient : <strong>{patientEmail}</strong>
+                </p>
+              ) : (
+                <p className="text-sm text-warning-dark">
+                  ⚠️ Aucun email enregistré. Saisis-en un :
+                </p>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder={patientEmail ?? 'patient@example.com'}
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                />
+                <Button onClick={handleEmail} disabled={emailSending || (!emailTo && !patientEmail)}>
+                  {emailSending ? 'Envoi…' : '✉️ Envoyer'}
                 </Button>
-                <Button onClick={() => navigate('/agenda')}>Retour à l'agenda</Button>
+              </div>
+              {emailMessage && (
+                <div
+                  className={`text-sm p-3 rounded ${
+                    emailMessage.ok
+                      ? 'bg-primary-light text-primary-dark'
+                      : 'bg-danger-light text-danger-dark'
+                  }`}
+                >
+                  {emailMessage.text}
+                </div>
+              )}
+              <p className="text-xs text-text-tertiary">
+                💡 Tu peux aussi{' '}
+                <a
+                  href={`/api/payments/${success.id}/invoice.html`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-info underline"
+                >
+                  visualiser/imprimer la facture
+                </a>
+                .
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="flex gap-2 justify-between">
+              <Button variant="outline" onClick={() => navigate('/accounting')}>
+                📊 Voir la comptabilité
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => navigate(`/patients/${data.appointment.patientId}`)}>
+                  Dossier patient
+                </Button>
+                <Button onClick={() => navigate('/agenda')}>Agenda</Button>
               </div>
             </CardContent>
           </Card>

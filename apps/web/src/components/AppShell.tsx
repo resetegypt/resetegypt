@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
   { to: '/inbox', label: 'nav.inbox', icon: '📥', roles: ['SECRETARY', 'ADMIN'] },
   { to: '/patients', label: 'nav.patients', icon: '👥' },
   { to: '/patients/intake', label: 'nav.intake', icon: '📝', roles: ['SECRETARY', 'ADMIN'] },
+  { to: '/accounting', label: 'nav.accounting', icon: '💰', roles: ['SECRETARY', 'ADMIN'] },
   { to: '/stats', label: 'nav.stats', icon: '📈', roles: ['ADMIN'] },
   { to: '/admin/users', label: 'nav.adminUsers', icon: '🛡️', roles: ['ADMIN'] },
   { to: '/admin/audit', label: 'nav.auditLogs', icon: '📜', roles: ['ADMIN'] },
