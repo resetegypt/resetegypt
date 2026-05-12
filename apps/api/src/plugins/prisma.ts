@@ -13,7 +13,9 @@ async function prismaPlugin(app: FastifyInstance) {
     log: app.log.level === 'debug' ? ['query', 'warn', 'error'] : ['warn', 'error'],
   });
 
-  await prisma.$connect();
+  // Pas de $connect() ici : Prisma se connecte automatiquement à la première requête.
+  // Évite que le boot du serveur (et donc le cold start serverless) ne crash si la DB
+  // n'est pas joignable au démarrage.
   app.decorate('prisma', prisma);
 
   app.addHook('onClose', async (instance) => {

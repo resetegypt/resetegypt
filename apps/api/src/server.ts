@@ -33,7 +33,10 @@ async function start() {
   }
 }
 
-const entryUrl = pathToFileURL(process.argv[1] ?? '').href;
-if (import.meta.url === entryUrl) {
-  start();
+// Démarre seulement quand exécuté directement en local dev (jamais en serverless Vercel)
+if (!process.env.VERCEL && !process.env.LAMBDA_TASK_ROOT) {
+  const entryUrl = pathToFileURL(process.argv[1] ?? '').href;
+  if (import.meta.url === entryUrl) {
+    start();
+  }
 }
