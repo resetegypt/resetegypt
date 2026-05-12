@@ -25,15 +25,20 @@ const ADDICTION_ICON: Record<string, string> = {
   STRESS: '😰',
 };
 
+type StatusFilter = 'ACTIVE' | 'ARCHIVED' | 'all';
+
 export function PatientsListPage() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ACTIVE');
   const { data } = useQuery({
-    queryKey: ['patients', search],
-    queryFn: () =>
-      apiGet<{ patients: PatientRow[] }>(
-        `/patients${search ? `?search=${encodeURIComponent(search)}` : ''}`,
-      ),
+    queryKey: ['patients', search, statusFilter],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      params.set('status', statusFilter);
+      return apiGet<{ patients: PatientRow[] }>(`/patients?${params.toString()}`);
+    },
   });
 
   return (
@@ -50,13 +55,31 @@ export function PatientsListPage() {
       <div className="p-7 max-w-7xl">
         <Card>
           <CardHeader>
-            <CardTitle>👥 {t('patients.list')}</CardTitle>
-            <Input
-              placeholder={t('patients.searchPlaceholder')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="max-w-xs"
-            />
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <CardTitle>👥 {t('patients.list')}</CardTitle>
+              <div className="flex items-center gap-2">
+                {(['ACTIVE', 'ARCHIVED', 'all'] as const).map((f) => (
+                  <Button
+                    key={f}
+                    size="sm"
+                    variant={statusFilter === f ? 'primary' : 'outline'}
+                    onClick={() => setStatusFilter(f)}
+                  >
+                    {f === 'ACTIVE'
+                      ? t('patients.filterActive', 'Actifs')
+                      : f === 'ARCHIVED'
+                        ? t('patients.filterArchived', 'Archivés')
+                        : t('patients.filterAll', 'Tous')}
+                  </Button>
+                ))}
+                <Input
+                  placeholder={t('patients.searchPlaceholder')}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="max-w-xs"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <table className="w-full text-sm">

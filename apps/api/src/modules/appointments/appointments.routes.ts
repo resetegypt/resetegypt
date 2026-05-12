@@ -129,6 +129,7 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       weekStart: start.toISOString(),
       appointments: rows.map((a) => ({
         id: a.id,
+        patientId: a.patientId,
         scheduledAt: a.scheduledAt.toISOString(),
         patientName: `${a.patient.firstName} ${a.patient.lastName}`,
         practitioner: a.practitioner.firstName,

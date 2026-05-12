@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogTitle, DialogTrigger, Input } from '@reset/ui';
-import { apiGet, apiPost } from '../../lib/api';
+import { apiGet, apiPost, apiPatch } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
 interface UserRow {
@@ -39,6 +39,29 @@ export function UsersPage() {
 
   const unlockMut = useMutation({
     mutationFn: (id: string) => apiPost(`/users/${id}/unlock`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] });
+      qc.invalidateQueries({ queryKey: ['admin', 'kpis'] });
+    },
+  });
+
+  const resetPwMut = useMutation({
+    mutationFn: (id: string) => apiPost<{ tempPassword: string }>(`/users/${id}/reset-password`),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['users'] });
+      window.alert(
+        t(
+          'users.passwordResetAlert',
+          'Mot de passe temporaire généré : {{p}}\n\nCommuniquez-le au collaborateur.',
+          { p: data.tempPassword },
+        ),
+      );
+    },
+  });
+
+  const toggleActiveMut = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      apiPatch(`/users/${id}`, { isActive }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['users'] });
       qc.invalidateQueries({ queryKey: ['admin', 'kpis'] });
@@ -140,7 +163,7 @@ export function UsersPage() {
                     <td className="px-4 py-3 text-xs text-text-tertiary" data-numeric>
                       {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString(i18n.language) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-end">
+                    <td className="px-4 py-3 text-end space-x-1">
                       {u.isLocked && (
                         <Button
                           size="sm"
@@ -148,9 +171,33 @@ export function UsersPage() {
                           onClick={() => unlockMut.mutate(u.id)}
                           disabled={unlockMut.isPending}
                         >
-                          {t('users.unlock')}
+                          🔓 {t('users.unlock')}
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (window.confirm(t('users.confirmResetPw', 'Réinitialiser le mot de passe de {{n}} ?', { n: u.firstName + ' ' + u.lastName }))) {
+                            resetPwMut.mutate(u.id);
+                          }
+                        }}
+                        disabled={resetPwMut.isPending}
+                      >
+                        🔑 {t('users.resetPw', 'Reset mdp')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={u.isActive ? 'outline' : 'primary'}
+                        onClick={() => {
+                          if (window.confirm(t(u.isActive ? 'users.confirmDisable' : 'users.confirmEnable', u.isActive ? 'Désactiver {{n}} ?' : 'Réactiver {{n}} ?', { n: u.firstName + ' ' + u.lastName }))) {
+                            toggleActiveMut.mutate({ id: u.id, isActive: !u.isActive });
+                          }
+                        }}
+                        disabled={toggleActiveMut.isPending}
+                      >
+                        {u.isActive ? '🚫 ' + t('users.disable', 'Désactiver') : '✅ ' + t('users.enable', 'Activer')}
+                      </Button>
                     </td>
                   </tr>
                 ))}

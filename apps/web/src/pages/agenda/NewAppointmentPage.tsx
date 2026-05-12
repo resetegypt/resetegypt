@@ -68,11 +68,13 @@ export function NewAppointmentPage() {
           primaryAddiction: string;
         }>;
       }>(
+        // status=ACTIVE par défaut côté API — exclut les patients archivés
+        // de l'autocomplete de création RDV.
         patientSearch
-          ? `/patients?search=${encodeURIComponent(patientSearch)}`
-          : '/patients',
+          ? `/patients?search=${encodeURIComponent(patientSearch)}&status=ACTIVE`
+          : '/patients?status=ACTIVE',
       ),
-    enabled: !initialPatientId,
+    enabled: !initialPatientId && patientSearch.length >= 2,
   });
 
   const selectedPatient = patientsData?.patients.find((p) => p.id === patientId);

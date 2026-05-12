@@ -13,7 +13,10 @@ const createUserSchema = z.object({
   password: z.string().min(8),
 });
 
-const updateUserSchema = createUserSchema.partial().omit({ password: true });
+const updateUserSchema = createUserSchema
+  .partial()
+  .omit({ password: true })
+  .extend({ isActive: z.boolean().optional() });
 
 export async function usersRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('onRequest', app.authenticate);

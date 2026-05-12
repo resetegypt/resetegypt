@@ -10,6 +10,7 @@ interface WeekData {
   weekStart: string;
   appointments: Array<{
     id: string;
+    patientId: string;
     scheduledAt: string;
     patientName: string;
     practitioner: string;
@@ -150,7 +151,7 @@ export function AgendaPage() {
                       return (
                         <td key={d.toISOString()} className="px-1 py-0.5 align-top">
                           {a ? (
-                            <Link to={`/patients/${a.patientName}`} className="block">
+                            <Link to={`/patients/${a.patientId}`} className="block">
                               <div
                                 className={`text-[10px] rounded px-1.5 py-1 cursor-pointer truncate ${statusColor(a.status)}`}
                                 title={`${a.patientName} — Dr.${a.practitioner}`}

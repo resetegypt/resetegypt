@@ -54,17 +54,33 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('onRequest', app.authenticate);
 
   app.get('/patients', async (req) => {
-    const q = (req.query as { search?: string }).search?.trim();
+    const params = req.query as { search?: string; status?: string };
+    const q = params.search?.trim();
+    // Par défaut on n'inclut PAS les patients archivés (sinon les listes
+    // sont polluées par les ex-patients). status=all OU status=ARCHIVED
+    // pour les voir explicitement.
+    const statusFilter =
+      params.status === 'all'
+        ? undefined
+        : params.status === 'ARCHIVED' || params.status === 'LOST'
+          ? params.status
+          : 'ACTIVE';
+
+    const conditions: Record<string, unknown>[] = [];
+    if (statusFilter) conditions.push({ status: statusFilter });
+    if (q) {
+      conditions.push({
+        OR: [
+          { firstName: { contains: q, mode: 'insensitive' } },
+          { lastName: { contains: q, mode: 'insensitive' } },
+          { phone: { contains: q } },
+        ],
+      });
+    }
+    const where = conditions.length ? { AND: conditions } : undefined;
+
     const patients = await app.prisma.patient.findMany({
-      where: q
-        ? {
-            OR: [
-              { firstName: { contains: q, mode: 'insensitive' } },
-              { lastName: { contains: q, mode: 'insensitive' } },
-              { phone: { contains: q } },
-            ],
-          }
-        : undefined,
+      where,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
