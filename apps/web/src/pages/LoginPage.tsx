@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '@reset/ui';
+import { Button, BrandMark, Card, CardContent, Input } from '@reset/ui';
 import { useAuthStore, defaultRouteForRole } from '../lib/auth';
 import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
 
@@ -30,33 +30,46 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center p-6">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex justify-center gap-1 mb-4">
-          {SUPPORTED_LANGUAGES.map((lng) => (
-            <button
-              key={lng}
-              onClick={() => i18n.changeLanguage(lng as Language)}
-              className={`px-3 py-1 text-xs rounded ${
-                i18n.language === lng
-                  ? 'bg-primary text-white'
-                  : 'bg-surface border border-border text-text-secondary'
-              }`}
-            >
-              {lng.toUpperCase()}
-            </button>
-          ))}
+    <div className="min-h-screen flex items-stretch">
+      {/* Volet gauche — fond bleu royal aux couleurs de la marque */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary text-primary-light items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary-dark/40 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-secondary/20 blur-3xl" />
+        <div className="relative z-10 text-center">
+          <BrandMark variant="stacked" tagline="YOURSELF" className="text-primary-light text-shadow-lg" />
+          <p className="mt-10 text-primary-light/80 text-sm max-w-xs mx-auto leading-relaxed">
+            {t('auth.heroTagline', "Plateforme métier — auriculothérapie laser, gestion patients et facturation conforme ETA.")}
+          </p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <span className="text-xl text-primary">Reset Egypt</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <h2 className="text-base font-semibold">{t('auth.login')}</h2>
-              <p className="text-sm text-text-secondary">{t('auth.loginSubtitle')}</p>
+      </div>
+
+      {/* Volet droit — formulaire */}
+      <div className="w-full lg:w-1/2 bg-bg flex items-center justify-center p-6">
+        <div className="w-full max-w-md space-y-4">
+          <div className="flex justify-center gap-1 mb-4">
+            {SUPPORTED_LANGUAGES.map((lng) => (
+              <button
+                key={lng}
+                onClick={() => i18n.changeLanguage(lng as Language)}
+                className={`px-3 py-1 text-xs rounded ${
+                  i18n.language === lng
+                    ? 'bg-primary text-white'
+                    : 'bg-surface border border-border text-text-secondary'
+                }`}
+              >
+                {lng.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          {/* Logo visible aussi en mobile (où le volet gauche est caché) */}
+          <div className="lg:hidden flex justify-center text-primary">
+            <BrandMark variant="stacked" tagline="YOURSELF" className="scale-75" />
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <h2 className="text-lg font-semibold text-primary">{t('auth.login')}</h2>
+                <p className="text-sm text-text-secondary">{t('auth.loginSubtitle')}</p>
 
               <div>
                 <label className="block text-xs font-medium mb-1">{t('auth.email')}</label>
@@ -102,9 +115,10 @@ export function LoginPage() {
               <p className="text-xs text-center text-text-tertiary pt-2">
                 {t('auth.devCredentialsHint')}
               </p>
-            </form>
-          </CardContent>
-        </Card>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

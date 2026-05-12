@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Avatar, AvatarFallback, Badge, Button } from '@reset/ui';
+import { Avatar, AvatarFallback, Badge, BrandMark, Button } from '@reset/ui';
 import { useAuthStore } from '../lib/auth';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
@@ -45,9 +45,9 @@ export function AppShell() {
   return (
     <div className="min-h-screen grid grid-cols-[260px_1fr]">
       <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
-        <div className="p-5 border-b border-border">
-          <div className="text-xl font-semibold text-primary tracking-tight">Reset</div>
-          <div className="text-[10px] text-text-secondary mt-0.5">Egypt</div>
+        <div className="p-5 border-b border-border bg-primary text-primary-light">
+          <BrandMark variant="horizontal" className="scale-[0.6] origin-left -my-1 -mx-2" />
+          <div className="text-[10px] text-primary-light/70 mt-1 tracking-[0.25em] font-medium">YOURSELF</div>
         </div>
         <div className="p-3 border-b border-border flex items-center gap-3">
           <Avatar>

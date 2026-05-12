@@ -1,39 +1,53 @@
 @layer base {
   :root {
-    --primary: 29 158 117;
-    --primary-dark: 15 110 86;
-    --primary-light: 225 245 238;
-    --primary-lightest: 242 250 246;
+    /* ============================================================
+       Reset Egypt — Brand palette
+       Bleu royal profond (logo bg) + cyan clair (lettres) + corail (point S)
+       ============================================================ */
 
-    --secondary: 83 74 183;
-    --secondary-light: 238 237 254;
+    /* Primary — Bleu royal profond (couleur principale du logo) */
+    --primary: 30 15 186;            /* #1E0FBA */
+    --primary-dark: 19 9 130;        /* #130982 — hover / active */
+    --primary-light: 121 201 238;    /* #79C9EE — cyan clair des lettres RESET */
+    --primary-lightest: 230 243 251; /* #E6F3FB — tint pâle pour badges/cards */
 
-    --info: 24 95 165;
-    --info-light: 230 241 251;
-    --info-dark: 12 68 124;
+    /* Secondary — Cyan clair (le bleu des lettres, utilisable en standalone) */
+    --secondary: 121 201 238;        /* #79C9EE */
+    --secondary-light: 220 240 250;  /* #DCF0FA */
 
-    --warning: 186 117 23;
-    --warning-light: 250 238 218;
-    --warning-dark: 133 79 11;
+    /* Info — Bleu doux distinct du primary (pour notifications neutres) */
+    --info: 47 95 220;               /* #2F5FDC */
+    --info-light: 224 234 254;       /* #E0EAFE */
+    --info-dark: 25 62 165;          /* #193EA5 */
 
-    --danger: 226 75 74;
-    --danger-light: 252 235 235;
-    --danger-dark: 121 31 31;
+    /* Warning — Ambre/orange */
+    --warning: 217 119 6;            /* #D97706 */
+    --warning-light: 254 243 199;    /* #FEF3C7 */
+    --warning-dark: 146 64 14;       /* #92400E */
 
+    /* Danger — Corail (rouge accent du logo) */
+    --danger: 255 84 64;             /* #FF5440 — le rouge du point dans le S */
+    --danger-light: 255 230 226;     /* #FFE6E2 */
+    --danger-dark: 204 60 45;        /* #CC3C2D */
+
+    /* Pink — gardé pour différenciation (badges genre, etc.) */
     --pink: 212 83 126;
     --pink-light: 252 224 233;
     --pink-dark: 163 58 92;
 
-    --bg: 250 250 247;
-    --bg-secondary: 241 239 232;
-    --surface: 255 255 255;
+    /* Backgrounds — légèrement teinté cyan pour cohérence avec la marque */
+    --bg: 248 250 253;               /* #F8FAFD — blanc cassé bleuté */
+    --bg-secondary: 237 244 251;     /* #EDF4FB — fond panneaux/sidebar */
+    --surface: 255 255 255;          /* #FFFFFF — cartes */
 
-    --text: 44 44 42;
-    --text-secondary: 95 94 90;
-    --text-tertiary: 136 135 128;
+    /* Text — neutre noir/gris */
+    --text: 17 24 39;                /* #111827 */
+    --text-secondary: 75 85 99;      /* #4B5563 */
+    --text-tertiary: 156 163 175;    /* #9CA3AF */
 
-    --border: 211 209 199;
-    --border-light: 229 227 219;
+    /* Borders — gris bleuté discret */
+    --border: 209 221 235;           /* #D1DDEB */
+    --border-light: 230 238 247;     /* #E6EEF7 */
 
     --radius-sm: 4px;
     --radius: 8px;
