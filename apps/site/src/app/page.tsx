@@ -520,21 +520,21 @@ function MethodSection() {
       title="Un héritage scientifique français"
       subtitle="Dans les années 1950, le Dr. Paul Nogier identifia une cartographie précise de correspondances neurales entre l'oreille externe et le corps. Cette découverte fonde l'auriculothérapie moderne — la base scientifique de notre approche."
     >
-      {/* Visuel méthode en grand */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-center mb-12">
+      {/* Visuel méthode en grand — portrait du Dr. Paul Nogier (fondateur) */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10 items-center mb-12">
         <div className="lg:col-span-2 relative">
-          <div className="aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-xl shadow-primary/15">
+          <div className="aspect-[3/4] rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-xl shadow-primary/15 bg-bg-secondary">
             <Image
-              src="/photos/about-method.png"
-              alt="Méthode RESET"
-              width={471}
-              height={623}
+              src="/photos/dr-nogier.webp"
+              alt="Dr. Paul Nogier — fondateur de l'auriculothérapie moderne"
+              width={600}
+              height={800}
               className="object-cover w-full h-full"
             />
           </div>
-          <div className="absolute -bottom-5 -right-5 lg:-bottom-7 lg:-right-7 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-white shadow-xl text-sm font-semibold">
+          <div className="absolute -bottom-5 -right-5 lg:-bottom-6 lg:-right-6 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-white shadow-xl text-sm font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            Depuis 1950
+            Dr. Paul Nogier · 1950
           </div>
         </div>
         <div className="lg:col-span-3 space-y-4 text-base text-text-secondary leading-relaxed">
@@ -544,9 +544,10 @@ function MethodSection() {
             entièrement non-invasive, sans médicament, et non-médicale.
           </p>
           <p>
-            Le Dr. Paul Nogier a établi la base scientifique de l'auriculothérapie moderne en
-            cartographiant les correspondances neuronales de l'oreille externe avec le corps. Une
-            méthode reconnue mondialement pour son efficacité dans la régulation comportementale.
+            Dans les années 1950, le médecin français <strong className="text-text">Dr. Paul Nogier</strong>{' '}
+            établit la base scientifique de l'auriculothérapie moderne en cartographiant les
+            correspondances neuronales de l'oreille externe avec le corps humain. Une méthode
+            reconnue mondialement pour son efficacité dans la régulation comportementale.
           </p>
           <Link
             href="/about"
