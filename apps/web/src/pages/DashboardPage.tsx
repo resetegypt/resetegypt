@@ -16,13 +16,13 @@ import {
   Check,
   ArrowRight,
   ClipboardPlus,
+  ClipboardList,
   CalendarPlus,
   Users,
   Wallet,
   FileText,
   Phone,
   Stethoscope,
-  UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -396,19 +396,19 @@ function AppointmentRowItem({
               {a.patientName}
             </Link>
             <Link
-              to={`/patients/${a.patientId}/clinical?appointmentId=${a.id}`}
+              to={`/patients/${a.patientId}`}
               className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary hover:text-primary hover:bg-primary-lightest px-1.5 py-0.5 rounded-md border border-border hover:border-primary/40 transition-all"
-              title={t('dashboard.actions.viewIntake', "Ouvrir la fiche d'accueil")}
+              title={t('dashboard.actions.viewIntake', "Ouvrir la fiche d'accueil (admission, infos perso)")}
             >
-              <Stethoscope className="w-3 h-3" />
+              <ClipboardList className="w-3 h-3" />
               {t('dashboard.actions.intake', "Fiche d'accueil")}
             </Link>
             <Link
-              to={`/patients/${a.patientId}`}
+              to={`/patients/${a.patientId}/clinical?appointmentId=${a.id}`}
               className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary hover:text-primary hover:bg-primary-lightest px-1.5 py-0.5 rounded-md border border-border hover:border-primary/40 transition-all"
-              title={t('dashboard.actions.viewPatient', 'Ouvrir la fiche patient')}
+              title={t('dashboard.actions.viewPatient', 'Ouvrir la fiche patient (anamnèse, scores, examen)')}
             >
-              <UserCircle2 className="w-3 h-3" />
+              <Stethoscope className="w-3 h-3" />
               {t('dashboard.actions.patient', 'Fiche patient')}
             </Link>
           </div>
