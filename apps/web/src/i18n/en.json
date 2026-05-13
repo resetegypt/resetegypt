@@ -85,7 +85,7 @@
       "reminders": "Reminders to send", "revenue": "Today's revenue"
     },
     "action": {
-      "newPatient": "Intake form", "newAppointment": "New appointment",
+      "newPatient": "New patient", "newAppointment": "New appointment",
       "patients": "Patients", "accounting": "Accounting"
     },
     "visitType": { "FIRST": "1st session", "FOLLOWUP": "Follow-up", "CONSOLIDATION": "Consolidation" }

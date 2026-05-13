@@ -110,7 +110,7 @@
       "revenue": "Recettes du jour"
     },
     "action": {
-      "newPatient": "Fiche d'accueil",
+      "newPatient": "Nouveau patient",
       "newAppointment": "Nouveau RDV",
       "patients": "Patients",
       "accounting": "Comptabilité"

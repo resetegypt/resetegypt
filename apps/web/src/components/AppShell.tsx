@@ -42,13 +42,6 @@ const NAV: NavItem[] = [
   { to: '/inbox', label: 'nav.inbox', Icon: Inbox, roles: ['SECRETARY', 'ADMIN'], section: 'work' },
   { to: '/patients', label: 'nav.patients', Icon: Users, section: 'work' },
   {
-    to: '/patients/intake',
-    label: 'nav.intake',
-    Icon: ClipboardPlus,
-    roles: ['SECRETARY', 'ADMIN'],
-    section: 'work',
-  },
-  {
     to: '/accounting',
     label: 'nav.accounting',
     Icon: Wallet,
