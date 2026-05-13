@@ -53,102 +53,109 @@ export default function HomePage() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      {/* Halos en arrière-plan pour la profondeur */}
-      <div className="absolute inset-0 pointer-events-none -z-10">
-        <div className="absolute -top-40 -left-40 w-[36rem] h-[36rem] rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute top-20 -right-20 w-[28rem] h-[28rem] rounded-full bg-secondary/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-[32rem] h-[32rem] rounded-full bg-danger/10 blur-3xl" />
-      </div>
+    <section className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      {/* Container card géant arrondi (recrée le hero de l'ancien WP) */}
+      <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden">
+        {/* Background image */}
+        <Image
+          src="/photos/hero-bg.png"
+          alt=""
+          fill
+          priority
+          quality={85}
+          className="object-cover object-center -z-10"
+          sizes="100vw"
+        />
+        {/* Overlay gradient primary → transparent (recrée l'opacity 0.73 du WP) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/85 via-primary/60 to-primary/30 -z-10" />
+        {/* Légère vignette latérale pour ancrer le texte */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/40 to-transparent -z-10" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 lg:pt-20 lg:pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          {/* Texte */}
-          <div className="text-center lg:text-start">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-border-light text-xs font-semibold text-primary mb-6 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Méthode française · Cairo East CMC
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-text tracking-tight leading-[1.05]">
-              Reprenez le contrôle.<br />
-              <span className="text-primary">Sans médicaments.</span>
-            </h1>
-
-            <p className="mt-6 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Auriculothérapie française + laser de photobiomodulation : une méthode
-              non-invasive et naturelle pour neutraliser le tabac, les addictions et le stress
-              — souvent en <strong className="text-text">une seule séance</strong>.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center justify-center lg:justify-start">
-              <Link
-                href="https://book.reset-egypt.com"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5"
-              >
-                Réserver ma séance
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold text-text hover:text-primary transition-colors"
-              >
-                Découvrir la méthode
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="mt-10 flex items-center gap-6 justify-center lg:justify-start flex-wrap text-xs text-text-secondary">
-              <KeyMetric value="90%" label="Taux de succès" />
-              <Divider />
-              <KeyMetric value="1" label="Séance suffit (souvent)" />
-              <Divider />
-              <KeyMetric value="0" label="Médicament" />
-            </div>
+        <div className="relative px-6 sm:px-10 lg:px-16 py-16 sm:py-20 lg:py-28 min-h-[560px] lg:min-h-[640px] flex flex-col justify-center">
+          {/* Eyebrow */}
+          <div className="text-[11px] sm:text-xs tracking-[0.32em] font-bold text-secondary uppercase mb-5">
+            BRANCH CAIRO EAST CMC
           </div>
 
-          {/* Visual : photo réelle du centre + badges flottants */}
-          <div className="relative max-w-md mx-auto lg:max-w-none">
-            <div className="relative aspect-[4/5]">
-              {/* Photo principale dans une carte avec ring */}
-              <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl shadow-primary/25 ring-1 ring-black/5">
-                <Image
-                  src="/photos/hero-center.png"
-                  alt="Centre RESET — Branch Cairo East CMC"
-                  width={800}
-                  height={1000}
-                  className="object-cover w-full h-full"
-                  priority
-                />
-              </div>
+          {/* Titre principal — grand, blanc, à la WP */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-[80px] font-extrabold text-white tracking-tight leading-[1.05] max-w-3xl">
+            Arrêtez de fumer.
+            <span className="block">Autrement.</span>
+          </h1>
 
-              {/* Logo flottant en coin (signature brand discrète) */}
-              <div className="absolute -bottom-5 -left-5 lg:-bottom-7 lg:-left-7 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white">
-                <Image
-                  src="/logo.svg"
-                  alt="RESET"
-                  width={72}
-                  height={72}
-                  className="block w-16 h-16 lg:w-20 lg:h-20"
-                />
-              </div>
+          {/* Description */}
+          <p className="mt-6 text-base sm:text-lg text-white/90 leading-relaxed max-w-xl">
+            Une méthode non-invasive combinant l'<strong className="text-white">auriculothérapie française</strong>{' '}
+            et une technologie laser avancée pour neutraliser naturellement les envies de nicotine et le stress —
+            <strong className="text-white"> sans douleur ni médicament</strong>.
+          </p>
 
-              {/* Badges flottants */}
-              <FloatingBadge
-                className="-top-3 -right-2 lg:-top-3 lg:-right-3"
-                Icon={Award}
-                label="Méthode certifiée"
-                tone="primary"
-              />
-              <FloatingBadge
-                className="bottom-10 -right-3 lg:bottom-12 lg:-right-6"
-                Icon={Shield}
-                label="100% non-invasif"
-                tone="success"
-              />
-            </div>
+          {/* Bullet list inline 5 services */}
+          <ul className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 max-w-2xl text-sm sm:text-[15px] text-white/95">
+            {[
+              'Tabac',
+              'Drogues',
+              'Sucre',
+              'Alcool',
+              'Stress & anxiété',
+            ].map((label) => (
+              <li key={label} className="inline-flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-secondary shrink-0" strokeWidth={2.25} />
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* CTAs */}
+          <div className="mt-10 flex flex-col sm:flex-row gap-3 sm:items-center">
+            <Link
+              href="/services"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-xs font-bold uppercase tracking-[0.16em] bg-secondary text-primary rounded-md hover:bg-white transition-all"
+            >
+              Nos services
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="https://book.reset-egypt.com"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-xs font-bold uppercase tracking-[0.16em] bg-primary-dark text-white border border-white/20 rounded-md hover:bg-primary transition-all"
+            >
+              Réserver une séance
+              <Calendar className="w-4 h-4" />
+            </Link>
           </div>
         </div>
+
+        {/* Logo flottant discret en haut à droite */}
+        <div className="absolute top-6 right-6 lg:top-8 lg:right-8 rounded-2xl overflow-hidden shadow-xl ring-2 ring-white/40 hidden sm:block">
+          <Image
+            src="/logo.svg"
+            alt="RESET"
+            width={64}
+            height={64}
+            className="block w-14 h-14 lg:w-16 lg:h-16"
+          />
+        </div>
+      </div>
+
+      {/* Bandeau de réassurance sous le hero */}
+      <div className="max-w-7xl mx-auto mt-6 grid grid-cols-3 gap-3 sm:gap-4">
+        {[
+          { value: '90%', label: 'Taux de succès' },
+          { value: '1', label: 'Séance suffit (souvent)' },
+          { value: '0', label: 'Médicament' },
+        ].map((m) => (
+          <div
+            key={m.label}
+            className="rounded-xl bg-surface border border-border-light p-4 sm:p-5 text-center"
+          >
+            <div className="text-2xl sm:text-4xl font-extrabold text-primary tracking-tight tabular-nums">
+              {m.value}
+            </div>
+            <div className="text-[10px] sm:text-xs text-text-secondary mt-1 tracking-wide">
+              {m.label}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
