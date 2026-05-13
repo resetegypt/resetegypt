@@ -1,10 +1,12 @@
-import { useParams, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 import { useAuthStore } from '../../lib/auth';
+import { ClipboardList, Stethoscope, Plus, FileText, ChevronRight } from 'lucide-react';
 
 interface ConsentEntry {
   accepted: boolean;
@@ -71,11 +73,24 @@ const ADDICTION_ICON: Record<string, string> = {
   STRESS: '😰',
 };
 
+type TabKey = 'accueil' | 'clinique';
+
 export function PatientDetailPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const isPractitioner = user?.role === 'PRACTITIONER';
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as TabKey) || 'accueil';
+  const [tab, setTab] = useState<TabKey>(initialTab);
+
+  function switchTab(t: TabKey): void {
+    setTab(t);
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', t);
+    setSearchParams(next, { replace: true });
+  }
+
   const { data } = useQuery({
     queryKey: ['patient', id],
     queryFn: () => apiGet<PatientDetail>(`/patients/${id}`),
@@ -192,7 +207,64 @@ export function PatientDetailPage() {
           </Card>
         </div>
 
-        {/* === FICHE D'ACCUEIL — toutes les infos saisies à l'admission === */}
+        {/* === TAB NAV === */}
+        <div className="flex items-center gap-1 border-b border-border">
+          <TabButton
+            active={tab === 'accueil'}
+            onClick={() => switchTab('accueil')}
+            Icon={ClipboardList}
+            label={t('patients.detail.tab.intake', "Fiche d'accueil")}
+          />
+          <TabButton
+            active={tab === 'clinique'}
+            onClick={() => switchTab('clinique')}
+            Icon={Stethoscope}
+            label={t('patients.detail.tab.clinical', 'Fiche clinique')}
+            badge={patient.appointments.filter((a) => a.medicalRecord).length || undefined}
+          />
+        </div>
+
+        {/* === ONGLET FICHE CLINIQUE === */}
+        {tab === 'clinique' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>🩺 {t('patients.detail.clinical.title', 'Fiches cliniques par séance')}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {patient.appointments.filter((a) => a.status !== 'CANCELLED').length === 0 ? (
+                <div className="px-5 py-12 text-center">
+                  <Stethoscope className="w-10 h-10 text-text-tertiary mx-auto mb-3" />
+                  <p className="text-sm font-semibold">
+                    {t('patients.detail.clinical.empty', 'Aucune séance pour ce patient')}
+                  </p>
+                  <p className="text-xs text-text-secondary mt-1">
+                    {t(
+                      'patients.detail.clinical.emptyHint',
+                      'Les fiches cliniques sont créées séance par séance.',
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-border-light">
+                  {patient.appointments
+                    .filter((a) => a.status !== 'CANCELLED')
+                    .map((a) => (
+                      <ClinicalRow
+                        key={a.id}
+                        appointment={a}
+                        patientId={patient.id}
+                        isPractitioner={isPractitioner}
+                      />
+                    ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* === ONGLET FICHE D'ACCUEIL — toutes les infos saisies à l'admission === */}
+        {tab === 'accueil' && (
+        <>
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-3 w-full">
@@ -410,8 +482,117 @@ export function PatientDetailPage() {
             </table>
           </CardContent>
         </Card>
+        </>
+        )}
       </div>
     </>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  Icon,
+  label,
+  badge,
+}: {
+  active: boolean;
+  onClick: () => void;
+  Icon: typeof ClipboardList;
+  label: string;
+  badge?: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all ${
+        active
+          ? 'text-primary'
+          : 'text-text-secondary hover:text-text'
+      }`}
+    >
+      <Icon className={`w-4 h-4 ${active ? 'text-primary' : 'text-text-tertiary'}`} />
+      <span>{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span
+          className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-semibold ${
+            active
+              ? 'bg-primary text-white'
+              : 'bg-bg-secondary text-text-secondary'
+          }`}
+        >
+          {badge}
+        </span>
+      )}
+      {active && (
+        <span className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-primary rounded-full" />
+      )}
+    </button>
+  );
+}
+
+function ClinicalRow({
+  appointment,
+  patientId,
+  isPractitioner,
+}: {
+  appointment: PatientDetail['patient']['appointments'][number];
+  patientId: string;
+  isPractitioner: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const a = appointment;
+  const date = new Date(a.scheduledAt);
+  const hasRecord = !!a.medicalRecord;
+  return (
+    <li className="flex items-center gap-4 px-5 py-3.5 hover:bg-bg-secondary/30 transition-colors">
+      <div className="flex flex-col items-end w-24 shrink-0 text-text-secondary">
+        <span className="text-xs font-semibold text-text" data-numeric>
+          {date.toLocaleDateString(i18n.language, {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })}
+        </span>
+        <span className="text-[11px] text-text-tertiary" data-numeric>
+          {date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold flex items-center gap-2">
+          <span>{ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)}</span>
+          <span className="text-text-tertiary">·</span>
+          <span className="text-text-secondary font-medium">
+            {t(`dashboard.visitType.${a.visitType}`)}
+          </span>
+        </div>
+        <div className="text-xs text-text-secondary mt-0.5">Dr. {a.practitioner.firstName}</div>
+      </div>
+      <Badge variant={statusVariant(a.status)}>{t(`appointmentStatus.${a.status}`)}</Badge>
+      <div className="min-w-[140px] flex justify-end">
+        {hasRecord ? (
+          <Link to={`/patients/${patientId}/clinical?appointmentId=${a.id}`}>
+            <Button size="sm" variant="outline">
+              <FileText className="w-3.5 h-3.5 me-1.5" />
+              {t('patients.detail.clinical.view', 'Voir')}
+              <ChevronRight className="w-3.5 h-3.5 ms-0.5" />
+            </Button>
+          </Link>
+        ) : isPractitioner ? (
+          <Link to={`/patients/${patientId}/clinical?appointmentId=${a.id}`}>
+            <Button size="sm">
+              <Plus className="w-3.5 h-3.5 me-1.5" />
+              {t('patients.detail.clinical.create', 'Créer')}
+            </Button>
+          </Link>
+        ) : (
+          <span className="text-xs text-text-tertiary italic">
+            {t('patients.detail.clinical.notYet', 'Pas encore créée')}
+          </span>
+        )}
+      </div>
+    </li>
   );
 }
 
