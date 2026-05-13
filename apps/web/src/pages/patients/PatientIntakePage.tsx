@@ -1,9 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
 import { ADDICTIONS, type Addiction } from '@reset/shared';
-import { apiPost } from '../../lib/api';
+import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
 const ADDICTION_ICON: Record<Addiction, string> = {
@@ -16,6 +17,25 @@ const ADDICTION_ICON: Record<Addiction, string> = {
 
 const GOVERNORATES = ['Le Caire', 'Gizeh', 'Alexandrie', 'New Cairo', 'Charm el-Cheikh', 'Autre'];
 const SOURCE_KEYS = ['instagram', 'facebook', 'google', 'wordOfMouth', 'doctor', 'other'] as const;
+
+// Prix par défaut selon le service pour une première séance
+const PRICE_FIRST: Record<Addiction, number> = {
+  TOBACCO: 3500,
+  DRUGS: 4000,
+  ALCOHOL: 4000,
+  SUGAR: 2500,
+  STRESS: 2000,
+};
+
+// Arrondit l'heure courante au prochain créneau de 40 min, format HH:MM
+function nextSlot(): string {
+  const now = new Date();
+  const min = now.getMinutes();
+  const next = Math.ceil(min / 40) * 40;
+  const target = new Date(now);
+  target.setMinutes(next, 0, 0);
+  return `${String(target.getHours()).padStart(2, '0')}:${String(target.getMinutes()).padStart(2, '0')}`;
+}
 
 export function PatientIntakePage() {
   const { t } = useTranslation();
@@ -42,6 +62,26 @@ export function PatientIntakePage() {
   const [consents, setConsents] = useState({ data: false, sms: true, nonMedical: false });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Rendez-vous du jour : praticien + heure (par défaut, le prochain créneau libre)
+  const [bookAppointment, setBookAppointment] = useState(true);
+  const [practitionerId, setPractitionerId] = useState<string>('');
+  const [appointmentTime, setAppointmentTime] = useState(nextSlot());
+
+  const { data: practitionersData } = useQuery({
+    queryKey: ['practitioners'],
+    queryFn: () =>
+      apiGet<{ practitioners: Array<{ id: string; firstName: string; lastName: string }> }>(
+        '/practitioners',
+      ),
+  });
+  const practitioners = practitionersData?.practitioners ?? [];
+  // Auto-select first practitioner if none set (sans déclencher de re-render boucle)
+  useEffect(() => {
+    if (practitioners.length > 0 && !practitionerId) {
+      setPractitionerId(practitioners[0]!.id);
+    }
+  }, [practitioners, practitionerId]);
 
   function toggleSource(s: string) {
     setForm((f) => ({
@@ -93,7 +133,34 @@ export function PatientIntakePage() {
           },
         },
       });
-      navigate(`/patients/${res.patient.id}`);
+
+      const patientId = res.patient.id;
+
+      // Si demandé, créer un RDV du jour pour que le docteur voie le patient
+      // immédiatement sur son dashboard.
+      if (bookAppointment && practitionerId && form.primaryAddiction) {
+        const [hh, mm] = appointmentTime.split(':');
+        const scheduledAt = new Date();
+        scheduledAt.setHours(parseInt(hh ?? '10', 10), parseInt(mm ?? '0', 10), 0, 0);
+        try {
+          await apiPost('/appointments', {
+            patientId,
+            practitionerId,
+            scheduledAt: scheduledAt.toISOString(),
+            service: form.primaryAddiction,
+            visitType: 'FIRST',
+            source: 'walkin',
+            price: PRICE_FIRST[form.primaryAddiction as Addiction],
+            duration: 40,
+          });
+        } catch (apptErr) {
+          // L'intake a réussi, le RDV a échoué — on garde le patient créé.
+          // L'utilisateur peut créer le RDV manuellement après.
+          console.warn('Auto-appointment failed, patient created OK:', apptErr);
+        }
+      }
+
+      navigate(`/patients/${patientId}`);
     } catch (err) {
       setError((err as { message?: string }).message ?? 'Error');
     } finally {
@@ -296,6 +363,63 @@ export function PatientIntakePage() {
                 onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
               />
             </FieldLabel>
+          </CardContent>
+        </Card>
+
+        {/* Section RDV — pour que le patient apparaisse direct sur le dashboard du docteur */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              📅{' '}
+              {t('patients.intake.appointmentSection', 'Rendez-vous du jour')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={bookAppointment}
+                onChange={(e) => setBookAppointment(e.target.checked)}
+              />
+              <span className="text-sm">
+                {t(
+                  'patients.intake.bookSameDay',
+                  "Créer un rendez-vous immédiat pour ce patient (apparaîtra sur le dashboard du praticien)",
+                )}
+              </span>
+            </label>
+            {bookAppointment && (
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border-light">
+                <FieldLabel label={t('patients.intake.practitioner', 'Praticien *')}>
+                  <select
+                    className="w-full h-9 rounded-lg border border-border bg-surface px-3 text-sm"
+                    value={practitionerId}
+                    onChange={(e) => setPractitionerId(e.target.value)}
+                  >
+                    {practitioners.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        Dr. {p.firstName} {p.lastName}
+                      </option>
+                    ))}
+                  </select>
+                </FieldLabel>
+                <FieldLabel
+                  label={`${t('patients.intake.appointmentTime', 'Heure du RDV')} ${
+                    form.primaryAddiction
+                      ? `(${PRICE_FIRST[form.primaryAddiction as Addiction]} EGP)`
+                      : ''
+                  }`}
+                >
+                  <Input
+                    type="time"
+                    step={2400}
+                    value={appointmentTime}
+                    onChange={(e) => setAppointmentTime(e.target.value)}
+                  />
+                </FieldLabel>
+              </div>
+            )}
           </CardContent>
         </Card>
 
