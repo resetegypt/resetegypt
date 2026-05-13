@@ -266,9 +266,8 @@ export function DashboardPage() {
             <h2 className="text-xs font-bold tracking-[0.15em] uppercase text-text-tertiary mb-3">
               {t('dashboard.quickActions', 'Actions rapides')}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <QuickAction to="/patients/intake" Icon={ClipboardPlus} label={t('dashboard.action.newPatient')} />
-              <QuickAction to="/appointments/new" Icon={CalendarPlus} label={t('dashboard.action.newAppointment')} />
               <QuickAction to="/patients" Icon={Users} label={t('dashboard.action.patients')} />
               <QuickAction to="/accounting" Icon={Wallet} label={t('dashboard.action.accounting')} />
             </div>

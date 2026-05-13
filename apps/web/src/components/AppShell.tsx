@@ -32,13 +32,6 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', label: 'nav.dashboard', Icon: LayoutDashboard, section: 'work' },
   { to: '/agenda', label: 'nav.agenda', Icon: Calendar, section: 'work' },
-  {
-    to: '/appointments/new',
-    label: 'nav.newAppointment',
-    Icon: CalendarPlus,
-    roles: ['SECRETARY', 'ADMIN'],
-    section: 'work',
-  },
   { to: '/inbox', label: 'nav.inbox', Icon: Inbox, roles: ['SECRETARY', 'ADMIN'], section: 'work' },
   { to: '/patients', label: 'nav.patients', Icon: Users, section: 'work' },
   {
