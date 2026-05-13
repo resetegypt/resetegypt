@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "pnpm install --frozen-lockfile=false && pnpm --filter @reset/site build",
+  "outputDirectory": "out",
+  "installCommand": "pnpm install --frozen-lockfile=false",
+  "framework": null,
+  "regions": ["fra1"]
+}

@@ -94,3 +94,6 @@ storage/
 .claude/settings.local.json
 .claude/.credentials*
 
+
+# Site scraping outputs (~27 MB)
+/scraped/
