@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function DrugsPage() {
   return (
     <ServicePage
+      heroPhoto="/photos/service-drugs.jpeg"
       Icon={Pill}
       eyebrow="Sevrage drogues"
       title="Reprenez votre vie en main."

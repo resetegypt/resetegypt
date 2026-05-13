@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function StressPage() {
   return (
     <ServicePage
+      heroPhoto="/photos/service-stress.jpeg"
       Icon={Brain}
       eyebrow="Stress & anxiété"
       title="Apaisez votre système nerveux."

@@ -96,16 +96,14 @@ export default function AboutPage() {
           </div>
 
           <div className="relative">
-            <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-gradient-to-br from-primary-lightest to-white border border-primary-light p-8 flex items-center justify-center">
-              <div className="rounded-2xl overflow-hidden shadow-2xl shadow-primary/30 ring-8 ring-white">
-                <Image
-                  src="/logo.svg"
-                  alt="RESET"
-                  width={280}
-                  height={280}
-                  className="block w-56 h-56"
-                />
-              </div>
+            <div className="aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-2xl shadow-primary/20">
+              <Image
+                src="/photos/practitioner.jpeg"
+                alt="Praticien certifié — méthode RESET"
+                width={569}
+                height={749}
+                className="object-cover w-full h-full"
+              />
             </div>
             <div className="absolute -bottom-4 -left-4 lg:-bottom-6 lg:-left-6 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface shadow-xl border border-border-light text-sm font-semibold">
               <Award className="w-4 h-4 text-primary" />

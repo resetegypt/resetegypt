@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function SugarPage() {
   return (
     <ServicePage
+      heroPhoto="/photos/service-sugar.jpeg"
       Icon={Candy}
       eyebrow="Gestion du sucre"
       title="Brisez le cycle du sucre."

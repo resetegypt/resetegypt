@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Sparkles, type LucideIcon } from 'lucide-react';
 import { Section } from './Section';
@@ -11,6 +12,8 @@ export interface ServicePageProps {
   benefits: Array<{ title: string; description: string }>;
   process?: string[];
   cta?: string;
+  /** Photo principale du service (chemin /photos/...). */
+  heroPhoto: string;
 }
 
 /**
@@ -19,33 +22,64 @@ export interface ServicePageProps {
  * pour cohérence brand.
  */
 export function ServicePage(props: ServicePageProps) {
-  const { Icon, eyebrow, title, tagline, intro, benefits, process, cta } = props;
+  const { Icon, eyebrow, title, tagline, intro, benefits, process, cta, heroPhoto } = props;
   return (
     <>
-      {/* HERO */}
+      {/* HERO avec photo en split-screen */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none -z-10">
-          <div className="absolute -top-40 -left-40 w-[32rem] h-[32rem] rounded-full bg-primary/12 blur-3xl" />
-          <div className="absolute top-20 -right-20 w-[24rem] h-[24rem] rounded-full bg-secondary/15 blur-3xl" />
+          <div className="absolute -top-40 -left-40 w-[32rem] h-[32rem] rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute top-20 -right-20 w-[24rem] h-[24rem] rounded-full bg-secondary/12 blur-3xl" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 lg:pt-24 pb-12 lg:pb-16 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-primary text-white mb-6 shadow-xl shadow-primary/30">
-            <Icon className="w-7 h-7 lg:w-9 lg:h-9" strokeWidth={1.75} />
-          </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-12 lg:pt-20 lg:pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <div className="text-center lg:text-start order-2 lg:order-1">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary text-white mb-5 shadow-xl shadow-primary/30">
+                <Icon className="w-6 h-6" strokeWidth={1.75} />
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-border-light text-xs font-semibold text-primary mb-4 shadow-sm">
+                <Sparkles className="w-3 h-3" />
+                {eyebrow}
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-text tracking-tight leading-[1.05]">
+                {title}
+              </h1>
+              <p className="mt-3 text-lg sm:text-xl text-primary font-semibold">{tagline}</p>
+              <p className="mt-5 text-base text-text-secondary leading-relaxed max-w-xl mx-auto lg:mx-0">
+                {intro}
+              </p>
+              <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:items-center justify-center lg:justify-start">
+                <Link
+                  href="https://book.reset-egypt.com"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  Réserver ma séance
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/services"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold text-text hover:text-primary transition-colors"
+                >
+                  Autres services
+                </Link>
+              </div>
+            </div>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-border-light text-xs font-semibold text-primary mb-4 shadow-sm">
-            <Sparkles className="w-3 h-3" />
-            {eyebrow}
+            {/* Photo */}
+            <div className="relative order-1 lg:order-2 max-w-md mx-auto lg:max-w-none">
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-2xl shadow-primary/20">
+                <Image
+                  src={heroPhoto}
+                  alt={title}
+                  width={1200}
+                  height={900}
+                  className="object-cover w-full h-full"
+                  priority
+                />
+              </div>
+            </div>
           </div>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-text tracking-tight leading-[1.05]">
-            {title}
-          </h1>
-          <p className="mt-4 text-lg sm:text-xl text-primary font-semibold">{tagline}</p>
-          <p className="mt-6 text-base sm:text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto">
-            {intro}
-          </p>
         </div>
       </section>
 

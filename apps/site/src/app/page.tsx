@@ -61,8 +61,8 @@ function Hero() {
         <div className="absolute bottom-0 left-1/3 w-[32rem] h-[32rem] rounded-full bg-danger/10 blur-3xl" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 lg:pt-20 lg:pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 lg:pt-20 lg:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Texte */}
           <div className="text-center lg:text-start">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-border-light text-xs font-semibold text-primary mb-6 shadow-sm">
@@ -107,37 +107,41 @@ function Hero() {
             </div>
           </div>
 
-          {/* Visual : logo XL avec décorations */}
+          {/* Visual : photo réelle du centre + badges flottants */}
           <div className="relative max-w-md mx-auto lg:max-w-none">
-            <div className="relative aspect-square">
-              {/* Cercles décoratifs animés */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary-lightest via-white to-secondary/20 blur-2xl" />
-              <div className="absolute inset-8 rounded-full border border-primary/15" />
-              <div className="absolute inset-16 rounded-full border border-primary/10" />
+            <div className="relative aspect-[4/5]">
+              {/* Photo principale dans une carte avec ring */}
+              <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl shadow-primary/25 ring-1 ring-black/5">
+                <Image
+                  src="/photos/hero-center.png"
+                  alt="Centre RESET — Branch Cairo East CMC"
+                  width={800}
+                  height={1000}
+                  className="object-cover w-full h-full"
+                  priority
+                />
+              </div>
 
-              {/* Logo central */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="rounded-3xl overflow-hidden shadow-2xl shadow-primary/30 ring-8 ring-white">
-                  <Image
-                    src="/logo.svg"
-                    alt="RESET"
-                    width={320}
-                    height={320}
-                    className="block w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80"
-                    priority
-                  />
-                </div>
+              {/* Logo flottant en coin (signature brand discrète) */}
+              <div className="absolute -bottom-5 -left-5 lg:-bottom-7 lg:-left-7 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white">
+                <Image
+                  src="/logo.svg"
+                  alt="RESET"
+                  width={72}
+                  height={72}
+                  className="block w-16 h-16 lg:w-20 lg:h-20"
+                />
               </div>
 
               {/* Badges flottants */}
               <FloatingBadge
-                className="-top-2 right-4 lg:top-4 lg:-right-4"
+                className="-top-3 -right-2 lg:-top-3 lg:-right-3"
                 Icon={Award}
                 label="Méthode certifiée"
                 tone="primary"
               />
               <FloatingBadge
-                className="bottom-8 -left-4 lg:bottom-12 lg:-left-8"
+                className="bottom-10 -right-3 lg:bottom-12 lg:-right-6"
                 Icon={Shield}
                 label="100% non-invasif"
                 tone="success"
@@ -229,36 +233,36 @@ const SERVICES = [
     href: '/services/smoking',
     Icon: Cigarette,
     title: 'Sevrage tabagique',
-    description:
-      'Arrêter de fumer en une séance — neutralisation des envies de nicotine au niveau neuronal.',
+    description: 'Arrêter de fumer en une séance.',
+    photo: '/photos/service-smoking.webp',
   },
   {
     href: '/services/drugs',
     Icon: Pill,
     title: 'Sevrage drogues',
-    description:
-      'Accompagnement non-médical pour briser le cycle de dépendance chimique en douceur.',
+    description: 'Briser le cycle de la dépendance chimique.',
+    photo: '/photos/service-drugs.jpeg',
   },
   {
     href: '/services/alcohol',
     Icon: Wine,
     title: 'Sevrage alcool',
-    description:
-      'Réduction des envies et stabilisation neuronale pour reprendre le contrôle.',
+    description: 'Reprenez le contrôle naturellement.',
+    photo: '/photos/service-alcohol.jpeg',
   },
   {
     href: '/services/sugar',
     Icon: Candy,
     title: 'Gestion du sucre',
-    description:
-      'Stop aux fringales — neutralisation des centres d\'addiction et perte de poids naturelle.',
+    description: 'Stop aux fringales sucrées.',
+    photo: '/photos/service-sugar.jpeg',
   },
   {
     href: '/services/stress',
     Icon: Brain,
     title: 'Stress & anxiété',
-    description:
-      'Régulation du cortisol et du système nerveux pour un sommeil et un calme profonds.',
+    description: 'Apaisez votre système nerveux.',
+    photo: '/photos/service-stress.jpeg',
   },
 ];
 
@@ -270,39 +274,56 @@ function ServicesSection() {
       subtitle="Chaque programme RESET cible une addiction ou un déséquilibre spécifique avec un protocole personnalisé."
       align="center"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
         {SERVICES.map((s) => (
           <Link
             key={s.href}
             href={s.href}
-            className="group relative rounded-2xl bg-surface border border-border-light p-6 lg:p-7 transition-all hover:border-primary/40 hover:shadow-xl hover:-translate-y-1"
+            className="group relative rounded-2xl bg-surface border border-border-light overflow-hidden transition-all hover:border-primary/40 hover:shadow-xl hover:-translate-y-1"
           >
-            <div className="w-14 h-14 rounded-xl bg-primary-lightest text-primary flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-colors">
-              <s.Icon className="w-6 h-6" strokeWidth={1.75} />
+            {/* Photo en haut */}
+            <div className="relative aspect-[5/3] overflow-hidden bg-bg-secondary">
+              <Image
+                src={s.photo}
+                alt={s.title}
+                width={808}
+                height={485}
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+              />
+              {/* Icône badge en haut à gauche */}
+              <div className="absolute top-3 left-3 w-10 h-10 rounded-xl bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-md">
+                <s.Icon className="w-4 h-4" strokeWidth={1.75} />
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-text leading-tight">{s.title}</h3>
-            <p className="text-sm text-text-secondary mt-2 leading-relaxed">{s.description}</p>
-            <div className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
-              En savoir plus
-              <ArrowRight className="w-3.5 h-3.5" />
+            <div className="p-5 lg:p-6">
+              <h3 className="text-lg font-bold text-text leading-tight">{s.title}</h3>
+              <p className="text-sm text-text-secondary mt-1.5 leading-relaxed">
+                {s.description}
+              </p>
+              <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
+                En savoir plus
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
             </div>
           </Link>
         ))}
         {/* Carte CTA */}
         <Link
           href="https://book.reset-egypt.com"
-          className="group relative rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white p-6 lg:p-7 transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden"
+          className="group relative rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-secondary/20 blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="w-14 h-14 rounded-xl bg-white/15 backdrop-blur-sm text-white flex items-center justify-center mb-5">
-              <Calendar className="w-6 h-6" strokeWidth={1.75} />
+          <div className="relative flex flex-col h-full p-6 lg:p-8 min-h-[260px]">
+            <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm text-white flex items-center justify-center mb-5">
+              <Calendar className="w-5 h-5" strokeWidth={1.75} />
             </div>
-            <h3 className="text-lg font-bold leading-tight">Prêt à commencer ?</h3>
+            <h3 className="text-2xl font-bold leading-tight">
+              Prêt(e) à commencer&nbsp;?
+            </h3>
             <p className="text-sm text-white/80 mt-2 leading-relaxed">
               Réservez votre 1ère consultation en moins de 2 minutes.
             </p>
-            <div className="mt-5 inline-flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all">
+            <div className="mt-auto inline-flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all pt-5">
               Réserver maintenant
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -394,21 +415,19 @@ const PROCESS = [
     title: 'Consultation initiale',
     description: "Un échange personnalisé pour comprendre votre profil et votre motivation.",
     duration: '15 min',
+    gif: '/photos/process-1.gif',
   },
   {
     title: 'Stimulation laser',
     description: 'Application précise sur les points auriculaires.',
     duration: '20–30 min',
+    gif: '/photos/process-2.gif',
   },
   {
     title: 'Recommandations',
     description: 'Conseils simples et actionnables à suivre après votre séance.',
     duration: '5 min',
-  },
-  {
-    title: 'Suivi long terme',
-    description: 'Nous restons disponibles pour assurer votre succès durable.',
-    duration: '∞',
+    gif: '/photos/process-3.gif',
   },
 ];
 
@@ -419,25 +438,57 @@ function ProcessSection() {
       title="Une heure pour changer de vie"
       subtitle="Le déroulement précis d'une consultation au centre RESET. Simple, rapide, transparent."
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
         {PROCESS.map((p, idx) => (
           <div
             key={idx}
-            className="relative rounded-2xl bg-surface border border-border-light p-6 hover:border-primary/40 hover:shadow-md transition-all"
+            className="relative rounded-2xl bg-surface border border-border-light overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
           >
-            {idx < PROCESS.length - 1 && (
-              <ArrowRight className="hidden lg:block absolute top-1/2 -right-3 w-4 h-4 text-text-tertiary -translate-y-1/2 z-10" />
-            )}
-            <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-2">
-              ÉTAPE 0{idx + 1}
+            {/* GIF animé du process */}
+            <div className="relative aspect-video overflow-hidden bg-bg-secondary">
+              <Image
+                src={p.gif}
+                alt={p.title}
+                width={640}
+                height={360}
+                unoptimized
+                className="object-cover w-full h-full"
+              />
+              <div className="absolute top-3 left-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white text-sm font-bold shadow-lg">
+                {idx + 1}
+              </div>
             </div>
-            <h3 className="text-base font-bold text-text leading-tight">{p.title}</h3>
-            <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
-            <div className="mt-4 inline-flex items-center gap-1 text-xs font-mono tabular-nums text-text-tertiary border border-border-light px-2 py-1 rounded-md">
-              ⏱ {p.duration}
+            <div className="p-5 lg:p-6">
+              <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-1.5">
+                Étape 0{idx + 1}
+              </div>
+              <h3 className="text-base font-bold text-text leading-tight">{p.title}</h3>
+              <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
+              <div className="mt-4 inline-flex items-center gap-1 text-xs font-mono tabular-nums text-text-tertiary border border-border-light px-2 py-1 rounded-md">
+                ⏱ {p.duration}
+              </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 4e étape — suivi (sans gif) */}
+      <div className="mt-6 rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light p-6 lg:p-7 flex items-start gap-4 flex-col sm:flex-row">
+        <div className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
+          <HeartHandshake className="w-5 h-5" />
+        </div>
+        <div className="flex-1">
+          <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-1">
+            Étape 04 · Suivi long terme
+          </div>
+          <h3 className="text-base font-bold text-text">
+            Nous restons disponibles pour assurer votre succès durable.
+          </h3>
+          <p className="text-sm text-text-secondary mt-1.5 leading-relaxed">
+            Un suivi régulier pour consolider les résultats et prévenir la rechute. WhatsApp,
+            téléphone, ou nouvelle séance — comme vous préférez.
+          </p>
+        </div>
       </div>
     </Section>
   );
