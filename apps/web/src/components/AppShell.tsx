@@ -99,7 +99,9 @@ export function AppShell() {
             <div className="absolute -bottom-16 -left-8 w-32 h-32 rounded-full bg-primary-light/10 blur-2xl pointer-events-none" />
             <div className="relative flex items-baseline justify-between">
               <span className="text-2xl font-extrabold tracking-tight text-white">Reset</span>
-              <span className="text-[10px] text-primary-light/70 tracking-[0.3em] font-semibold">EGYPT</span>
+              <span className="text-[9px] text-primary-light/70 tracking-[0.22em] font-semibold ms-2 leading-tight text-end">
+                BRANCH CAIRO<br />EAST CMC
+              </span>
             </div>
             <div className="relative mt-4 flex items-center gap-3">
               <Avatar className="ring-2 ring-white/20 h-10 w-10">
