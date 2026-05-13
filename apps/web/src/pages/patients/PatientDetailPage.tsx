@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
+import { useAuthStore } from '../../lib/auth';
 
 interface PatientDetail {
   patient: {
@@ -54,6 +55,8 @@ const ADDICTION_ICON: Record<string, string> = {
 
 export function PatientDetailPage() {
   const { t, i18n } = useTranslation();
+  const { user } = useAuthStore();
+  const isPractitioner = user?.role === 'PRACTITIONER';
   const { id } = useParams<{ id: string }>();
   const { data } = useQuery({
     queryKey: ['patient', id],
@@ -134,7 +137,7 @@ export function PatientDetailPage() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-2 ${isPractitioner ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-4`}>
           <Card>
             <CardContent>
               <p className="text-xs text-text-secondary">📋 {t('patients.detail.kpi.sessions')}</p>
@@ -143,14 +146,16 @@ export function PatientDetailPage() {
               </p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">💰 {t('patients.detail.kpi.totalPaid')}</p>
-              <p className="text-3xl font-bold" data-numeric>
-                {stats.totalPaid.toLocaleString(i18n.language)} EGP
-              </p>
-            </CardContent>
-          </Card>
+          {!isPractitioner && (
+            <Card>
+              <CardContent>
+                <p className="text-xs text-text-secondary">💰 {t('patients.detail.kpi.totalPaid')}</p>
+                <p className="text-3xl font-bold" data-numeric>
+                  {stats.totalPaid.toLocaleString(i18n.language)} EGP
+                </p>
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent>
               <p className="text-xs text-text-secondary">⏱️ {t('patients.detail.kpi.duration')}</p>
@@ -181,7 +186,9 @@ export function PatientDetailPage() {
                   <th className="text-start px-4 py-2">{t('patients.detail.columns.practitioner')}</th>
                   <th className="text-start px-4 py-2">{t('patients.detail.columns.type')}</th>
                   <th className="text-start px-4 py-2">{t('patients.detail.columns.status')}</th>
-                  <th className="text-end px-4 py-2">{t('patients.detail.columns.amount')}</th>
+                  {!isPractitioner && (
+                    <th className="text-end px-4 py-2">{t('patients.detail.columns.amount')}</th>
+                  )}
                   <th className="text-end px-4 py-2">{t('patients.detail.columns.actions')}</th>
                 </tr>
               </thead>
@@ -199,11 +206,13 @@ export function PatientDetailPage() {
                     <td className="px-4 py-2">
                       <Badge variant={statusVariant(a.status)}>{t(`appointmentStatus.${a.status}`)}</Badge>
                     </td>
-                    <td className="px-4 py-2 text-end font-mono text-xs" data-numeric>
-                      {a.payment
-                        ? `${Number(a.payment.total).toLocaleString(i18n.language)} EGP`
-                        : `${Number(a.price).toLocaleString(i18n.language)} (${t('patients.detail.toCash')})`}
-                    </td>
+                    {!isPractitioner && (
+                      <td className="px-4 py-2 text-end font-mono text-xs" data-numeric>
+                        {a.payment
+                          ? `${Number(a.payment.total).toLocaleString(i18n.language)} EGP`
+                          : `${Number(a.price).toLocaleString(i18n.language)} (${t('patients.detail.toCash')})`}
+                      </td>
+                    )}
                     <td className="px-4 py-2 text-end space-x-1">
                       {!a.medicalRecord && a.status !== 'CANCELLED' && (
                         <Link
@@ -214,7 +223,7 @@ export function PatientDetailPage() {
                           </Button>
                         </Link>
                       )}
-                      {!a.payment && a.status !== 'CANCELLED' && (
+                      {!isPractitioner && !a.payment && a.status !== 'CANCELLED' && (
                         <Link to={`/payment/${a.id}`}>
                           <Button size="sm" variant="outline">
                             {t('patients.detail.cash')}

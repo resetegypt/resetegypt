@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
+import { useAuthStore } from '../../lib/auth';
 
 interface WeekData {
   weekStart: string;
@@ -34,6 +35,8 @@ function slotTime(idx: number): string {
 
 export function AgendaPage() {
   const { t, i18n } = useTranslation();
+  const { user } = useAuthStore();
+  const isPractitioner = user?.role === 'PRACTITIONER';
   const [weekOffset, setWeekOffset] = useState(0);
   const start = new Date();
   start.setDate(start.getDate() + weekOffset * 7);
@@ -99,14 +102,16 @@ export function AgendaPage() {
               <p className="text-2xl font-bold" data-numeric>{occupation}%</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent>
-              <p className="text-xs text-text-secondary">{t('agenda.stats.expectedRevenue')}</p>
-              <p className="text-2xl font-bold text-primary-dark" data-numeric>
-                {expectedRevenue.toLocaleString(i18n.language)} EGP
-              </p>
-            </CardContent>
-          </Card>
+          {!isPractitioner && (
+            <Card>
+              <CardContent>
+                <p className="text-xs text-text-secondary">{t('agenda.stats.expectedRevenue')}</p>
+                <p className="text-2xl font-bold text-primary-dark" data-numeric>
+                  {expectedRevenue.toLocaleString(i18n.language)} EGP
+                </p>
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent>
               <p className="text-xs text-text-secondary">{t('agenda.stats.toConfirm')}</p>

@@ -102,34 +102,57 @@ export function DashboardPage() {
     <>
       <PageHeader title={greeting} subtitle={dateLabel} />
       <div className="p-7 space-y-6 max-w-7xl">
-        {/* KPI grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard
-            Icon={Calendar}
-            label={t('dashboard.kpi.appointments')}
-            value={kpis?.todayAppointments ?? 0}
-            tone="info"
-          />
-          <KPICard
-            Icon={CircleDollarSign}
-            label={t('dashboard.kpi.toCash')}
-            value={completedUnpaid.length}
-            tone={completedUnpaid.length > 0 ? 'warning' : 'neutral'}
-          />
-          <KPICard
-            Icon={Bell}
-            label={t('dashboard.kpi.reminders')}
-            value={kpis?.remindersToSend ?? 0}
-            tone="neutral"
-          />
-          <KPICard
-            Icon={TrendingUp}
-            label={t('dashboard.kpi.revenue')}
-            value={kpis ? `${kpis.todayRevenue.toLocaleString(i18n.language)}` : '0'}
-            suffix="EGP"
-            tone="success"
-          />
-        </div>
+        {/* KPI grid — pour PRATICIEN on cache les KPI prix/encaissement */}
+        {user?.role === 'PRACTITIONER' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <KPICard
+              Icon={Calendar}
+              label={t('dashboard.kpi.appointments')}
+              value={kpis?.todayAppointments ?? 0}
+              tone="info"
+            />
+            <KPICard
+              Icon={Check}
+              label={t('dashboard.kpi.completed', 'Séances terminées')}
+              value={completed.length}
+              tone="success"
+            />
+            <KPICard
+              Icon={Play}
+              label={t('dashboard.kpi.inProgress', 'En cours')}
+              value={inProgress.length}
+              tone={inProgress.length > 0 ? 'warning' : 'neutral'}
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KPICard
+              Icon={Calendar}
+              label={t('dashboard.kpi.appointments')}
+              value={kpis?.todayAppointments ?? 0}
+              tone="info"
+            />
+            <KPICard
+              Icon={CircleDollarSign}
+              label={t('dashboard.kpi.toCash')}
+              value={completedUnpaid.length}
+              tone={completedUnpaid.length > 0 ? 'warning' : 'neutral'}
+            />
+            <KPICard
+              Icon={Bell}
+              label={t('dashboard.kpi.reminders')}
+              value={kpis?.remindersToSend ?? 0}
+              tone="neutral"
+            />
+            <KPICard
+              Icon={TrendingUp}
+              label={t('dashboard.kpi.revenue')}
+              value={kpis ? `${kpis.todayRevenue.toLocaleString(i18n.language)}` : '0'}
+              suffix="EGP"
+              tone="success"
+            />
+          </div>
+        )}
 
         {appointments.length === 0 ? (
           <EmptyState
@@ -197,9 +220,11 @@ export function DashboardPage() {
                 title={t('dashboard.sections.completed')}
                 count={completed.length}
                 accent="success"
-                description={t('dashboard.sections.completedDesc', {
-                  count: completedUnpaid.length,
-                })}
+                description={
+                  user?.role !== 'PRACTITIONER'
+                    ? t('dashboard.sections.completedDesc', { count: completedUnpaid.length })
+                    : undefined
+                }
               >
                 {completed.map((a) => (
                   <AppointmentRowItem
@@ -467,7 +492,13 @@ function AppointmentRowItem({
         )}
         {a.status === 'COMPLETED' && (
           <>
-            {a.payment ? (
+            {/* Le praticien voit seulement un check « Terminé » — pas de prix/facture */}
+            {!canCash ? (
+              <span className="inline-flex items-center gap-1 text-xs text-text-tertiary">
+                <Check className="w-3.5 h-3.5 text-primary-dark" />
+                {t('dashboard.actions.done', 'Terminé')}
+              </span>
+            ) : a.payment ? (
               <Button
                 size="sm"
                 variant="outline"
@@ -476,15 +507,13 @@ function AppointmentRowItem({
                 <FileText className="w-3.5 h-3.5 me-1" />
                 {a.payment.invoiceNumber}
               </Button>
-            ) : canCash ? (
+            ) : (
               <Button size="sm" onClick={onEncaisser}>
                 <Wallet className="w-3.5 h-3.5 me-1" />
                 {t('dashboard.actions.cashAmount', {
                   amount: a.price.toLocaleString(i18n.language),
                 })}
               </Button>
-            ) : (
-              <Badge variant="warning">{t('dashboard.actions.toBeCashed')}</Badge>
             )}
           </>
         )}
