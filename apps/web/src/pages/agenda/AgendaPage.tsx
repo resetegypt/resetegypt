@@ -154,8 +154,16 @@ export function AgendaPage() {
 
   const todayKey = localDateKey(new Date());
   const totalCount = appointments.length;
-  const slotsInRange =
-    view === 'day' ? SLOTS_PER_DAY : view === 'week' ? 7 * SLOTS_PER_DAY : 30 * SLOTS_PER_DAY;
+  // Capacité = nb de créneaux ouvrables sur la plage de la vue actuelle.
+  // Mois : on prend les jours réels du mois affiché (pas les 42 cellules
+  // de la grille, qui débordent sur le mois précédent/suivant).
+  const daysInRange =
+    view === 'day'
+      ? 1
+      : view === 'week'
+        ? 7
+        : endOfMonth(anchorDate).getDate();
+  const slotsInRange = daysInRange * SLOTS_PER_DAY;
   const occupation = slotsInRange > 0 ? Math.round((totalCount / slotsInRange) * 100) : 0;
   const expectedRevenue = appointments.reduce((sum, a) => sum + a.price, 0);
   const toConfirm = appointments.filter((a) => a.status === 'SCHEDULED').length;
@@ -260,6 +268,7 @@ export function AgendaPage() {
             Icon={CalendarDays}
             label={t('agenda.stats.bookings', 'Rendez-vous')}
             value={totalCount}
+            suffix={`/ ${slotsInRange}`}
             tone="info"
           />
           <AgendaKPI
