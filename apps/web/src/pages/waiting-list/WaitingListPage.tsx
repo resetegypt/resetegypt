@@ -13,6 +13,8 @@ import {
 } from '@reset/ui';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
+import { useToast } from '../../lib/toast';
+import { SkelList } from '../../components/skeletons';
 import {
   Users,
   Bell,
@@ -90,6 +92,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export function WaitingListPage() {
   const { t, i18n } = useTranslation();
+  const toast = useToast();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const prefillPatientId = searchParams.get('prefillPatientId');
@@ -102,7 +105,7 @@ export function WaitingListPage() {
     }
   }, [prefillPatientId]);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['waiting-list', statusFilter],
     queryFn: () =>
       apiGet<{ entries: WaitingEntry[] }>(
@@ -123,17 +126,26 @@ export function WaitingListPage() {
 
   const remove = useMutation({
     mutationFn: (id: string) => apiDelete(`/waiting-list/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['waiting-list'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waiting-list'] });
+      toast.success(t('waitingList.toasts.removed', 'Patient retiré de la liste'));
+    },
+    onError: () => toast.error(t('toasts.actionFailed', 'Action impossible')),
   });
 
   const notify = useMutation({
     mutationFn: ({ id, slotAt }: { id: string; slotAt?: string }) =>
       apiPost(`/waiting-list/${id}/notify`, slotAt ? { slotAt } : {}),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['waiting-list'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waiting-list'] });
+      toast.success(t('waitingList.toasts.notified', 'Email envoyé au patient'));
+    },
     onError: (err: Error) => {
-      alert(err.message?.includes('PatientHasNoEmail')
-        ? "Ce patient n'a pas d'email — ajoutez-en un avant de notifier."
-        : "Échec de l'envoi du mail.");
+      toast.error(
+        err.message?.includes('PatientHasNoEmail')
+          ? t('waitingList.toasts.noEmail', "Ce patient n'a pas d'email")
+          : t('waitingList.toasts.notifyFailed', "Échec de l'envoi"),
+      );
     },
   });
 
@@ -179,7 +191,9 @@ export function WaitingListPage() {
       />
 
       <div className="p-7 space-y-6 max-w-[1400px]">
-        {entries.length === 0 ? (
+        {isLoading ? (
+          <SkelList rows={4} />
+        ) : entries.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-primary-lightest text-primary-dark flex items-center justify-center mb-4">

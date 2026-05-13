@@ -31,7 +31,11 @@ import {
   StickyNote,
   Trash2,
   MessageSquareText,
+  TrendingUp,
+  Camera as CameraIcon,
 } from 'lucide-react';
+import { LineChart, type LineSeries } from '../../components/charts';
+import { useToast } from '../../lib/toast';
 
 interface ConsentEntry {
   accepted: boolean;
@@ -308,7 +312,12 @@ export function PatientDetailPage() {
         </div>
 
         {/* === ONGLET SUIVI === */}
-        {tab === 'suivi' && <FollowUpTimeline patientId={patient.id} />}
+        {tab === 'suivi' && (
+          <div className="space-y-6">
+            <ScoreEvolutionChart patientId={patient.id} hasMedicalRecord={!!patient.medicalRecord} />
+            <FollowUpTimeline patientId={patient.id} />
+          </div>
+        )}
 
         {/* === ONGLET FICHE CLINIQUE === */}
         {tab === 'clinique' && (
@@ -1051,6 +1060,257 @@ function PatientTagsEditor({ patient }: { patient: PatientDetail['patient'] }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ======================================================================
+// Évolution des scores patient — LineChart avec snapshots datés
+// ======================================================================
+
+interface ScoreSnapshot {
+  id: string;
+  takenAt: string;
+  stressScore: number | null;
+  anxietyScore: number | null;
+  cravingScore: number | null;
+  sleepScore: number | null;
+  motivationScore: number | null;
+  selfEsteemScore: number | null;
+  notes: string | null;
+  takenBy: { firstName: string; lastName: string } | null;
+}
+
+function ScoreEvolutionChart({
+  patientId,
+  hasMedicalRecord,
+}: {
+  patientId: string;
+  hasMedicalRecord: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const { user } = useAuthStore();
+  const isPractitioner = user?.role === 'PRACTITIONER';
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['patient-score-snapshots', patientId],
+    queryFn: () =>
+      apiGet<{ snapshots: ScoreSnapshot[] }>(`/patients/${patientId}/score-snapshots`),
+  });
+
+  const takeSnapshot = useMutation({
+    mutationFn: () =>
+      apiPost(`/patients/${patientId}/score-snapshots`, { useCurrent: true }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient-score-snapshots', patientId] });
+      toast.success(
+        t('patients.detail.scoresEvolution.snapshotTaken', 'Snapshot des scores enregistré'),
+      );
+    },
+    onError: () => {
+      toast.error(
+        t('patients.detail.scoresEvolution.snapshotFailed', 'Impossible de prendre le snapshot'),
+      );
+    },
+  });
+
+  const snapshots = data?.snapshots ?? [];
+  const xLabels = snapshots.map((s) =>
+    new Date(s.takenAt).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }),
+  );
+  const series: LineSeries[] = [
+    { label: 'Stress', color: '#FF5440', values: snapshots.map((s) => s.stressScore) },
+    { label: 'Anxiété', color: '#A855F7', values: snapshots.map((s) => s.anxietyScore) },
+    { label: 'Envies', color: '#F59E0B', values: snapshots.map((s) => s.cravingScore) },
+    { label: 'Sommeil', color: '#0EA5E9', values: snapshots.map((s) => s.sleepScore) },
+    { label: 'Motivation', color: '#1E0FBA', values: snapshots.map((s) => s.motivationScore) },
+    { label: 'Estime', color: '#10B981', values: snapshots.map((s) => s.selfEsteemScore) },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between gap-3 flex-wrap w-full">
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            {t('patients.detail.scoresEvolution.title', 'Évolution des scores')}
+          </CardTitle>
+          {isPractitioner && hasMedicalRecord && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => takeSnapshot.mutate()}
+              disabled={takeSnapshot.isPending}
+            >
+              <CameraIcon className="w-3.5 h-3.5 me-1.5" />
+              {takeSnapshot.isPending
+                ? t('common.loading')
+                : t(
+                    'patients.detail.scoresEvolution.snapshotButton',
+                    'Snapshot des scores actuels',
+                  )}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="h-56 bg-bg-secondary/30 rounded animate-pulse" />
+        ) : snapshots.length === 0 ? (
+          <div className="text-center py-10 text-text-secondary">
+            <TrendingUp className="w-10 h-10 mx-auto text-text-tertiary mb-2" />
+            <p className="text-sm">
+              {t(
+                'patients.detail.scoresEvolution.empty',
+                "Aucun snapshot pour le moment. Le médecin peut figer un instantané des scores après chaque séance pour suivre l'évolution.",
+              )}
+            </p>
+            {!hasMedicalRecord && (
+              <p className="text-xs text-text-tertiary mt-2 italic">
+                {t(
+                  'patients.detail.scoresEvolution.needsRecord',
+                  "La fiche clinique doit être créée d'abord.",
+                )}
+              </p>
+            )}
+          </div>
+        ) : snapshots.length === 1 ? (
+          <SingleSnapshotView snapshot={snapshots[0]!} lang={i18n.language} />
+        ) : (
+          <div>
+            <div dir="ltr" className="overflow-x-auto">
+              <LineChart
+                series={series}
+                xLabels={xLabels}
+                min={0}
+                max={10}
+                height={260}
+                ariaLabel={t('patients.detail.scoresEvolution.title', 'Évolution des scores')}
+              />
+            </div>
+            {/* Légende */}
+            <div className="flex items-center gap-4 flex-wrap mt-4 text-xs">
+              {series.map((s) => (
+                <span key={s.label} className="inline-flex items-center gap-1.5">
+                  <span
+                    className="inline-block w-3 h-3 rounded"
+                    style={{ backgroundColor: s.color }}
+                  />
+                  <span className="text-text-secondary">{s.label}</span>
+                </span>
+              ))}
+            </div>
+            {/* Comparatif premier vs dernier */}
+            <ScoreEvolutionSummary snapshots={snapshots} />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function SingleSnapshotView({ snapshot, lang }: { snapshot: ScoreSnapshot; lang: string }) {
+  const { t } = useTranslation();
+  const scores: Array<{ label: string; value: number | null; tone: 'good' | 'bad' | 'neutral' }> = [
+    { label: 'Stress', value: snapshot.stressScore, tone: 'bad' },
+    { label: 'Anxiété', value: snapshot.anxietyScore, tone: 'bad' },
+    { label: 'Envies', value: snapshot.cravingScore, tone: 'bad' },
+    { label: 'Sommeil', value: snapshot.sleepScore, tone: 'good' },
+    { label: 'Motivation', value: snapshot.motivationScore, tone: 'good' },
+    { label: 'Estime', value: snapshot.selfEsteemScore, tone: 'good' },
+  ];
+  return (
+    <div>
+      <div className="text-xs text-text-secondary mb-3">
+        {t(
+          'patients.detail.scoresEvolution.firstSnapshot',
+          'Premier snapshot enregistré le {{date}}. Prenez-en un nouveau après la prochaine séance pour voir la courbe d\'évolution.',
+          {
+            date: new Date(snapshot.takenAt).toLocaleDateString(lang, {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            }),
+          },
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        {scores.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-lg bg-bg-secondary/40 border border-border-light p-3 text-center"
+          >
+            <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wide">
+              {s.label}
+            </div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
+              {s.value !== null ? `${s.value}/10` : '—'}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScoreEvolutionSummary({ snapshots }: { snapshots: ScoreSnapshot[] }) {
+  const { t } = useTranslation();
+  if (snapshots.length < 2) return null;
+  const first = snapshots[0]!;
+  const last = snapshots[snapshots.length - 1]!;
+  const fields: Array<{ key: keyof ScoreSnapshot; label: string; better: 'lower' | 'higher' }> = [
+    { key: 'stressScore', label: 'Stress', better: 'lower' },
+    { key: 'anxietyScore', label: 'Anxiété', better: 'lower' },
+    { key: 'cravingScore', label: 'Envies', better: 'lower' },
+    { key: 'sleepScore', label: 'Sommeil', better: 'higher' },
+    { key: 'motivationScore', label: 'Motivation', better: 'higher' },
+    { key: 'selfEsteemScore', label: 'Estime', better: 'higher' },
+  ];
+  return (
+    <div className="mt-4 pt-4 border-t border-border-light">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-text-tertiary mb-2">
+        {t('patients.detail.scoresEvolution.summary', 'Évolution depuis le 1er snapshot')}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        {fields.map((f) => {
+          const a = first[f.key] as number | null;
+          const b = last[f.key] as number | null;
+          if (a === null || b === null) {
+            return (
+              <div
+                key={f.key as string}
+                className="rounded-lg bg-bg-secondary/30 border border-border-light p-2 text-center"
+              >
+                <div className="text-[10px] text-text-tertiary">{f.label}</div>
+                <div className="text-base text-text-tertiary italic">—</div>
+              </div>
+            );
+          }
+          const delta = b - a;
+          const improved = f.better === 'lower' ? delta < 0 : delta > 0;
+          const stable = delta === 0;
+          const color = stable
+            ? 'text-text-secondary'
+            : improved
+              ? 'text-primary-dark'
+              : 'text-danger-dark';
+          const sign = delta > 0 ? '+' : '';
+          return (
+            <div
+              key={f.key as string}
+              className="rounded-lg bg-bg-secondary/30 border border-border-light p-2 text-center"
+            >
+              <div className="text-[10px] text-text-tertiary">{f.label}</div>
+              <div className={`text-base font-bold tabular-nums ${color}`}>
+                {sign}
+                {delta}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

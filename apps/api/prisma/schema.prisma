@@ -41,6 +41,7 @@ model User {
   createdMedicalRecords  MedicalRecord[] @relation("MedicalRecordCreatedBy")
   finalizedMedicalRecords MedicalRecord[] @relation("MedicalRecordFinalizedBy")
   followUpNotes          FollowUpNote[]  @relation("FollowUpNoteAuthor")
+  scoreSnapshots         ScoreSnapshot[] @relation("ScoreSnapshotTakenBy")
 }
 
 enum Role {
@@ -90,6 +91,7 @@ model Patient {
   messages       Message[]
   followUpNotes  FollowUpNote[]
   waitingEntries WaitingList[]
+  scoreSnapshots ScoreSnapshot[]
 
   @@index([phone])
   @@index([lastName, firstName])
@@ -428,4 +430,26 @@ enum WaitingListStatus {
   BOOKED     // a accepté et un RDV a été créé
   EXPIRED    // créneau passé sans réponse
   CANCELLED  // retiré de la liste
+}
+
+// Snapshot des scores 0-10 du patient à un instant T.
+// Pris explicitement par le médecin (bouton dans la fiche clinique)
+// pour suivre l'évolution séance après séance.
+model ScoreSnapshot {
+  id              String   @id @default(uuid())
+  patientId       String
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  stressScore     Int?
+  anxietyScore    Int?
+  cravingScore    Int?
+  sleepScore      Int?
+  motivationScore Int?
+  selfEsteemScore Int?
+  // Note libre attachée au snapshot (ex: "après 3ème séance")
+  notes           String?
+  takenAt         DateTime @default(now())
+  takenById       String?
+  takenBy         User?    @relation("ScoreSnapshotTakenBy", fields: [takenById], references: [id])
+
+  @@index([patientId, takenAt])
 }

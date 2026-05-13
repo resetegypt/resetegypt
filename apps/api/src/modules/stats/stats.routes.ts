@@ -152,4 +152,148 @@ export async function statsRoutes(app: FastifyInstance): Promise<void> {
       paymentsCount: payments.length,
     };
   });
+
+  // === Heatmap horaire ====================================================
+  // Renvoie un array de cellules { dayOfWeek, hour, count } sur la période.
+  // dayOfWeek = 0 (dimanche) à 6 (samedi). On groupe via SQL pour rester rapide
+  // même sur de gros volumes.
+  app.get('/stats/heatmap', async (req, reply) => {
+    if (req.currentUser!.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'AdminOnly' });
+    }
+    const q = req.query as { period?: string };
+    const period = q.period ?? 'month';
+    const now = new Date();
+    const start = new Date(now);
+    if (period === 'week') start.setDate(start.getDate() - 7);
+    else if (period === 'year') start.setFullYear(start.getFullYear() - 1);
+    else start.setMonth(start.getMonth() - 1);
+    start.setHours(0, 0, 0, 0);
+
+    const rows = await app.prisma.$queryRawUnsafe<
+      Array<{ day_of_week: number; hour: number; count: bigint }>
+    >(
+      `SELECT
+         EXTRACT(DOW FROM "scheduledAt")::int AS day_of_week,
+         EXTRACT(HOUR FROM "scheduledAt")::int AS hour,
+         COUNT(*) AS count
+       FROM "Appointment"
+       WHERE "scheduledAt" >= $1 AND "scheduledAt" < $2
+         AND "status" != 'CANCELLED'
+       GROUP BY day_of_week, hour
+       ORDER BY day_of_week ASC, hour ASC`,
+      start,
+      now,
+    );
+
+    const cells = rows.map((r) => ({
+      dayOfWeek: r.day_of_week,
+      hour: r.hour,
+      count: Number(r.count),
+    }));
+
+    return {
+      period,
+      from: start.toISOString(),
+      to: now.toISOString(),
+      cells,
+    };
+  });
+
+  // === Comparatif praticiens =============================================
+  // Renvoie pour chaque praticien : nb RDV, CA encaissé, taux completion,
+  // taux no-show, RDV à venir. Période identique au /stats/global.
+  app.get('/stats/practitioners', async (req, reply) => {
+    if (req.currentUser!.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'AdminOnly' });
+    }
+    const q = req.query as { period?: string };
+    const period = q.period ?? 'month';
+    const now = new Date();
+    const start = new Date(now);
+    if (period === 'day') start.setHours(0, 0, 0, 0);
+    else if (period === 'week') start.setDate(start.getDate() - 7);
+    else if (period === 'year') start.setFullYear(start.getFullYear() - 1);
+    else start.setMonth(start.getMonth() - 1);
+
+    const practitioners = await app.prisma.user.findMany({
+      where: { role: 'PRACTITIONER', isActive: true },
+      select: { id: true, firstName: true, lastName: true },
+      orderBy: { lastName: 'asc' },
+    });
+
+    const enriched = await Promise.all(
+      practitioners.map(async (p) => {
+        const [appsCount, appsByStatus, paymentsAgg, upcoming] = await Promise.all([
+          app.prisma.appointment.count({
+            where: {
+              practitionerId: p.id,
+              scheduledAt: { gte: start, lt: now },
+            },
+          }),
+          app.prisma.appointment.groupBy({
+            by: ['status'],
+            where: {
+              practitionerId: p.id,
+              scheduledAt: { gte: start, lt: now },
+            },
+            _count: true,
+          }),
+          app.prisma.payment.aggregate({
+            where: {
+              appointment: { practitionerId: p.id },
+              createdAt: { gte: start, lt: now },
+            },
+            _sum: { total: true },
+            _count: true,
+          }),
+          app.prisma.appointment.count({
+            where: {
+              practitionerId: p.id,
+              scheduledAt: { gte: now },
+              status: { in: ['SCHEDULED', 'CONFIRMED'] },
+            },
+          }),
+        ]);
+
+        const completed = appsByStatus.find((a) => a.status === 'COMPLETED')?._count ?? 0;
+        const noShow = appsByStatus.find((a) => a.status === 'NO_SHOW')?._count ?? 0;
+        const cancelled = appsByStatus.find((a) => a.status === 'CANCELLED')?._count ?? 0;
+        const finished = completed + noShow + cancelled;
+
+        return {
+          id: p.id,
+          name: `Dr. ${p.firstName} ${p.lastName}`,
+          firstName: p.firstName,
+          appointments: appsCount,
+          completed,
+          noShow,
+          cancelled,
+          upcoming,
+          completionRate: finished > 0 ? Math.round((completed / finished) * 100) : 0,
+          noShowRate: finished > 0 ? Math.round((noShow / finished) * 100) : 0,
+          revenue: Number(paymentsAgg._sum.total ?? 0),
+          paymentsCount: paymentsAgg._count,
+        };
+      }),
+    );
+
+    return {
+      period,
+      from: start.toISOString(),
+      to: now.toISOString(),
+      practitioners: enriched,
+    };
+  });
+
+  // === Compteur global de messages non lus (pour badge sidebar) ===========
+  app.get('/stats/unread', async (req) => {
+    if (req.currentUser!.role === 'PRACTITIONER') {
+      return { unread: 0 };
+    }
+    const unread = await app.prisma.message.count({
+      where: { direction: 'INBOUND', readAt: null },
+    });
+    return { unread };
+  });
 }

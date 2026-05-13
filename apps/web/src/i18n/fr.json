@@ -1,4 +1,15 @@
 {
+  "toasts": {
+    "confirmed": "RDV confirmé",
+    "arrived": "Patient marqué arrivé",
+    "started": "Séance démarrée",
+    "completed": "Séance terminée",
+    "noShow": "No-show enregistré",
+    "cancelled": "RDV annulé",
+    "updated": "Mis à jour",
+    "updateFailed": "Échec de la mise à jour",
+    "actionFailed": "Action impossible"
+  },
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",

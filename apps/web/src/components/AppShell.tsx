@@ -23,9 +23,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '../lib/api';
+import {
+  notifyImportantEvent,
+  requestNotificationPermission,
+} from '../lib/notifications';
 
 interface NavItem {
   to: string;
@@ -33,12 +37,21 @@ interface NavItem {
   Icon: LucideIcon;
   roles?: Array<'ADMIN' | 'PRACTITIONER' | 'SECRETARY'>;
   section: 'work' | 'admin';
+  /** Si défini, affiche un badge avec une valeur dynamique. */
+  badgeKey?: 'inboxUnread';
 }
 
 const NAV: NavItem[] = [
   { to: '/', label: 'nav.dashboard', Icon: LayoutDashboard, section: 'work' },
   { to: '/agenda', label: 'nav.agenda', Icon: Calendar, section: 'work' },
-  { to: '/inbox', label: 'nav.inbox', Icon: Inbox, roles: ['SECRETARY', 'ADMIN'], section: 'work' },
+  {
+    to: '/inbox',
+    label: 'nav.inbox',
+    Icon: Inbox,
+    roles: ['SECRETARY', 'ADMIN'],
+    section: 'work',
+    badgeKey: 'inboxUnread',
+  },
   { to: '/patients', label: 'nav.patients', Icon: Users, section: 'work' },
   {
     to: '/waiting-list',
@@ -102,6 +115,23 @@ export function AppShell() {
   const workNav = visibleNav.filter((n) => n.section === 'work');
   const adminNav = visibleNav.filter((n) => n.section === 'admin');
 
+  // === Polling badges (inbox unread) ====================================
+  // ADMIN + SECRETARY uniquement (les praticiens n'ont pas accès à l'inbox)
+  // Polling toutes les 30 s, pas trop agressif. On accepte 401/403 silencieusement.
+  const { data: unreadData } = useQuery({
+    queryKey: ['stats-unread'],
+    queryFn: () => apiGet<{ unread: number }>('/stats/unread').catch(() => ({ unread: 0 })),
+    refetchInterval: 30_000,
+    enabled: user.role !== 'PRACTITIONER',
+  });
+  const inboxUnread = unreadData?.unread ?? 0;
+  const badges = { inboxUnread };
+
+  // === Hook événements RDV : sons + notifications desktop =================
+  // Détecte les transitions importantes (ARRIVED / IN_PROGRESS / nouveau msg)
+  // en comparant les snapshots successifs côté client.
+  useAppointmentEventsNotifier();
+
   return (
     <div className="min-h-screen grid grid-cols-[264px_1fr] bg-bg">
       <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
@@ -154,9 +184,9 @@ export function AppShell() {
 
         {/* Nav sections */}
         <nav className="flex-1 py-3 px-2 space-y-5">
-          <NavSection label={t('nav.sectionWork', 'WORKSPACE')} items={workNav} t={t} />
+          <NavSection label={t('nav.sectionWork', 'WORKSPACE')} items={workNav} t={t} badges={badges} />
           {adminNav.length > 0 && (
-            <NavSection label={t('nav.sectionAdmin', 'ADMINISTRATION')} items={adminNav} t={t} />
+            <NavSection label={t('nav.sectionAdmin', 'ADMINISTRATION')} items={adminNav} t={t} badges={badges} />
           )}
         </nav>
 
@@ -207,10 +237,12 @@ function NavSection({
   label,
   items,
   t,
+  badges,
 }: {
   label: string;
   items: NavItem[];
   t: (k: string) => string;
+  badges: { inboxUnread: number };
 }) {
   return (
     <div>
@@ -218,37 +250,141 @@ function NavSection({
         {label}
       </div>
       <div className="space-y-0.5">
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              `group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-text-secondary hover:bg-bg-secondary hover:text-text'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <span className="absolute start-0 top-1 bottom-1 w-1 rounded-e-full bg-primary" />
-                )}
-                <item.Icon
-                  className={`w-4 h-4 shrink-0 ${
-                    isActive ? 'text-primary' : 'text-text-tertiary group-hover:text-text-secondary'
-                  }`}
-                />
-                <span className="truncate">{t(item.label)}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        {items.map((item) => {
+          const badgeValue = item.badgeKey ? badges[item.badgeKey] : 0;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                  isActive
+                    ? 'bg-primary/10 text-primary font-semibold'
+                    : 'text-text-secondary hover:bg-bg-secondary hover:text-text'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute start-0 top-1 bottom-1 w-1 rounded-e-full bg-primary" />
+                  )}
+                  <item.Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? 'text-primary' : 'text-text-tertiary group-hover:text-text-secondary'
+                    }`}
+                  />
+                  <span className="truncate flex-1">{t(item.label)}</span>
+                  {badgeValue > 0 && (
+                    <span
+                      className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold tabular-nums ${
+                        isActive
+                          ? 'bg-primary text-white'
+                          : 'bg-danger text-white animate-pulse'
+                      }`}
+                    >
+                      {badgeValue > 99 ? '99+' : badgeValue}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </div>
     </div>
   );
+}
+
+// === Hook événements RDV ====================================================
+// Compare le snapshot précédent des RDV du jour avec le nouveau et déclenche
+// notifications + sons pour les transitions importantes :
+//   - ARRIVED  : patient s'enregistre à l'accueil → bip doux + toast info
+//   - IN_PROGRESS : séance commence → ding + notification desktop (utile pour
+//                   le médecin en consultation, on cible son ID en plus du rôle)
+// On utilise React Query polling sur /appointments/today pour récupérer l'état.
+function useAppointmentEventsNotifier(): void {
+  const { user } = useAuthStore();
+  const prevSnapshot = useRef<Map<string, string>>(new Map());
+
+  const { data } = useQuery({
+    queryKey: ['appointments-today-notif'],
+    queryFn: () =>
+      apiGet<{
+        appointments: Array<{
+          id: string;
+          patientName: string;
+          status: string;
+          scheduledAt: string;
+          practitionerName?: string;
+        }>;
+      }>('/appointments/today').catch(() => ({ appointments: [] })),
+    refetchInterval: 20_000,
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (!data || !user) return;
+    const next = new Map<string, string>();
+    data.appointments.forEach((a) => next.set(a.id, a.status));
+
+    // Premier chargement : on initialise sans bipeur (sinon on bipperait pour
+    // chaque RDV existant à l'ouverture de la page).
+    if (prevSnapshot.current.size === 0) {
+      prevSnapshot.current = next;
+      return;
+    }
+
+    const prev = prevSnapshot.current;
+    data.appointments.forEach((a) => {
+      const prevStatus = prev.get(a.id);
+      if (prevStatus === a.status) return;
+      const isNewArrival = a.status === 'ARRIVED' && prevStatus !== 'ARRIVED';
+      const isStartingNow = a.status === 'IN_PROGRESS' && prevStatus !== 'IN_PROGRESS';
+      if (isNewArrival) {
+        notifyImportantEvent(
+          {
+            title: 'Patient arrivé',
+            body: `${a.patientName} s'est enregistré(e) à l'accueil`,
+            tag: `arrived-${a.id}`,
+            onClick: () => {
+              // Au clic sur la notification, on focus la fenêtre — la nav se
+              // fera via le UX habituel.
+              window.location.href = '/agenda';
+            },
+          },
+          'soft',
+        );
+      } else if (isStartingNow) {
+        notifyImportantEvent(
+          {
+            title: 'Séance démarrée',
+            body: `${a.patientName} — ${new Date(a.scheduledAt).toLocaleTimeString(undefined, {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}`,
+            tag: `started-${a.id}`,
+          },
+          'ding',
+        );
+      }
+    });
+
+    prevSnapshot.current = next;
+  }, [data, user]);
+
+  // Demande de permission à la première interaction utilisateur (focus window).
+  // On ne le fait pas dans un useEffect immédiat pour éviter de spammer.
+  useEffect(() => {
+    if (!user) return;
+    const onFocus = (): void => {
+      requestNotificationPermission().catch(() => {});
+      window.removeEventListener('focus', onFocus);
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [user]);
 }
 
 // === Command palette élargi ============================================

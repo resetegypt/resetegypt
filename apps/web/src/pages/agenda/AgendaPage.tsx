@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage, Badge, Button, Card } from '@reset
 import { apiGet, apiPatch, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 import { useAuthStore } from '../../lib/auth';
+import { useToast } from '../../lib/toast';
+import { SkelKpiGrid, SkelAgendaWeek } from '../../components/skeletons';
 import {
   ChevronLeft,
   ChevronRight,
@@ -138,6 +140,7 @@ export function AgendaPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { user } = useAuthStore();
   const showRevenue = user?.role === 'ADMIN';
   const isAdmin = user?.role === 'ADMIN';
@@ -171,7 +174,7 @@ export function AgendaPage() {
     return { from, to };
   }, [view, anchorDate]);
 
-  const { data, refetch } = useQuery({
+  const { data, refetch, isLoading } = useQuery({
     queryKey: ['agenda', view, range.from.toISOString(), range.to.toISOString()],
     queryFn: () =>
       apiGet<{ appointments: Appointment[] }>(
@@ -199,12 +202,13 @@ export function AgendaPage() {
       apiPatch(`/appointments/${id}`, { scheduledAt: newScheduledAt }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agenda'] });
+      toast.success(t('agenda.dnd.moved', 'RDV déplacé'));
     },
     onError: (err: Error) => {
       const msg = err.message?.includes('TimeSlotConflict')
         ? t('agenda.dnd.conflict', 'Conflit : un autre RDV existe déjà sur ce créneau.')
         : t('agenda.dnd.failed', 'Impossible de déplacer le RDV.');
-      alert(msg);
+      toast.error(msg);
     },
   });
 
@@ -296,6 +300,19 @@ export function AgendaPage() {
   const selectedAppointment = selectedAppointmentId
     ? appointments.find((a) => a.id === selectedAppointmentId) ?? null
     : null;
+
+  // Skeleton initial — avant le premier fetch.
+  if (isLoading && allAppointments.length === 0) {
+    return (
+      <>
+        <PageHeader title={t('agenda.title', 'Agenda')} subtitle={subtitle} />
+        <div className="p-7 space-y-5 max-w-[1600px]">
+          <SkelKpiGrid count={showRevenue ? 5 : 3} />
+          <SkelAgendaWeek />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -1114,6 +1131,7 @@ function AppointmentDetailModal({
   showAddToWaitingList: boolean;
 }) {
   const { t, i18n } = useTranslation();
+  const toast = useToast();
   const a = appointment;
   const date = new Date(a.scheduledAt);
   const sc = SERVICE_COLOR[a.service] ?? SERVICE_COLOR.STRESS!;
@@ -1121,10 +1139,20 @@ function AppointmentDetailModal({
 
   const setStatus = useMutation({
     mutationFn: (status: string) => apiPatch(`/appointments/${a.id}`, { status }),
-    onSuccess: () => {
+    onSuccess: (_, status) => {
+      const msg: Record<string, string> = {
+        CONFIRMED: t('toasts.confirmed', 'RDV confirmé'),
+        ARRIVED: t('toasts.arrived', 'Patient marqué arrivé'),
+        IN_PROGRESS: t('toasts.started', 'Séance démarrée'),
+        COMPLETED: t('toasts.completed', 'Séance terminée'),
+        NO_SHOW: t('toasts.noShow', 'No-show enregistré'),
+        CANCELLED: t('toasts.cancelled', 'RDV annulé'),
+      };
+      toast.success(msg[status] ?? t('toasts.updated', 'Mis à jour'));
       onChanged();
       onClose();
     },
+    onError: () => toast.error(t('toasts.updateFailed', 'Échec de la mise à jour')),
   });
 
   const addToWaitingList = useMutation({
@@ -1136,8 +1164,9 @@ function AppointmentDetailModal({
         notes: `Ajouté depuis RDV ${a.id} (${date.toLocaleString(i18n.language)})`,
       }),
     onSuccess: () => {
-      alert(t('agenda.modal.addedToWaitingList', 'Patient ajouté à la liste d\'attente.'));
+      toast.success(t('agenda.modal.addedToWaitingList', "Patient ajouté à la liste d'attente"));
     },
+    onError: () => toast.error(t('toasts.actionFailed', 'Action impossible')),
   });
 
   useEffect(() => {

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ToastProvider } from './lib/toast';
 import { useAuthStore, defaultRouteForRole } from './lib/auth';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -22,38 +24,52 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 
 export function App() {
   const init = useAuthStore((s) => s.init);
-  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     init();
   }, [init]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
+    <ToastProvider>
+      <BrowserRouter>
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </ToastProvider>
+  );
+}
+
+// AnimatePresence a besoin d'une `key` qui change à chaque navigation pour
+// déclencher les transitions enter/exit. On utilise location.pathname.
+function AnimatedRoutes() {
+  const location = useLocation();
+  const user = useAuthStore((s) => s.user);
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/login" element={<PageMotion><LoginPage /></PageMotion>} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
-            <Route index element={user?.role === 'ADMIN' ? <Navigate to="/admin/dashboard" replace /> : <DashboardPage />} />
-            <Route path="agenda" element={<AgendaPage />} />
-            <Route path="appointments/new" element={<NewAppointmentPage />} />
-            <Route path="patients" element={<PatientsListPage />} />
-            <Route path="patients/intake" element={<PatientIntakePage />} />
-            <Route path="patients/:id" element={<PatientDetailPage />} />
-            <Route path="patients/:id/clinical" element={<ClinicalFormPage />} />
-            <Route path="payment/:appointmentId" element={<PaymentPage />} />
-            <Route path="payments/:id" element={<InvoicePage />} />
-            <Route path="accounting" element={<AccountingPage />} />
-            <Route path="inbox" element={<InboxPage />} />
-            <Route path="waiting-list" element={<WaitingListPage />} />
-            <Route path="stats" element={<StatsPage />} />
+            <Route index element={user?.role === 'ADMIN' ? <Navigate to="/admin/dashboard" replace /> : <PageMotion><DashboardPage /></PageMotion>} />
+            <Route path="agenda" element={<PageMotion><AgendaPage /></PageMotion>} />
+            <Route path="appointments/new" element={<PageMotion><NewAppointmentPage /></PageMotion>} />
+            <Route path="patients" element={<PageMotion><PatientsListPage /></PageMotion>} />
+            <Route path="patients/intake" element={<PageMotion><PatientIntakePage /></PageMotion>} />
+            <Route path="patients/:id" element={<PageMotion><PatientDetailPage /></PageMotion>} />
+            <Route path="patients/:id/clinical" element={<PageMotion><ClinicalFormPage /></PageMotion>} />
+            <Route path="payment/:appointmentId" element={<PageMotion><PaymentPage /></PageMotion>} />
+            <Route path="payments/:id" element={<PageMotion><InvoicePage /></PageMotion>} />
+            <Route path="accounting" element={<PageMotion><AccountingPage /></PageMotion>} />
+            <Route path="inbox" element={<PageMotion><InboxPage /></PageMotion>} />
+            <Route path="waiting-list" element={<PageMotion><WaitingListPage /></PageMotion>} />
+            <Route path="stats" element={<PageMotion><StatsPage /></PageMotion>} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute roles={['ADMIN']} />}>
           <Route element={<AppShell />}>
-            <Route path="admin/dashboard" element={<StatsPage />} />
-            <Route path="admin/users" element={<UsersPage />} />
-            <Route path="admin/audit" element={<AuditPage />} />
+            <Route path="admin/dashboard" element={<PageMotion><StatsPage /></PageMotion>} />
+            <Route path="admin/users" element={<PageMotion><UsersPage /></PageMotion>} />
+            <Route path="admin/audit" element={<PageMotion><AuditPage /></PageMotion>} />
           </Route>
         </Route>
         <Route
@@ -61,6 +77,21 @@ export function App() {
           element={user ? <Navigate to={defaultRouteForRole(user.role)} replace /> : <Navigate to="/login" replace />}
         />
       </Routes>
-    </BrowserRouter>
+    </AnimatePresence>
+  );
+}
+
+// Wrapper d'animation : fade + glissement vertical court. Effet "Linear-like".
+function PageMotion({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.22, ease: [0.4, 0.0, 0.2, 1] }}
+      className="h-full"
+    >
+      {children}
+    </motion.div>
   );
 }

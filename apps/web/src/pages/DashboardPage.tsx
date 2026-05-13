@@ -4,7 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Badge, Button, Card, CardContent } from '@reset/ui';
 import { apiGet, apiPatch } from '../lib/api';
 import { useAuthStore } from '../lib/auth';
-import { PageHeader } from '../components/AppShell';
+import { useToast } from '../lib/toast';
+import { PageHeader } from './../components/AppShell';
+import { SkelKpiGrid, SkelList } from './../components/skeletons';
 import {
   Calendar,
   CircleDollarSign,
@@ -62,11 +64,13 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const { data: kpis } = useQuery({
+  const toast = useToast();
+
+  const { data: kpis, isLoading: kpisLoading } = useQuery({
     queryKey: ['dashboard', 'kpis'],
     queryFn: () => apiGet<DashboardKPIs>('/stats/dashboard'),
   });
-  const { data: today } = useQuery({
+  const { data: today, isLoading: todayLoading } = useQuery({
     queryKey: ['dashboard', 'today'],
     queryFn: () => apiGet<{ appointments: AppointmentRow[] }>('/appointments/today'),
     refetchInterval: 30_000,
@@ -75,10 +79,21 @@ export function DashboardPage() {
   const updateStatus = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       apiPatch(`/appointments/${id}`, { status }),
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['dashboard', 'today'] });
       qc.invalidateQueries({ queryKey: ['dashboard', 'kpis'] });
+      qc.invalidateQueries({ queryKey: ['agenda'] });
+      const msg: Record<string, string> = {
+        CONFIRMED: t('toasts.confirmed', 'RDV confirmé'),
+        ARRIVED: t('toasts.arrived', 'Patient marqué arrivé'),
+        IN_PROGRESS: t('toasts.started', 'Séance démarrée'),
+        COMPLETED: t('toasts.completed', 'Séance terminée'),
+        NO_SHOW: t('toasts.noShow', 'No-show enregistré'),
+        CANCELLED: t('toasts.cancelled', 'RDV annulé'),
+      };
+      toast.success(msg[vars.status] ?? t('toasts.updated', 'Mis à jour'));
     },
+    onError: () => toast.error(t('toasts.updateFailed', 'Échec de la mise à jour')),
   });
 
   const greeting = `${t('dashboard.greeting')}, ${user?.firstName}`;
@@ -97,6 +112,19 @@ export function DashboardPage() {
   const completed = appointments.filter((a) => a.status === 'COMPLETED');
   const archived = appointments.filter((a) => a.status === 'NO_SHOW' || a.status === 'CANCELLED');
   const completedUnpaid = completed.filter((a) => !a.payment);
+
+  // Skeleton initial — affiché tant qu'on n'a pas reçu les KPI + RDV.
+  if (kpisLoading || todayLoading) {
+    return (
+      <>
+        <PageHeader title={greeting} subtitle={dateLabel} />
+        <div className="p-7 space-y-6 max-w-7xl">
+          <SkelKpiGrid count={user?.role === 'PRACTITIONER' ? 3 : 4} />
+          <SkelList rows={4} />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

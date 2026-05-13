@@ -320,4 +320,91 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     });
     return { ok: true };
   });
+
+  // === Snapshots des scores 0-10 (évolution séance après séance) ==========
+  // GET liste chronologique. POST crée un snapshot (depuis le body OU les
+  // valeurs actuelles de la fiche clinique si non fournies).
+  app.get('/patients/:id/score-snapshots', async (req) => {
+    const id = (req.params as { id: string }).id;
+    const snapshots = await app.prisma.scoreSnapshot.findMany({
+      where: { patientId: id },
+      orderBy: { takenAt: 'asc' },
+      include: { takenBy: { select: { firstName: true, lastName: true } } },
+      take: 200,
+    });
+    return { snapshots };
+  });
+
+  app.post('/patients/:id/score-snapshots', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const schema = z.object({
+      stressScore: z.number().int().min(0).max(10).nullable().optional(),
+      anxietyScore: z.number().int().min(0).max(10).nullable().optional(),
+      cravingScore: z.number().int().min(0).max(10).nullable().optional(),
+      sleepScore: z.number().int().min(0).max(10).nullable().optional(),
+      motivationScore: z.number().int().min(0).max(10).nullable().optional(),
+      selfEsteemScore: z.number().int().min(0).max(10).nullable().optional(),
+      notes: z.string().max(500).optional(),
+      // Si "useCurrent" est true et qu'on ne passe pas de scores explicites,
+      // on prend les valeurs actuelles du MedicalRecord.
+      useCurrent: z.boolean().optional(),
+    });
+    const parsed = schema.safeParse(req.body ?? {});
+    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    const d = parsed.data;
+
+    let scores = {
+      stressScore: d.stressScore,
+      anxietyScore: d.anxietyScore,
+      cravingScore: d.cravingScore,
+      sleepScore: d.sleepScore,
+      motivationScore: d.motivationScore,
+      selfEsteemScore: d.selfEsteemScore,
+    };
+
+    // Si rien n'est passé OU useCurrent=true, on charge depuis le MR
+    const hasAnyScore = Object.values(scores).some((v) => v !== undefined && v !== null);
+    if (!hasAnyScore || d.useCurrent) {
+      const mr = await app.prisma.medicalRecord.findUnique({ where: { patientId: id } });
+      if (mr) {
+        scores = {
+          stressScore: mr.stressScore,
+          anxietyScore: mr.anxietyScore,
+          cravingScore: mr.cravingScore,
+          sleepScore: mr.sleepScore,
+          motivationScore: mr.motivationScore,
+          selfEsteemScore: mr.selfEsteemScore,
+        };
+      }
+    }
+
+    const snapshot = await app.prisma.scoreSnapshot.create({
+      data: {
+        patientId: id,
+        ...scores,
+        notes: d.notes,
+        takenById: req.currentUser!.sub,
+      },
+    });
+
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: 'score_snapshot_taken',
+      resource: `patient:${id}`,
+      details: { snapshotId: snapshot.id },
+    });
+
+    return reply.status(201).send({ snapshot });
+  });
+
+  app.delete('/score-snapshots/:id', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const snap = await app.prisma.scoreSnapshot.findUnique({ where: { id } });
+    if (!snap) return reply.status(404).send({ error: 'NotFound' });
+    const isAuthor = snap.takenById === req.currentUser!.sub;
+    const isAdmin = req.currentUser!.role === 'ADMIN';
+    if (!isAuthor && !isAdmin) return reply.status(403).send({ error: 'Forbidden' });
+    await app.prisma.scoreSnapshot.delete({ where: { id } });
+    return { ok: true };
+  });
 }
