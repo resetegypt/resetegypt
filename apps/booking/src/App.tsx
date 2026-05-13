@@ -11,66 +11,46 @@ type Step = 1 | 2 | 3 | 4 | 'success';
 const SERVICE_IDS = ['TOBACCO', 'DRUGS', 'ALCOHOL', 'SUGAR', 'STRESS'] as const;
 type ServiceId = (typeof SERVICE_IDS)[number];
 
-// === Méta de chaque service : icône emoji, prix de base, palette colorée ===
-// Les palettes sont construites pour être discernables même daltonien et
-// rester dans l'univers de marque Reset (bleu/cyan/corail) avec un accent
-// secondaire par service.
+// Une palette par service, légère et discernable même daltonien.
+// On reste dans l'univers Reset (primary/secondary) avec un accent par service.
 const SERVICE_META: Record<
   ServiceId,
-  {
-    icon: string;
-    priceFrom: number;
-    accent: string;
-    bgGradient: string;
-    iconBg: string;
-    ring: string;
-    selectedRing: string;
-  }
+  { icon: string; priceFrom: number; accent: string; iconBg: string; selectedRing: string }
 > = {
   TOBACCO: {
     icon: '🚬',
     priceFrom: 1500,
     accent: 'text-amber-700',
-    bgGradient: 'from-amber-50 via-white to-amber-50/40',
-    iconBg: 'bg-gradient-to-br from-amber-100 to-amber-200',
-    ring: 'ring-amber-200/60',
-    selectedRing: 'ring-2 ring-amber-500',
+    iconBg: 'bg-amber-100',
+    selectedRing: 'ring-amber-500',
   },
   DRUGS: {
     icon: '💊',
     priceFrom: 1800,
     accent: 'text-purple-700',
-    bgGradient: 'from-purple-50 via-white to-purple-50/40',
-    iconBg: 'bg-gradient-to-br from-purple-100 to-purple-200',
-    ring: 'ring-purple-200/60',
-    selectedRing: 'ring-2 ring-purple-500',
+    iconBg: 'bg-purple-100',
+    selectedRing: 'ring-purple-500',
   },
   ALCOHOL: {
     icon: '🍷',
     priceFrom: 1800,
     accent: 'text-rose-700',
-    bgGradient: 'from-rose-50 via-white to-rose-50/40',
-    iconBg: 'bg-gradient-to-br from-rose-100 to-rose-200',
-    ring: 'ring-rose-200/60',
-    selectedRing: 'ring-2 ring-rose-500',
+    iconBg: 'bg-rose-100',
+    selectedRing: 'ring-rose-500',
   },
   SUGAR: {
     icon: '🍬',
     priceFrom: 1100,
     accent: 'text-pink-700',
-    bgGradient: 'from-pink-50 via-white to-pink-50/40',
-    iconBg: 'bg-gradient-to-br from-pink-100 to-pink-200',
-    ring: 'ring-pink-200/60',
-    selectedRing: 'ring-2 ring-pink-500',
+    iconBg: 'bg-pink-100',
+    selectedRing: 'ring-pink-500',
   },
   STRESS: {
     icon: '😰',
     priceFrom: 900,
     accent: 'text-sky-700',
-    bgGradient: 'from-sky-50 via-white to-sky-50/40',
-    iconBg: 'bg-gradient-to-br from-sky-100 to-sky-200',
-    ring: 'ring-sky-200/60',
-    selectedRing: 'ring-2 ring-sky-500',
+    iconBg: 'bg-sky-100',
+    selectedRing: 'ring-sky-500',
   },
 };
 
@@ -108,12 +88,9 @@ export function App() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Scroll vers le haut à chaque changement d'étape pour éviter
-  // que l'utilisateur reste perdu en bas du formulaire précédent.
+  // Scroll vers le haut à chaque changement d'étape.
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [step]);
 
   async function submit() {
@@ -153,23 +130,26 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-bg-secondary flex flex-col">
-      {/* === HEADER fin & élégant (sticky) ============================== */}
-      <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-border-light">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      {/* === HEADER : logo bien visible sur fond clair ================== */}
+      <header className="bg-surface border-b border-border-light">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="flex items-center gap-3 group"
+            className="flex items-center gap-2.5 sm:gap-3 group min-w-0"
             aria-label="Accueil"
           >
-            <div className="rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(30,15,186,0.25)] transition-transform group-hover:scale-105">
-              <ResetLogo variant="full" className="block w-10 h-10 sm:w-11 sm:h-11" />
+            <div className="rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(30,15,186,0.25)] shrink-0 transition-transform group-hover:scale-105">
+              <ResetLogo
+                variant="full"
+                className="block w-12 h-12 sm:w-14 sm:h-14"
+              />
             </div>
-            <div className="leading-tight text-start">
-              <div className="text-sm sm:text-base font-bold text-primary tracking-tight">
+            <div className="leading-tight text-start min-w-0">
+              <div className="text-sm sm:text-base font-bold text-primary tracking-tight truncate">
                 Reset Yourself
               </div>
-              <div className="text-[9px] sm:text-[10px] tracking-[0.28em] font-semibold text-text-tertiary">
+              <div className="text-[9px] sm:text-[10px] tracking-[0.24em] sm:tracking-[0.28em] font-semibold text-text-tertiary truncate">
                 BRANCH CAIRO EAST CMC
               </div>
             </div>
@@ -179,18 +159,15 @@ export function App() {
         </div>
       </header>
 
-      {/* === HERO (step 1 uniquement) =================================== */}
-      {step === 1 && <Hero />}
-
-      {/* === STEPPER (étapes 2-4) ======================================= */}
-      {step !== 'success' && step !== 1 && (
-        <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 mt-6">
+      {/* === STEPPER : toujours présent, plus discret ================== */}
+      {step !== 'success' && (
+        <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 pt-4 sm:pt-6">
           <Stepper step={step as 1 | 2 | 3 | 4} />
         </div>
       )}
 
       {/* === BODY ======================================================= */}
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-5 sm:py-7">
         {step === 1 && (
           <ServiceSelection
             booking={booking}
@@ -233,24 +210,26 @@ export function App() {
         )}
       </main>
 
-      <Footer />
+      <footer className="mt-6 text-center text-[11px] text-text-tertiary py-4 px-4">
+        © {new Date().getFullYear()} Reset Yourself — Branch Cairo East CMC
+      </footer>
     </div>
   );
 }
 
 // ============================================================================
-// HEADER bits
+// LANGUAGE SWITCH
 // ============================================================================
 
 function LanguageSwitch() {
   const { i18n } = useTranslation();
   return (
-    <div className="inline-flex rounded-lg border border-border bg-bg-secondary/40 p-0.5">
+    <div className="inline-flex rounded-lg border border-border bg-bg-secondary/40 p-0.5 shrink-0">
       {LANGUAGES.map((lng) => (
         <button
           key={lng}
           onClick={() => i18n.changeLanguage(lng as Lang)}
-          className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
+          className={`px-2 sm:px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
             i18n.language === lng
               ? 'bg-surface shadow-sm text-text'
               : 'text-text-secondary hover:text-text'
@@ -264,81 +243,8 @@ function LanguageSwitch() {
 }
 
 // ============================================================================
-// HERO (step 1) — gros logo lisible sur fond clair, tagline brandée,
-// indicateurs de confiance, CTA visuel.
-// ============================================================================
-
-function Hero() {
-  const { t } = useTranslation();
-  return (
-    <section className="relative overflow-hidden">
-      {/* Halos d'arrière-plan pour la profondeur */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute -top-20 right-0 w-[24rem] h-[24rem] rounded-full bg-secondary/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-[30rem] h-[30rem] rounded-full bg-danger/10 blur-3xl" />
-      </div>
-
-      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-10 text-center">
-        {/* Logo officiel — grand et bien visible sur fond clair */}
-        <div className="inline-flex mb-6">
-          <div className="rounded-3xl overflow-hidden shadow-[0_12px_40px_-12px_rgba(30,15,186,0.35)] ring-4 ring-white/60">
-            <ResetLogo variant="full" className="block w-32 h-32 sm:w-40 sm:h-40" />
-          </div>
-        </div>
-
-        <div className="text-[10px] sm:text-[11px] tracking-[0.4em] font-bold text-primary/70 mb-3">
-          BRANCH CAIRO EAST CMC
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-primary tracking-tight leading-[1.05]">
-          {t('hero.title', 'Reprenez le contrôle.')}
-        </h1>
-        <p className="mt-4 text-base sm:text-lg text-text-secondary max-w-xl mx-auto leading-relaxed">
-          {t(
-            'hero.subtitle',
-            "Auriculothérapie & laser non-invasif — accompagnement sur-mesure pour le sevrage tabagique, alimentaire et la gestion du stress.",
-          )}
-        </p>
-
-        {/* Bandeau de confiance */}
-        <div className="mt-7 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-[11px] sm:text-xs text-text-secondary">
-          <TrustChip icon="✓" label={t('hero.trust.nonMedical', 'Centre non-médical agréé')} />
-          <TrustChip icon="🇪🇬" label={t('hero.trust.eta', 'Facturation conforme ETA')} />
-          <TrustChip icon="🔒" label={t('hero.trust.gdpr', 'Données protégées (loi 151/2020)')} />
-        </div>
-
-        {/* Indicateur "scrollez pour réserver" */}
-        <div className="mt-10 inline-flex flex-col items-center gap-1 text-text-tertiary text-xs">
-          <span>{t('hero.scrollHint', 'Choisissez votre service ci-dessous')}</span>
-          <svg
-            className="w-4 h-4 animate-bounce"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TrustChip({ icon, label }: { icon: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-border-light shadow-sm">
-      <span aria-hidden>{icon}</span>
-      <span className="font-medium text-text">{label}</span>
-    </span>
-  );
-}
-
-// ============================================================================
-// STEPPER — barre de progression avec libellés.
+// STEPPER — barre de progression compacte, responsive.
+// Mobile : pastilles compactes sans label. Desktop : pastilles + labels.
 // ============================================================================
 
 function Stepper({ step }: { step: 1 | 2 | 3 | 4 }) {
@@ -351,43 +257,33 @@ function Stepper({ step }: { step: 1 | 2 | 3 | 4 }) {
   ] as const;
 
   return (
-    <ol className="flex items-center gap-2 sm:gap-3">
+    <ol className="flex items-center gap-1.5 sm:gap-2">
       {steps.map((s, idx) => {
         const done = step > s.n;
         const active = step === s.n;
         return (
-          <li key={s.n} className="flex items-center gap-2 sm:gap-3 flex-1">
-            <div
-              className={`flex items-center gap-2 flex-1 ${
-                idx === steps.length - 1 ? '' : ''
+          <li key={s.n} className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+            <span
+              className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold transition-all shrink-0 ${
+                done
+                  ? 'bg-primary text-white'
+                  : active
+                    ? 'bg-primary text-white ring-4 ring-primary/15'
+                    : 'bg-surface text-text-tertiary border border-border'
               }`}
             >
-              <span
-                className={`inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full text-xs font-bold transition-all shrink-0 ${
-                  done
-                    ? 'bg-primary text-white shadow-sm'
-                    : active
-                      ? 'bg-primary text-white ring-4 ring-primary/20 shadow-md'
-                      : 'bg-surface text-text-tertiary border border-border'
-                }`}
-              >
-                {done ? '✓' : s.n}
-              </span>
-              <span
-                className={`text-xs sm:text-sm font-semibold transition-colors hidden sm:inline ${
-                  done
-                    ? 'text-primary-dark'
-                    : active
-                      ? 'text-primary'
-                      : 'text-text-tertiary'
-                }`}
-              >
-                {s.label}
-              </span>
-            </div>
+              {done ? '✓' : s.n}
+            </span>
+            <span
+              className={`text-xs font-semibold transition-colors hidden sm:inline truncate ${
+                done ? 'text-primary-dark' : active ? 'text-primary' : 'text-text-tertiary'
+              }`}
+            >
+              {s.label}
+            </span>
             {idx < steps.length - 1 && (
               <span
-                className={`flex-1 h-0.5 rounded-full transition-colors ${
+                className={`flex-1 h-px sm:h-0.5 rounded-full ${
                   done ? 'bg-primary' : 'bg-border-light'
                 }`}
               />
@@ -400,7 +296,7 @@ function Stepper({ step }: { step: 1 | 2 | 3 | 4 }) {
 }
 
 // ============================================================================
-// STEP 1 — Sélection du service. Grille de cartes avec palette par service.
+// STEP 1 — Sélection du service. Cartes avec palette par service.
 // ============================================================================
 
 function ServiceSelection({
@@ -415,19 +311,15 @@ function ServiceSelection({
   const { t } = useTranslation();
   return (
     <section>
-      <div className="text-center mb-7">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">
-          {t('serviceSelection.title', 'Quel accompagnement souhaitez-vous ?')}
-        </h2>
-        <p className="text-sm text-text-secondary mt-2">
-          {t(
-            'serviceSelection.subtitle',
-            'Sélectionnez le programme qui correspond à votre objectif.',
-          )}
-        </p>
-      </div>
+      <SectionHeading
+        title={t('serviceSelection.title', 'Quel accompagnement souhaitez-vous ?')}
+        subtitle={t(
+          'serviceSelection.subtitle',
+          'Sélectionnez le programme qui correspond à votre objectif.',
+        )}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
         {SERVICE_IDS.map((id) => {
           const meta = SERVICE_META[id];
           const selected = booking.service === id;
@@ -436,57 +328,57 @@ function ServiceSelection({
               key={id}
               type="button"
               onClick={() => onChange({ ...booking, service: id })}
-              className={`group relative rounded-2xl bg-gradient-to-br ${meta.bgGradient} border border-white/60 shadow-sm transition-all duration-200 text-start p-5 sm:p-6 overflow-hidden ${
+              className={`group relative rounded-2xl bg-surface border transition-all duration-200 text-start p-4 sm:p-5 ${
                 selected
-                  ? `${meta.selectedRing} ring-offset-2 ring-offset-bg-secondary shadow-xl -translate-y-0.5`
-                  : `ring-1 ${meta.ring} hover:shadow-xl hover:-translate-y-0.5`
+                  ? `border-transparent ring-2 ${meta.selectedRing} shadow-lg shadow-primary/10 -translate-y-px`
+                  : 'border-border hover:border-primary/40 hover:shadow-md'
               }`}
               aria-pressed={selected}
             >
-              {/* Coche en haut à droite si sélectionné */}
               {selected && (
-                <span className="absolute top-3 end-3 inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold shadow-md">
+                <span className="absolute top-2.5 end-2.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shadow-md">
                   ✓
                 </span>
               )}
 
-              <div
-                className={`w-14 h-14 ${meta.iconBg} rounded-2xl flex items-center justify-center text-3xl shadow-inner mb-4`}
-                aria-hidden
-              >
-                {meta.icon}
-              </div>
-
-              <h3 className="text-lg font-bold text-text leading-tight">
-                {t(`services.${id}`)}
-              </h3>
-              <p className="text-sm text-text-secondary mt-1 leading-relaxed line-clamp-2">
-                {t(`services.${id}_DESC`)}
-              </p>
-
-              <div className="mt-4 flex items-baseline gap-1.5">
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-text-tertiary">
-                  {t('priceFrom')}
-                </span>
-                <span className={`text-xl font-extrabold tabular-nums ${meta.accent}`}>
-                  {meta.priceFrom.toLocaleString()}
-                </span>
-                <span className="text-xs font-medium text-text-secondary">EGP</span>
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-12 h-12 sm:w-14 sm:h-14 ${meta.iconBg} rounded-xl flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0`}
+                  aria-hidden
+                >
+                  {meta.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm sm:text-base font-bold text-text leading-tight">
+                    {t(`services.${id}`)}
+                  </h3>
+                  <p className="text-xs text-text-secondary mt-0.5 leading-snug line-clamp-2">
+                    {t(`services.${id}_DESC`)}
+                  </p>
+                  <div className="mt-2 flex items-baseline gap-1.5">
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-text-tertiary">
+                      {t('priceFrom')}
+                    </span>
+                    <span className={`text-base font-extrabold tabular-nums ${meta.accent}`}>
+                      {meta.priceFrom.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-medium text-text-secondary">EGP</span>
+                  </div>
+                </div>
               </div>
             </button>
           );
         })}
       </div>
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-6 flex justify-end">
         <Button
           size="lg"
           disabled={!booking.service}
           onClick={onNext}
-          className="px-8 shadow-lg shadow-primary/20"
+          className="w-full sm:w-auto px-6 shadow-md shadow-primary/15"
         >
-          {t('continueButton', 'Continuer')}
-          <span className="ms-2" aria-hidden>→</span>
+          {t('continueButton', 'Continuer')} →
         </Button>
       </div>
     </section>
@@ -494,8 +386,7 @@ function ServiceSelection({
 }
 
 // ============================================================================
-// STEP 2 — Date & créneaux. Carrousel de jours horizontalement scrollable
-// pour bien fonctionner en mobile.
+// STEP 2 — Date & créneaux
 // ============================================================================
 
 function StepDateTime({
@@ -515,10 +406,9 @@ function StepDateTime({
   const [slots, setSlots] = useState<Array<{ time: string; iso: string; taken: boolean }>>([]);
   const [loading, setLoading] = useState(false);
 
-  // Charge les slots dès qu'on change de date (et au mount via useEffect).
   useEffect(() => {
     let cancelled = false;
-    async function loadSlots() {
+    async function load() {
       setLoading(true);
       try {
         const res = await fetch(apiUrl(`/booking/slots?date=${date}`));
@@ -528,7 +418,7 @@ function StepDateTime({
         if (!cancelled) setLoading(false);
       }
     }
-    void loadSlots();
+    void load();
     return () => {
       cancelled = true;
     };
@@ -552,7 +442,7 @@ function StepDateTime({
       />
 
       <Card className="mt-5">
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-5">
           <div>
             <Label>{t('sessionType')}</Label>
             <div className="flex gap-2">
@@ -561,9 +451,9 @@ function StepDateTime({
                   key={v}
                   type="button"
                   onClick={() => onChange({ ...booking, visitType: v })}
-                  className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all ${
+                  className={`flex-1 px-3 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all ${
                     booking.visitType === v
-                      ? 'border-primary bg-primary text-white shadow-sm'
+                      ? 'border-primary bg-primary text-white'
                       : 'border-border bg-surface text-text-secondary hover:border-primary/50'
                   }`}
                 >
@@ -575,7 +465,10 @@ function StepDateTime({
 
           <div>
             <Label>{t('dateLabel')}</Label>
-            <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x" dir="ltr">
+            <div
+              className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory"
+              dir="ltr"
+            >
               {next14Days.map((d) => {
                 const key = d.toISOString().slice(0, 10);
                 const selected = date === key;
@@ -590,7 +483,7 @@ function StepDateTime({
                     }}
                     className={`shrink-0 snap-start w-14 sm:w-16 rounded-xl border-2 py-2 transition-all flex flex-col items-center ${
                       selected
-                        ? 'border-primary bg-primary text-white shadow-md scale-105'
+                        ? 'border-primary bg-primary text-white shadow-md'
                         : 'border-border bg-surface hover:border-primary/40'
                     }`}
                     data-numeric
@@ -602,7 +495,7 @@ function StepDateTime({
                     >
                       {d.toLocaleDateString(i18n.language, { weekday: 'short' })}
                     </div>
-                    <div className="text-xl font-bold tabular-nums leading-none mt-1">
+                    <div className="text-lg sm:text-xl font-bold tabular-nums leading-none mt-1">
                       {d.getDate()}
                     </div>
                     <div
@@ -630,10 +523,7 @@ function StepDateTime({
             {loading ? (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 {Array.from({ length: 12 }, (_, i) => (
-                  <div
-                    key={i}
-                    className="h-10 rounded-lg bg-bg-secondary animate-pulse"
-                  />
+                  <div key={i} className="h-10 rounded-lg bg-bg-secondary animate-pulse" />
                 ))}
               </div>
             ) : slots.length === 0 ? (
@@ -665,22 +555,6 @@ function StepDateTime({
                 })}
               </div>
             )}
-            {slots.length > 0 && !loading && (
-              <div className="flex items-center gap-4 mt-3 text-[10px] text-text-tertiary">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block w-2.5 h-2.5 rounded border-2 border-border bg-surface" />
-                  {t('step2.legend.free', 'Libre')}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block w-2.5 h-2.5 rounded bg-primary" />
-                  {t('step2.legend.selected', 'Sélectionné')}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block w-2.5 h-2.5 rounded bg-bg-secondary border border-border-light" />
-                  {t('step2.legend.taken', 'Pris')}
-                </span>
-              </div>
-            )}
           </div>
 
           <NavButtons
@@ -696,7 +570,7 @@ function StepDateTime({
 }
 
 // ============================================================================
-// STEP 3 — Coordonnées patient
+// STEP 3 — Coordonnées
 // ============================================================================
 
 function StepContact({
@@ -720,8 +594,16 @@ function StepContact({
       <Card className="mt-5">
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label={`${t('firstName')} *`} value={booking.firstName} onChange={(v) => onChange({ ...booking, firstName: v })} />
-            <Field label={`${t('lastName')} *`} value={booking.lastName} onChange={(v) => onChange({ ...booking, lastName: v })} />
+            <Field
+              label={`${t('firstName')} *`}
+              value={booking.firstName}
+              onChange={(v) => onChange({ ...booking, firstName: v })}
+            />
+            <Field
+              label={`${t('lastName')} *`}
+              value={booking.lastName}
+              onChange={(v) => onChange({ ...booking, lastName: v })}
+            />
           </div>
           <Field
             label={`${t('phone')} *`}
@@ -731,8 +613,18 @@ function StepContact({
             onChange={(v) => onChange({ ...booking, phone: v })}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label={t('emailOptional')} type="email" value={booking.email} onChange={(v) => onChange({ ...booking, email: v })} />
-            <Field label={t('age')} type="number" value={booking.age} onChange={(v) => onChange({ ...booking, age: v })} />
+            <Field
+              label={t('emailOptional')}
+              type="email"
+              value={booking.email}
+              onChange={(v) => onChange({ ...booking, email: v })}
+            />
+            <Field
+              label={t('age')}
+              type="number"
+              value={booking.age}
+              onChange={(v) => onChange({ ...booking, age: v })}
+            />
           </div>
           <div>
             <Label>{t('howDidYouKnow')}</Label>
@@ -796,28 +688,36 @@ function StepConfirm({
     <section>
       <SectionHeading
         title={t('step4.heading', 'Récapitulatif')}
-        subtitle={t('step4.subtitle', "Vérifiez les informations avant de confirmer.")}
+        subtitle={t('step4.subtitle', 'Vérifiez les informations avant de confirmer.')}
       />
 
       <Card className="mt-5">
         <CardContent className="space-y-5">
-          <div className="rounded-xl border border-primary-light bg-gradient-to-br from-primary-lightest to-white p-5 space-y-3">
-            <SummaryRow label={t('service')} value={booking.service ? t(`services.${booking.service}`) : ''} />
-            <SummaryRow label={t('type')} value={booking.visitType === 'FIRST' ? t('firstSession') : t('followup')} />
+          <div className="rounded-xl border border-primary-light bg-gradient-to-br from-primary-lightest to-white p-4 sm:p-5 space-y-2.5">
+            <SummaryRow
+              label={t('service')}
+              value={booking.service ? t(`services.${booking.service}`) : ''}
+            />
+            <SummaryRow
+              label={t('type')}
+              value={booking.visitType === 'FIRST' ? t('firstSession') : t('followup')}
+            />
             <SummaryRow label={t('dateSummary')} value={dateStr} mono />
-            <SummaryRow label={t('patientSummary')} value={`${booking.firstName} ${booking.lastName}`} />
+            <SummaryRow
+              label={t('patientSummary')}
+              value={`${booking.firstName} ${booking.lastName}`}
+            />
             <SummaryRow label={t('phoneSummary')} value={booking.phone} mono />
             {booking.email && <SummaryRow label="Email" value={booking.email} mono />}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <ConsentCheckbox
               checked={booking.consents.dataProtection}
               onChange={(v) =>
                 onChange({ ...booking, consents: { ...booking.consents, dataProtection: v } })
               }
               label={t('consent1')}
-              required
             />
             <ConsentCheckbox
               checked={booking.consents.nonMedical}
@@ -825,7 +725,6 @@ function StepConfirm({
                 onChange({ ...booking, consents: { ...booking.consents, nonMedical: v } })
               }
               label={t('consent2')}
-              required
             />
           </div>
 
@@ -843,11 +742,9 @@ function StepConfirm({
               size="lg"
               onClick={onSubmit}
               disabled={
-                submitting ||
-                !booking.consents.dataProtection ||
-                !booking.consents.nonMedical
+                submitting || !booking.consents.dataProtection || !booking.consents.nonMedical
               }
-              className="px-6 shadow-lg shadow-primary/20"
+              className="shadow-md shadow-primary/15"
             >
               {submitting ? t('submitting') : `✓ ${t('confirm')}`}
             </Button>
@@ -862,14 +759,11 @@ function ConsentCheckbox({
   checked,
   onChange,
   label,
-  required,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   label: string;
-  required?: boolean;
 }) {
-  const { t } = useTranslation();
   return (
     <label
       className={`flex gap-3 items-start cursor-pointer p-3 rounded-lg border transition-colors ${
@@ -884,10 +778,7 @@ function ConsentCheckbox({
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />
-      <span className="text-sm text-text">
-        {label}
-        {required && <span className="text-danger ms-1">{t('required')}</span>}
-      </span>
+      <span className="text-sm text-text leading-snug">{label}</span>
     </label>
   );
 }
@@ -905,52 +796,40 @@ function SuccessView({
 }) {
   const { t, i18n } = useTranslation();
   return (
-    <section className="text-center">
-      <Card className="max-w-xl mx-auto overflow-hidden">
-        <CardContent className="text-center py-12 space-y-5 relative">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-secondary/15 blur-3xl" />
-          </div>
-          <div className="relative">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white text-4xl shadow-xl shadow-primary/30">
-              ✓
-            </div>
-          </div>
-          <h2 className="relative text-3xl font-extrabold text-primary tracking-tight">
-            {t('success')}
-          </h2>
-          <p className="relative text-text-secondary max-w-md mx-auto">
-            {t('whatsappNotice')}
+    <Card className="max-w-xl mx-auto overflow-hidden">
+      <CardContent className="text-center py-10 px-5 space-y-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white text-3xl shadow-lg shadow-primary/30">
+          ✓
+        </div>
+        <h2 className="text-2xl font-extrabold text-primary tracking-tight">{t('success')}</h2>
+        <p className="text-text-secondary text-sm">{t('whatsappNotice')}</p>
+        <div className="bg-bg-secondary rounded-xl p-4 inline-block">
+          <p className="text-[10px] text-text-tertiary uppercase tracking-wider font-semibold">
+            {t('confirmationNumber')}
           </p>
-          <div className="relative bg-bg-secondary rounded-2xl p-5 inline-block">
-            <p className="text-[10px] text-text-tertiary uppercase tracking-wider font-semibold">
-              {t('confirmationNumber')}
-            </p>
-            <p className="text-2xl font-mono font-extrabold text-primary-dark mt-1" data-numeric>
-              {confirmation.confirmationNumber}
-            </p>
-          </div>
-          <div className="relative bg-primary-lightest border border-primary-light rounded-xl p-4 max-w-md mx-auto">
-            <div className="text-[10px] text-primary-dark uppercase tracking-wider font-semibold">
-              {t('appointmentLabel').replace(':', '')}
-            </div>
-            <div className="text-lg font-bold text-text mt-1">
-              {new Date(booking.slotIso).toLocaleString(i18n.language, {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </div>
-          </div>
-          <p className="relative text-sm text-text-secondary pt-2" data-numeric>
-            📍 {t('centerAddress')}
+          <p className="text-2xl font-mono font-extrabold text-primary-dark mt-1" data-numeric>
+            {confirmation.confirmationNumber}
           </p>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+        <div className="bg-primary-lightest border border-primary-light rounded-lg p-3 max-w-xs mx-auto">
+          <div className="text-[10px] text-primary-dark uppercase tracking-wider font-semibold">
+            {t('appointmentLabel').replace(':', '')}
+          </div>
+          <div className="text-sm font-bold text-text mt-1">
+            {new Date(booking.slotIso).toLocaleString(i18n.language, {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </div>
+        </div>
+        <p className="text-xs text-text-secondary pt-1" data-numeric>
+          📍 {t('centerAddress')}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -960,7 +839,7 @@ function SuccessView({
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="text-center sm:text-start">
+    <div>
       <h2 className="text-xl sm:text-2xl font-bold text-text tracking-tight">{title}</h2>
       {subtitle && <p className="text-sm text-text-secondary mt-1">{subtitle}</p>}
     </div>
@@ -991,7 +870,12 @@ function Field({
   return (
     <div>
       <Label>{label}</Label>
-      <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      <Input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
     </div>
   );
 }
@@ -1031,61 +915,18 @@ function NavButtons({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-2">
+    <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-1">
       <Button variant="outline" size="lg" onClick={onBack}>
         ← {t('back')}
       </Button>
-      <Button size="lg" disabled={nextDisabled} onClick={onNext} className="shadow-md shadow-primary/10">
+      <Button
+        size="lg"
+        disabled={nextDisabled}
+        onClick={onNext}
+        className="shadow-md shadow-primary/15"
+      >
         {nextLabel} →
       </Button>
     </div>
-  );
-}
-
-// ============================================================================
-// FOOTER
-// ============================================================================
-
-function Footer() {
-  const { t } = useTranslation();
-  return (
-    <footer className="mt-10 border-t border-border-light bg-surface">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-        <div>
-          <div className="text-[10px] tracking-[0.28em] font-bold text-text-tertiary uppercase mb-1.5">
-            Reset Yourself
-          </div>
-          <div className="text-text font-medium">Branch Cairo East CMC</div>
-          <div className="text-text-secondary text-xs mt-1">N Teseen, New Cairo 1, 11835</div>
-        </div>
-        <div>
-          <div className="text-[10px] tracking-[0.28em] font-bold text-text-tertiary uppercase mb-1.5">
-            {t('footer.contact', 'Contact')}
-          </div>
-          <a
-            href="https://wa.me/201234567890"
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary hover:text-primary-dark font-medium inline-flex items-center gap-1"
-          >
-            💬 WhatsApp
-          </a>
-        </div>
-        <div>
-          <div className="text-[10px] tracking-[0.28em] font-bold text-text-tertiary uppercase mb-1.5">
-            {t('footer.legal', 'Mentions')}
-          </div>
-          <div className="text-text-secondary text-xs">
-            {t(
-              'footer.legalText',
-              'Centre non-médical · Conforme décret 188/2020 (ETA) · Loi 151/2020 (données)',
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="border-t border-border-light text-center text-xs text-text-tertiary py-3">
-        © {new Date().getFullYear()} Reset Yourself — Branch Cairo East CMC
-      </div>
-    </footer>
   );
 }
