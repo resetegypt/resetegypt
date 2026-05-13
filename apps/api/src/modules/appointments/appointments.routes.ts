@@ -69,10 +69,17 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       where,
       orderBy: { scheduledAt: 'asc' },
       include: {
-        patient: { select: { id: true, firstName: true, lastName: true, phone: true } },
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            medicalRecord: { select: { id: true } },
+          },
+        },
         practitioner: { select: { firstName: true, lastName: true } },
         payment: { select: { id: true, total: true, invoiceNumber: true } },
-        medicalRecord: { select: { id: true } },
       },
     });
 
@@ -88,7 +95,7 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
         practitionerName: `Dr. ${a.practitioner.firstName}`,
         status: a.status,
         price: Number(a.price),
-        hasMedicalRecord: !!a.medicalRecord,
+        hasMedicalRecord: !!a.patient.medicalRecord,
         payment: a.payment
           ? {
               id: a.payment.id,
@@ -146,9 +153,8 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     const a = await app.prisma.appointment.findUnique({
       where: { id },
       include: {
-        patient: true,
+        patient: { include: { medicalRecord: true } },
         practitioner: { select: { firstName: true, lastName: true } },
-        medicalRecord: true,
         payment: true,
       },
     });

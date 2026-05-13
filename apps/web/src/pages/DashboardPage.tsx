@@ -429,7 +429,7 @@ function AppointmentRowItem({
               {t('dashboard.actions.intake', "Fiche d'accueil")}
             </Link>
             <Link
-              to={`/patients/${a.patientId}/clinical?appointmentId=${a.id}`}
+              to={`/patients/${a.patientId}/clinical`}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-white hover:bg-primary bg-primary-lightest px-2 py-1 rounded-md transition-all"
               title={t('dashboard.actions.viewClinical', 'Ouvrir la fiche clinique (anamnèse, scores, examen)')}
             >

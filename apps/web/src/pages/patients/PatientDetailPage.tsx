@@ -42,6 +42,15 @@ interface PatientDetail {
     preferredLanguage: string;
     createdAt: string;
     preferredPractitioner: { firstName: string; lastName: string } | null;
+    medicalRecord: {
+      id: string;
+      finalizedAt: string | null;
+      stressScore: number | null;
+      anxietyScore: number | null;
+      cravingScore: number | null;
+      sleepScore: number | null;
+      motivationScore: number | null;
+    } | null;
     appointments: Array<{
       id: string;
       scheduledAt: string;
@@ -51,7 +60,6 @@ interface PatientDetail {
       price: string | number;
       practitioner: { firstName: string };
       payment: { invoiceNumber: string; total: string | number } | null;
-      medicalRecord: { id: string } | null;
     }>;
   };
   stats: { sessionsCount: number; totalPaid: number };
@@ -220,46 +228,16 @@ export function PatientDetailPage() {
             onClick={() => switchTab('clinique')}
             Icon={Stethoscope}
             label={t('patients.detail.tab.clinical', 'Fiche clinique')}
-            badge={patient.appointments.filter((a) => a.medicalRecord).length || undefined}
+            badge={patient.medicalRecord ? 1 : undefined}
           />
         </div>
 
         {/* === ONGLET FICHE CLINIQUE === */}
         {tab === 'clinique' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>🩺 {t('patients.detail.clinical.title', 'Fiches cliniques par séance')}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {patient.appointments.filter((a) => a.status !== 'CANCELLED').length === 0 ? (
-                <div className="px-5 py-12 text-center">
-                  <Stethoscope className="w-10 h-10 text-text-tertiary mx-auto mb-3" />
-                  <p className="text-sm font-semibold">
-                    {t('patients.detail.clinical.empty', 'Aucune séance pour ce patient')}
-                  </p>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {t(
-                      'patients.detail.clinical.emptyHint',
-                      'Les fiches cliniques sont créées séance par séance.',
-                    )}
-                  </p>
-                </div>
-              ) : (
-                <ul className="divide-y divide-border-light">
-                  {patient.appointments
-                    .filter((a) => a.status !== 'CANCELLED')
-                    .map((a) => (
-                      <ClinicalRow
-                        key={a.id}
-                        appointment={a}
-                        patientId={patient.id}
-                        isPractitioner={isPractitioner}
-                      />
-                    ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+          <ClinicalTabContent
+            patient={patient}
+            isPractitioner={isPractitioner}
+          />
         )}
 
         {/* === ONGLET FICHE D'ACCUEIL — toutes les infos saisies à l'admission === */}
@@ -459,15 +437,6 @@ export function PatientDetailPage() {
                       </td>
                     )}
                     <td className="px-4 py-2 text-end space-x-1">
-                      {!a.medicalRecord && a.status !== 'CANCELLED' && (
-                        <Link
-                          to={`/patients/${patient.id}/clinical?appointmentId=${a.id}`}
-                        >
-                          <Button size="sm" variant="outline">
-                            {t('patients.detail.clinicalForm')}
-                          </Button>
-                        </Link>
-                      )}
                       {!isPractitioner && !a.payment && a.status !== 'CANCELLED' && (
                         <Link to={`/payment/${a.id}`}>
                           <Button size="sm" variant="outline">
@@ -532,67 +501,138 @@ function TabButton({
   );
 }
 
-function ClinicalRow({
-  appointment,
-  patientId,
+function ClinicalTabContent({
+  patient,
   isPractitioner,
 }: {
-  appointment: PatientDetail['patient']['appointments'][number];
-  patientId: string;
+  patient: PatientDetail['patient'];
   isPractitioner: boolean;
 }) {
   const { t, i18n } = useTranslation();
-  const a = appointment;
-  const date = new Date(a.scheduledAt);
-  const hasRecord = !!a.medicalRecord;
+  const mr = patient.medicalRecord;
+
+  if (!mr) {
+    return (
+      <Card>
+        <CardContent className="text-center py-16">
+          <div className="w-20 h-20 rounded-2xl bg-primary-lightest text-primary-dark mx-auto flex items-center justify-center mb-4">
+            <Stethoscope className="w-10 h-10" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">
+            {t('patients.detail.clinical.noneTitle', "Aucune fiche clinique pour ce patient")}
+          </h3>
+          <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
+            {isPractitioner
+              ? t(
+                  'patients.detail.clinical.noneHintDoctor',
+                  "Créez la fiche clinique en posant les questions nécessaires au patient pour comprendre son addiction en détail.",
+                )
+              : t(
+                  'patients.detail.clinical.noneHintOther',
+                  "La fiche clinique sera créée par le médecin lors de la première consultation.",
+                )}
+          </p>
+          {isPractitioner && (
+            <Link to={`/patients/${patient.id}/clinical`}>
+              <Button>
+                <Plus className="w-4 h-4 me-1.5" />
+                {t('patients.detail.clinical.createFull', "Créer la fiche clinique")}
+              </Button>
+            </Link>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const isFinalized = !!mr.finalizedAt;
+  const scoresFilled = [
+    mr.stressScore,
+    mr.anxietyScore,
+    mr.cravingScore,
+    mr.sleepScore,
+    mr.motivationScore,
+  ].filter((s) => s !== null && s !== undefined).length;
+
   return (
-    <li className="flex items-center gap-4 px-5 py-3.5 hover:bg-bg-secondary/30 transition-colors">
-      <div className="flex flex-col items-end w-24 shrink-0 text-text-secondary">
-        <span className="text-xs font-semibold text-text" data-numeric>
-          {date.toLocaleDateString(i18n.language, {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          })}
-        </span>
-        <span className="text-[11px] text-text-tertiary" data-numeric>
-          {date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
-        </span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold flex items-center gap-2">
-          <span>{ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)}</span>
-          <span className="text-text-tertiary">·</span>
-          <span className="text-text-secondary font-medium">
-            {t(`dashboard.visitType.${a.visitType}`)}
-          </span>
+    <Card>
+      <div className="px-5 py-4 border-b border-border-light flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <Stethoscope className="w-5 h-5 text-primary" />
+          <div>
+            <h3 className="text-sm font-semibold">
+              {t('patients.detail.clinical.recordTitle', 'Fiche clinique du patient')}
+            </h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              {isFinalized
+                ? `${t('clinical.finalizedOn', 'Terminée le')} ${new Date(mr.finalizedAt!).toLocaleDateString(i18n.language)}`
+                : t('patients.detail.clinical.draftStatus', 'Brouillon en cours')}
+            </p>
+          </div>
         </div>
-        <div className="text-xs text-text-secondary mt-0.5">Dr. {a.practitioner.firstName}</div>
-      </div>
-      <Badge variant={statusVariant(a.status)}>{t(`appointmentStatus.${a.status}`)}</Badge>
-      <div className="min-w-[140px] flex justify-end">
-        {hasRecord ? (
-          <Link to={`/patients/${patientId}/clinical?appointmentId=${a.id}`}>
-            <Button size="sm" variant="outline">
+        <div className="flex items-center gap-2">
+          <Badge variant={isFinalized ? 'success' : 'warning'}>
+            {isFinalized
+              ? t('clinical.finalized', 'Terminée')
+              : t('patients.detail.clinical.inProgress', 'En cours')}
+          </Badge>
+          <Link to={`/patients/${patient.id}/clinical`}>
+            <Button size="sm">
               <FileText className="w-3.5 h-3.5 me-1.5" />
-              {t('patients.detail.clinical.view', 'Voir')}
+              {isPractitioner
+                ? t('patients.detail.clinical.openEdit', 'Ouvrir / Modifier')
+                : t('patients.detail.clinical.view', 'Voir')}
               <ChevronRight className="w-3.5 h-3.5 ms-0.5" />
             </Button>
           </Link>
-        ) : isPractitioner ? (
-          <Link to={`/patients/${patientId}/clinical?appointmentId=${a.id}`}>
-            <Button size="sm">
-              <Plus className="w-3.5 h-3.5 me-1.5" />
-              {t('patients.detail.clinical.create', 'Créer')}
-            </Button>
-          </Link>
-        ) : (
-          <span className="text-xs text-text-tertiary italic">
-            {t('patients.detail.clinical.notYet', 'Pas encore créée')}
-          </span>
-        )}
+        </div>
       </div>
-    </li>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <SummaryStat label="Stress" value={mr.stressScore} max={10} tone={mr.stressScore && mr.stressScore >= 7 ? 'danger' : 'default'} />
+          <SummaryStat label="Anxiété" value={mr.anxietyScore} max={10} tone={mr.anxietyScore && mr.anxietyScore >= 7 ? 'danger' : 'default'} />
+          <SummaryStat label="Envies" value={mr.cravingScore} max={10} tone={mr.cravingScore && mr.cravingScore >= 7 ? 'warning' : 'default'} />
+          <SummaryStat label="Sommeil" value={mr.sleepScore} max={10} tone={mr.sleepScore && mr.sleepScore <= 3 ? 'warning' : 'default'} />
+          <SummaryStat label="Motivation" value={mr.motivationScore} max={10} tone={mr.motivationScore && mr.motivationScore >= 7 ? 'success' : 'default'} />
+        </div>
+        {scoresFilled === 0 && (
+          <p className="text-xs text-text-tertiary italic mt-3 text-center">
+            {t(
+              'patients.detail.clinical.noScoresYet',
+              "Les évaluations 0-10 n'ont pas encore été renseignées.",
+            )}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function SummaryStat({
+  label,
+  value,
+  max,
+  tone = 'default',
+}: {
+  label: string;
+  value: number | null | undefined;
+  max: number;
+  tone?: 'default' | 'success' | 'warning' | 'danger';
+}) {
+  const colors = {
+    default: 'text-text',
+    success: 'text-primary-dark',
+    warning: 'text-warning-dark',
+    danger: 'text-danger-dark',
+  };
+  const isSet = value !== null && value !== undefined;
+  return (
+    <div className="rounded-lg bg-bg-secondary/40 border border-border-light px-3 py-2.5">
+      <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">{label}</div>
+      <div className={`mt-0.5 font-bold tabular-nums ${isSet ? `text-xl ${colors[tone]}` : 'text-base text-text-tertiary italic'}`}>
+        {isSet ? `${value}/${max}` : '—'}
+      </div>
+    </div>
   );
 }
 

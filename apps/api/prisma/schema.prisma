@@ -32,12 +32,14 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  appointments        Appointment[]   @relation("PractitionerAppointments")
-  createdPatients     Patient[]       @relation("CreatedBy")
-  preferredByPatients Patient[]       @relation("PreferredPractitioner")
-  payments            Payment[]       @relation("PaymentCreatedBy")
-  auditLogs           AuditLog[]
-  systemSettings      SystemSetting[]
+  appointments         Appointment[]   @relation("PractitionerAppointments")
+  createdPatients      Patient[]       @relation("CreatedBy")
+  preferredByPatients  Patient[]       @relation("PreferredPractitioner")
+  payments             Payment[]       @relation("PaymentCreatedBy")
+  auditLogs            AuditLog[]
+  systemSettings       SystemSetting[]
+  createdMedicalRecords  MedicalRecord[] @relation("MedicalRecordCreatedBy")
+  finalizedMedicalRecords MedicalRecord[] @relation("MedicalRecordFinalizedBy")
 }
 
 enum Role {
@@ -75,10 +77,10 @@ model Patient {
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
-  appointments   Appointment[]
-  medicalRecords MedicalRecord[]
-  payments       Payment[]
-  messages       Message[]
+  appointments  Appointment[]
+  medicalRecord MedicalRecord?
+  payments      Payment[]
+  messages      Message[]
 
   @@index([phone])
   @@index([lastName, firstName])
@@ -120,7 +122,6 @@ model Appointment {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
-  medicalRecord MedicalRecord?
   payment       Payment?
 
   @@index([scheduledAt])
@@ -143,48 +144,87 @@ enum AppointmentStatus {
   CANCELLED
 }
 
+// Fiche clinique : UNE seule par patient (vs une par RDV avant).
+// Créée par le médecin lors de la première séance, éditable en suivi.
+// Quand le médecin clique "Terminer", finalizedAt est set — la fiche
+// reste éditable (en mode "suivi") mais la version finale est marquée.
 model MedicalRecord {
-  id            String      @id @default(uuid())
-  appointmentId String      @unique
-  appointment   Appointment @relation(fields: [appointmentId], references: [id])
-  patientId     String
-  patient       Patient     @relation(fields: [patientId], references: [id])
+  id        String  @id @default(uuid())
+  patientId String  @unique
+  patient   Patient @relation(fields: [patientId], references: [id])
 
-  yearsOfAddiction Int?
-  dailyQuantity    String?
-  previousMethods  String[]
-  longestQuit      String?
+  // === Addiction en détail ===
+  yearsOfAddiction      Int?
+  startedAt             DateTime?
+  dailyQuantity         String?
+  estimatedCostPerMonth Decimal?    @db.Decimal(10, 2)
 
-  triggers           String[]
-  consumptionMoments String?
+  // === Déclencheurs & contexte ===
+  triggers           String[]    // chips: stress, social, ennui, anxiete, etc.
+  consumptionMoments String?     // textarea
+  socialContext      String?     // entourage, conjoint, amis qui consomment
+  workContext        String?     // contexte pro
 
-  stressScore     Int?
-  anxietyScore    Int?
-  cravingScore    Int?
-  sleepScore      Int?
-  motivationScore Int?
+  // === Historique tentatives ===
+  previousAttempts     Int?       // nb de tentatives
+  longestQuit          String?    // plus longue période d'arrêt
+  relapseReasons       String?    // qu'est-ce qui a déclenché la rechute
+  methodsTried         String[]   // patchs, gommes, hypnose, etc.
 
-  contraindications String[]
-  medications       String?
-  allergies         String?
+  // === Évaluations psycho-comportementales (0-10) ===
+  stressScore       Int?
+  anxietyScore      Int?
+  cravingScore      Int?
+  sleepScore        Int?
+  motivationScore   Int?
+  selfEsteemScore   Int?
 
-  weight Float?
-  height Float?
-  bmi    Float?
-  spo2   Int?
+  // === Examen clinique ===
+  weight        Float?
+  height        Float?
+  bmi           Float?
+  bloodPressure String?
+  heartRate     Int?
+  spo2          Int?
 
-  fagerstromScore    Int?
-  auditScore         Int?
-  duditScore         Int?
-  yfasScore          Int?
-  hadAnxietyScore    Int?
+  // === Antécédents ===
+  medicalHistory     String?
+  surgicalHistory    String?
+  familyHistory      String?
+  currentMedications String?
+  allergies          String?
+
+  // === Contre-indications laser ===
+  contraindications     String[]
+  contraindicationNotes String?
+
+  // === Scores standardisés ===
+  fagerstromScore    Int?     // Tabac
+  auditScore         Int?     // Alcool
+  duditScore         Int?     // Drogues
+  yfasScore          Int?     // Sucre
+  hadAnxietyScore    Int?     // Hospital Anxiety Depression scale
   hadDepressionScore Int?
 
-  auricularPoints String?
-  laserDuration   Int?
-  nextSession     String?
+  // === Protocole thérapeutique ===
+  auricularPoints   String?
+  laserDuration     Int?
+  sessionFrequency  String?
+  estimatedSessions Int?
 
+  // === Objectifs & plan ===
+  patientGoals  String?
+  treatmentPlan String?
+
+  // === Notes privées (visibles seulement par les médecins) ===
   privateNotes String?
+
+  // === Workflow ===
+  createdById   String?
+  createdBy     User?     @relation("MedicalRecordCreatedBy", fields: [createdById], references: [id])
+  finalizedAt   DateTime? // quand le médecin clique "Terminer"
+  finalizedById String?
+  finalizedBy   User?     @relation("MedicalRecordFinalizedBy", fields: [finalizedById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

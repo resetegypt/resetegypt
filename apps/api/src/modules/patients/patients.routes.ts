@@ -113,7 +113,17 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
           include: {
             practitioner: { select: { firstName: true, lastName: true } },
             payment: { select: { total: true, paymentMethod: true, invoiceNumber: true } },
-            medicalRecord: { select: { id: true } },
+          },
+        },
+        medicalRecord: {
+          select: {
+            id: true,
+            finalizedAt: true,
+            stressScore: true,
+            anxietyScore: true,
+            cravingScore: true,
+            sleepScore: true,
+            motivationScore: true,
           },
         },
       },
@@ -125,26 +135,15 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       _sum: { total: true },
     });
 
-    const records = await app.prisma.medicalRecord.findMany({
-      where: { patientId: id },
-      orderBy: { createdAt: 'asc' },
-      select: {
-        createdAt: true,
-        stressScore: true,
-        anxietyScore: true,
-        cravingScore: true,
-        sleepScore: true,
-        motivationScore: true,
-      },
-    });
-
+    // Pour la page patient : on renvoie aussi le medicalRecord (s'il existe)
+    // pour l'onglet "Fiche clinique".
     return {
       patient,
       stats: {
         sessionsCount: patient.appointments.length,
         totalPaid: Number(totalPaid._sum.total ?? 0),
       },
-      evolution: records,
+      evolution: patient.medicalRecord ? [patient.medicalRecord] : [],
     };
   });
 
