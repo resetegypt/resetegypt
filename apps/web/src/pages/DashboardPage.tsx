@@ -21,6 +21,8 @@ import {
   Wallet,
   FileText,
   Phone,
+  Stethoscope,
+  UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -386,13 +388,31 @@ function AppointmentRowItem({
           {initials}
         </div>
         <div className="min-w-0 flex-1">
-          <Link
-            to={`/patients/${a.patientId}`}
-            className="text-sm font-semibold hover:text-primary truncate block"
-          >
-            {a.patientName}
-          </Link>
-          <p className="text-xs text-text-secondary truncate flex items-center gap-1.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              to={`/patients/${a.patientId}`}
+              className="text-sm font-semibold hover:text-primary truncate"
+            >
+              {a.patientName}
+            </Link>
+            <Link
+              to={`/patients/${a.patientId}/clinical?appointmentId=${a.id}`}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary hover:text-primary hover:bg-primary-lightest px-1.5 py-0.5 rounded-md border border-border hover:border-primary/40 transition-all"
+              title={t('dashboard.actions.viewIntake', "Ouvrir la fiche d'accueil")}
+            >
+              <Stethoscope className="w-3 h-3" />
+              {t('dashboard.actions.intake', "Fiche d'accueil")}
+            </Link>
+            <Link
+              to={`/patients/${a.patientId}`}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary hover:text-primary hover:bg-primary-lightest px-1.5 py-0.5 rounded-md border border-border hover:border-primary/40 transition-all"
+              title={t('dashboard.actions.viewPatient', 'Ouvrir la fiche patient')}
+            >
+              <UserCircle2 className="w-3 h-3" />
+              {t('dashboard.actions.patient', 'Fiche patient')}
+            </Link>
+          </div>
+          <p className="text-xs text-text-secondary truncate flex items-center gap-1.5 mt-0.5">
             <span>{t(`addiction.${a.service}`)}</span>
             <span className="text-text-tertiary">·</span>
             <span>{t(`dashboard.visitType.${a.visitType}`)}</span>
