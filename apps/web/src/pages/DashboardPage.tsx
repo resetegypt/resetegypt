@@ -422,19 +422,19 @@ function AppointmentRowItem({
             </Link>
             <Link
               to={`/patients/${a.patientId}`}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary hover:text-primary hover:bg-primary-lightest px-1.5 py-0.5 rounded-md border border-border hover:border-primary/40 transition-all"
-              title={t('dashboard.actions.viewIntake', "Ouvrir la fiche d'accueil (admission, infos perso)")}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-info-dark hover:text-white hover:bg-info bg-info-light/60 hover:bg-info px-2 py-1 rounded-md transition-all"
+              title={t('dashboard.actions.viewIntake', "Voir la fiche d'accueil (admission, infos perso, consentements)")}
             >
-              <ClipboardList className="w-3 h-3" />
+              <ClipboardList className="w-3.5 h-3.5" />
               {t('dashboard.actions.intake', "Fiche d'accueil")}
             </Link>
             <Link
               to={`/patients/${a.patientId}/clinical?appointmentId=${a.id}`}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary hover:text-primary hover:bg-primary-lightest px-1.5 py-0.5 rounded-md border border-border hover:border-primary/40 transition-all"
-              title={t('dashboard.actions.viewPatient', 'Ouvrir la fiche patient (anamnèse, scores, examen)')}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-white hover:bg-primary bg-primary-lightest px-2 py-1 rounded-md transition-all"
+              title={t('dashboard.actions.viewClinical', 'Ouvrir la fiche clinique (anamnèse, scores, examen)')}
             >
-              <Stethoscope className="w-3 h-3" />
-              {t('dashboard.actions.patient', 'Fiche patient')}
+              <Stethoscope className="w-3.5 h-3.5" />
+              {t('dashboard.actions.clinical', 'Fiche clinique')}
             </Link>
           </div>
           <p className="text-xs text-text-secondary truncate flex items-center gap-1.5 mt-0.5">
