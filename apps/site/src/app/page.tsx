@@ -172,12 +172,12 @@ function VisitCenterSection() {
             </div>
           </div>
 
-          {/* Photo unique du centre — plus impactante qu'un duo asymétrique */}
+          {/* Photo d'auriculothérapie — représentative de la pratique RESET */}
           <div className="relative">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden ring-2 ring-white/30 shadow-2xl">
               <Image
-                src="/photos/hero-center.png"
-                alt="Centre RESET — Branch Cairo East CMC"
+                src="/photos/about-method.png"
+                alt="Séance d'auriculothérapie au centre RESET"
                 width={600}
                 height={750}
                 className="object-cover w-full h-full"
