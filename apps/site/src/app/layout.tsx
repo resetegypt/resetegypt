@@ -53,10 +53,8 @@ export const metadata: Metadata = {
     description:
       'Auriculothérapie laser non-invasive — sevrage tabac, drogues, alcool, sucre, stress.',
   },
-  icons: {
-    icon: '/logo-icon.svg',
-    apple: '/logo-icon.svg',
-  },
+  // Pas besoin d'override : Next.js App Router prend automatiquement
+  // icon.png + apple-icon.png placés à côté de layout.tsx.
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function SmokingPage() {
   return (
     <ServicePage
-      heroPhoto="/photos/service-smoking.webp"
+      heroPhoto="/photos/service-smoking.jpeg"
       Icon={Cigarette}
       eyebrow="Sevrage tabagique"
       title="Arrêtez de fumer en une séance."
