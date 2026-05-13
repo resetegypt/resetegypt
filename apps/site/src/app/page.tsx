@@ -696,21 +696,21 @@ const TESTIMONIALS = [
   {
     name: 'Sarah J.',
     role: 'Cliente — anxiété',
-    photo: '/photos/testimonial-1.jpeg',
+    rating: 5,
     quote:
       "Je suis venue chez RESET pour gérer mon anxiété. La séance de photobiomodulation était incroyablement relaxante — sans douleur et silencieuse. Elle m'a aidée à retrouver mon focus et a significativement amélioré la qualité de mon sommeil.",
   },
   {
     name: 'Ahmed M.',
     role: 'Client — sevrage tabac',
-    photo: '/photos/testimonial-2.jpeg',
+    rating: 5,
     quote:
       "J'étais sceptique au début, mais après une seule séance chez RESET, mon envie de cigarette a littéralement disparu. Même dans les bouchons stressants du Caire, je n'ai pas ressenti le besoin de fumer. 3 mois après, je n'ai jamais été mieux.",
   },
   {
     name: 'Khaled S.',
     role: 'Client — sevrage tabac',
-    photo: '/photos/testimonial-3.jpeg',
+    rating: 5,
     quote:
       "J'avais tout essayé — patchs, gommes, volonté pure — rien ne fonctionnait jusqu'à RESET. L'équipe est professionnelle et le centre top. Je suis sorti de ma séance avec le sentiment d'être un non-fumeur. Aucun symptôme de sevrage, aucune irritabilité.",
   },
@@ -730,25 +730,34 @@ function TestimonialsSection() {
             key={idx}
             className="relative rounded-2xl bg-surface border border-border-light p-7 hover:shadow-lg transition-shadow"
           >
-            <div className="text-5xl text-primary/15 font-serif leading-none mb-2 absolute top-4 right-5">
-              "
+            {/* Étoiles de notation en haut */}
+            <div className="flex items-center gap-0.5 mb-4">
+              {Array.from({ length: t.rating }, (_, i) => (
+                <svg
+                  key={i}
+                  className="w-4 h-4 text-amber-400 fill-current"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
+                </svg>
+              ))}
             </div>
-            <blockquote className="text-sm text-text-secondary leading-relaxed relative">
+            <blockquote className="text-sm text-text-secondary leading-relaxed">
               {t.quote}
             </blockquote>
             <figcaption className="mt-5 pt-5 border-t border-border-light flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-primary-lightest">
-                <Image
-                  src={t.photo}
-                  alt={t.name}
-                  width={44}
-                  height={44}
-                  className="object-cover w-full h-full"
-                />
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center text-sm font-bold shrink-0 shadow-md shadow-primary/15">
+                {t.name.split(' ').map((p) => p.charAt(0)).join('').toUpperCase()}
               </div>
               <div>
                 <div className="text-sm font-bold text-text">{t.name}</div>
                 <div className="text-xs text-text-tertiary">{t.role}</div>
+              </div>
+              {/* Badge "Vérifié" */}
+              <div className="ms-auto inline-flex items-center gap-1 text-[10px] font-semibold text-primary-dark bg-primary-lightest px-2 py-1 rounded-full">
+                <CheckCircle2 className="w-3 h-3" />
+                Vérifié
               </div>
             </figcaption>
           </figure>
