@@ -38,12 +38,104 @@ export default function HomePage() {
       <Hero />
       <BrandRibbon />
       <ServicesSection />
+      <VisitCenterSection />
       <MethodSection />
       <ProcessSection />
       <TestimonialsSection />
       <FaqSection />
       <FinalCta />
     </>
+  );
+}
+
+// ============================================================================
+// Visit Our Center (recrée la section WP avec IMG_8661 en bg + 2 photos)
+// ============================================================================
+
+function VisitCenterSection() {
+  return (
+    <section className="px-4 sm:px-6 lg:px-8 my-16 lg:my-24">
+      <div className="max-w-7xl mx-auto rounded-3xl overflow-hidden relative">
+        {/* BG */}
+        <Image
+          src="/photos/center-bg.jpeg"
+          alt=""
+          fill
+          className="object-cover -z-10"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/85 via-primary/75 to-primary/30 -z-10" />
+
+        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 p-8 sm:p-12 lg:p-16">
+          {/* Texte */}
+          <div>
+            <div className="text-[11px] tracking-[0.32em] font-bold text-secondary uppercase mb-4">
+              Visitez RESET
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              Centre RESET<br />Branch Cairo East CMC
+            </h2>
+            <p className="mt-5 text-white/85 leading-relaxed max-w-md">
+              Technologie certifiée, accompagnement expert. Nous sommes dédiés à vous offrir la
+              percée dont vous avez besoin pour reprendre le contrôle de votre vie.
+            </p>
+            <div className="mt-6 space-y-2 text-sm text-white/85">
+              <div className="flex items-start gap-2">
+                <span className="text-secondary mt-0.5">📍</span>
+                <span>N Teseen, New Cairo 1<br />Le Caire 11835, Égypte</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-secondary">🕐</span>
+                <span>11h00 – 22h00 · 7 jours sur 7</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-secondary">📞</span>
+                <span className="font-mono">+811.2311.785 · +811.2311.657</span>
+              </div>
+            </div>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <Link
+                href="https://book.reset-egypt.com"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] bg-secondary text-primary rounded-md hover:bg-white transition-all"
+              >
+                Réserver une séance
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white border border-white/40 rounded-md hover:bg-white/10 transition-all"
+              >
+                Nous contacter
+              </Link>
+            </div>
+          </div>
+
+          {/* 2 photos juxtaposées */}
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl overflow-hidden aspect-[3/4] ring-2 ring-white/30 shadow-xl translate-y-4">
+                <Image
+                  src="/photos/about-1.png"
+                  alt="Centre RESET — vue intérieure"
+                  width={300}
+                  height={400}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="rounded-2xl overflow-hidden aspect-[3/4] ring-2 ring-white/30 shadow-xl -translate-y-4">
+                <Image
+                  src="/photos/method-hero.png"
+                  alt="Méthode RESET — auriculothérapie laser"
+                  width={300}
+                  height={400}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -351,18 +443,21 @@ const PILLARS = [
     title: 'Régulation du stress',
     description:
       'Laser de photobiomodulation basse intensité pour apaiser naturellement le système nerveux.',
+    gif: '/photos/pillar-1.gif',
   },
   {
     Icon: Zap,
     title: 'Stimulation auriculaire',
     description:
       'Cible précise sur les points neurologiques qui neutralisent les envies physiques.',
+    gif: '/photos/pillar-2.gif',
   },
   {
     Icon: HeartHandshake,
     title: 'Accompagnement personnel',
     description:
       'Un praticien dédié vous guide pendant et après la transition comportementale.',
+    gif: '/photos/pillar-3.gif',
   },
 ];
 
@@ -373,22 +468,82 @@ function MethodSection() {
       title="Un héritage scientifique français"
       subtitle="Dans les années 1950, le Dr. Paul Nogier identifia une cartographie précise de correspondances neurales entre l'oreille externe et le corps. Cette découverte fonde l'auriculothérapie moderne — la base scientifique de notre approche."
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+      {/* Visuel méthode en grand */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-center mb-12">
+        <div className="lg:col-span-2 relative">
+          <div className="aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-xl shadow-primary/15">
+            <Image
+              src="/photos/about-method.png"
+              alt="Méthode RESET"
+              width={471}
+              height={623}
+              className="object-cover w-full h-full"
+            />
+          </div>
+          <div className="absolute -bottom-5 -right-5 lg:-bottom-7 lg:-right-7 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-white shadow-xl text-sm font-semibold">
+            <Sparkles className="w-3.5 h-3.5" />
+            Depuis 1950
+          </div>
+        </div>
+        <div className="lg:col-span-3 space-y-4 text-base text-text-secondary leading-relaxed">
+          <p>
+            RESET combine la <strong className="text-text">précision de l'auriculothérapie française</strong>{' '}
+            avec la <strong className="text-text">photobiomodulation laser</strong> avancée. Notre approche est
+            entièrement non-invasive, sans médicament, et non-médicale.
+          </p>
+          <p>
+            Le Dr. Paul Nogier a établi la base scientifique de l'auriculothérapie moderne en
+            cartographiant les correspondances neuronales de l'oreille externe avec le corps. Une
+            méthode reconnue mondialement pour son efficacité dans la régulation comportementale.
+          </p>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all"
+          >
+            En apprendre plus sur la méthode
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* 3 piliers avec GIFs animés */}
+      <div className="text-center mb-8">
+        <div className="text-[10px] tracking-[0.32em] font-bold text-primary uppercase">
+          Les 3 piliers
+        </div>
+        <h3 className="text-2xl sm:text-3xl font-bold text-text tracking-tight mt-2">
+          Comment ça marche concrètement
+        </h3>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
         {PILLARS.map((p, idx) => (
           <div
             key={idx}
-            className="rounded-2xl bg-surface border border-border-light p-7 hover:border-primary/40 hover:shadow-lg transition-all"
+            className="rounded-2xl bg-surface border border-border-light overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl font-extrabold text-primary/30 tabular-nums leading-none">
-                0{idx + 1}
+            {/* GIF en haut */}
+            <div className="relative aspect-video overflow-hidden bg-bg-secondary">
+              <Image
+                src={p.gif}
+                alt={p.title}
+                width={640}
+                height={360}
+                unoptimized
+                className="object-cover w-full h-full"
+              />
+              <span className="absolute top-3 left-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/95 text-primary text-sm font-extrabold shadow-md">
+                {idx + 1}
               </span>
-              <div className="w-12 h-12 rounded-xl bg-primary-lightest text-primary flex items-center justify-center">
-                <p.Icon className="w-5 h-5" strokeWidth={1.75} />
-              </div>
             </div>
-            <h3 className="text-lg font-bold text-text leading-tight">{p.title}</h3>
-            <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
+            <div className="p-5 lg:p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-lightest text-primary flex items-center justify-center">
+                  <p.Icon className="w-4 h-4" strokeWidth={1.75} />
+                </div>
+              </div>
+              <h3 className="text-base font-bold text-text leading-tight">{p.title}</h3>
+              <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -479,14 +634,26 @@ function ProcessSection() {
         ))}
       </div>
 
-      {/* 4e étape — suivi (sans gif) */}
-      <div className="mt-6 rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light p-6 lg:p-7 flex items-start gap-4 flex-col sm:flex-row">
-        <div className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
-          <HeartHandshake className="w-5 h-5" />
+      {/* 4e étape — suivi avec GIF */}
+      <div className="mt-6 rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light overflow-hidden flex flex-col sm:flex-row">
+        <div className="relative w-full sm:w-1/3 aspect-video sm:aspect-auto sm:min-h-[180px] shrink-0">
+          <Image
+            src="/photos/pillar-4.gif"
+            alt="Suivi long terme"
+            fill
+            unoptimized
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 33vw"
+          />
         </div>
-        <div className="flex-1">
-          <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-1">
-            Étape 04 · Suivi long terme
+        <div className="p-6 lg:p-7 flex-1 flex flex-col justify-center">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
+              <HeartHandshake className="w-5 h-5" />
+            </div>
+            <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase">
+              Étape 04 · Suivi long terme
+            </div>
           </div>
           <h3 className="text-base font-bold text-text">
             Nous restons disponibles pour assurer votre succès durable.
@@ -509,18 +676,21 @@ const TESTIMONIALS = [
   {
     name: 'Sarah J.',
     role: 'Cliente — anxiété',
+    photo: '/photos/testimonial-1.jpeg',
     quote:
       "Je suis venue chez RESET pour gérer mon anxiété. La séance de photobiomodulation était incroyablement relaxante — sans douleur et silencieuse. Elle m'a aidée à retrouver mon focus et a significativement amélioré la qualité de mon sommeil.",
   },
   {
     name: 'Ahmed M.',
     role: 'Client — sevrage tabac',
+    photo: '/photos/testimonial-2.jpeg',
     quote:
       "J'étais sceptique au début, mais après une seule séance chez RESET, mon envie de cigarette a littéralement disparu. Même dans les bouchons stressants du Caire, je n'ai pas ressenti le besoin de fumer. 3 mois après, je n'ai jamais été mieux.",
   },
   {
     name: 'Khaled S.',
     role: 'Client — sevrage tabac',
+    photo: '/photos/testimonial-3.jpeg',
     quote:
       "J'avais tout essayé — patchs, gommes, volonté pure — rien ne fonctionnait jusqu'à RESET. L'équipe est professionnelle et le centre top. Je suis sorti de ma séance avec le sentiment d'être un non-fumeur. Aucun symptôme de sevrage, aucune irritabilité.",
   },
@@ -547,8 +717,14 @@ function TestimonialsSection() {
               {t.quote}
             </blockquote>
             <figcaption className="mt-5 pt-5 border-t border-border-light flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center text-sm font-bold shrink-0">
-                {t.name.charAt(0)}
+              <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-primary-lightest">
+                <Image
+                  src={t.photo}
+                  alt={t.name}
+                  width={44}
+                  height={44}
+                  className="object-cover w-full h-full"
+                />
               </div>
               <div>
                 <div className="text-sm font-bold text-text">{t.name}</div>
