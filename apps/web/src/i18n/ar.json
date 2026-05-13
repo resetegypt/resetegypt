@@ -72,6 +72,7 @@
     "inbox": "الرسائل",
     "patients": "المرضى",
     "intake": "ورقة الاستقبال",
+    "waitingList": "قائمة الانتظار",
     "accounting": "المحاسبة",
     "stats": "الإحصائيات",
     "adminUsers": "إدارة الحسابات",
@@ -124,6 +125,7 @@
   "appointmentStatus": {
     "SCHEDULED": "للتأكيد",
     "CONFIRMED": "مؤكد",
+    "ARRIVED": "حاضر",
     "IN_PROGRESS": "قيد التنفيذ",
     "COMPLETED": "منتهي",
     "NO_SHOW": "غياب",

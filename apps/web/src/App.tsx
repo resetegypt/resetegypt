@@ -16,6 +16,7 @@ import { InvoicePage } from './pages/payment/InvoicePage';
 import { AccountingPage } from './pages/accounting/AccountingPage';
 import { StatsPage } from './pages/stats/StatsPage';
 import { InboxPage } from './pages/inbox/InboxPage';
+import { WaitingListPage } from './pages/waiting-list/WaitingListPage';
 import { AppShell } from './components/AppShell';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -44,6 +45,7 @@ export function App() {
             <Route path="payments/:id" element={<InvoicePage />} />
             <Route path="accounting" element={<AccountingPage />} />
             <Route path="inbox" element={<InboxPage />} />
+            <Route path="waiting-list" element={<WaitingListPage />} />
             <Route path="stats" element={<StatsPage />} />
           </Route>
         </Route>

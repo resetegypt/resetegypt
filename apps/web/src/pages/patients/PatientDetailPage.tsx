@@ -1,12 +1,37 @@
-import { useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Avatar, AvatarFallback, Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
-import { apiGet } from '../../lib/api';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@reset/ui';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 import { useAuthStore } from '../../lib/auth';
-import { ClipboardList, Stethoscope, Plus, FileText, ChevronRight } from 'lucide-react';
+import {
+  ClipboardList,
+  Stethoscope,
+  Plus,
+  FileText,
+  ChevronRight,
+  Camera,
+  X,
+  Tag,
+  Activity as ActivityIcon,
+  AlertTriangle,
+  Phone as PhoneIcon,
+  StickyNote,
+  Trash2,
+  MessageSquareText,
+} from 'lucide-react';
 
 interface ConsentEntry {
   accepted: boolean;
@@ -39,6 +64,8 @@ interface PatientDetail {
       nonMedicalAcknowledgement?: ConsentEntry;
     };
     status: string;
+    avatarUrl: string | null;
+    tags: string[];
     preferredLanguage: string;
     createdAt: string;
     preferredPractitioner: { firstName: string; lastName: string } | null;
@@ -81,7 +108,48 @@ const ADDICTION_ICON: Record<string, string> = {
   STRESS: '😰',
 };
 
-type TabKey = 'accueil' | 'clinique';
+type TabKey = 'accueil' | 'clinique' | 'suivi';
+
+// Tags suggérés (templates rapides). Le user peut ajouter des libres aussi.
+const SUGGESTED_TAGS = [
+  { value: 'vip', label: 'VIP', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  {
+    value: 'paie en retard',
+    label: 'Paie en retard',
+    color: 'bg-rose-100 text-rose-700 border-rose-200',
+  },
+  {
+    value: 'allergie laser',
+    label: 'Allergie laser',
+    color: 'bg-purple-100 text-purple-700 border-purple-200',
+  },
+  {
+    value: 'fragile',
+    label: 'Fragile / anxieux',
+    color: 'bg-sky-100 text-sky-700 border-sky-200',
+  },
+  {
+    value: 'rdv repeat',
+    label: 'Annule souvent',
+    color: 'bg-orange-100 text-orange-700 border-orange-200',
+  },
+  {
+    value: 'famille',
+    label: 'Famille du staff',
+    color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  },
+];
+
+function tagPalette(t: string): string {
+  const found = SUGGESTED_TAGS.find((s) => s.value === t);
+  if (found) return found.color;
+  return 'bg-bg-secondary text-text-secondary border-border';
+}
+
+function tagLabel(t: string): string {
+  const found = SUGGESTED_TAGS.find((s) => s.value === t);
+  return found ? found.label : t;
+}
 
 export function PatientDetailPage() {
   const { t, i18n } = useTranslation();
@@ -107,7 +175,6 @@ export function PatientDetailPage() {
 
   if (!data) return <div className="p-7">{t('common.loading')}</div>;
   const { patient, stats, evolution } = data;
-  const initials = patient.firstName.charAt(0) + patient.lastName.charAt(0);
 
   const first = evolution[0];
   const last = evolution[evolution.length - 1];
@@ -149,11 +216,12 @@ export function PatientDetailPage() {
       />
       <div className="p-7 space-y-6 max-w-6xl">
         <Card>
-          <CardContent className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
+          <CardContent className="flex items-start gap-4">
+            <PatientAvatarUpload
+              patient={patient}
+              editable={!isPractitioner /* tout le monde sauf praticien peut éditer */ || user?.role === 'PRACTITIONER'}
+            />
+            <div className="flex-1 min-w-0">
               <div className="flex gap-2 flex-wrap items-center">
                 <Badge variant={patient.status === 'ACTIVE' ? 'success' : 'neutral'}>
                   {patient.status === 'ACTIVE'
@@ -174,6 +242,7 @@ export function PatientDetailPage() {
                 📞 {patient.phone}
                 {patient.email ? ` · ✉️ ${patient.email}` : ''}
               </p>
+              <PatientTagsEditor patient={patient} />
             </div>
           </CardContent>
         </Card>
@@ -230,7 +299,16 @@ export function PatientDetailPage() {
             label={t('patients.detail.tab.clinical', 'Fiche clinique')}
             badge={patient.medicalRecord ? 1 : undefined}
           />
+          <TabButton
+            active={tab === 'suivi'}
+            onClick={() => switchTab('suivi')}
+            Icon={MessageSquareText}
+            label={t('patients.detail.tab.followUp', 'Suivi')}
+          />
         </div>
+
+        {/* === ONGLET SUIVI === */}
+        {tab === 'suivi' && <FollowUpTimeline patientId={patient.id} />}
 
         {/* === ONGLET FICHE CLINIQUE === */}
         {tab === 'clinique' && (
@@ -739,5 +817,451 @@ function ConsentRow({
         )}
       </div>
     </div>
+  );
+}
+
+// ======================================================================
+// Avatar upload — redimensionne + compresse côté client en data URL JPEG
+// avant de l'envoyer à l'API. Cible : 256×256 max, qualité 0.82, ~20 KB.
+// ======================================================================
+
+async function resizeImage(file: File, maxSize = 256, quality = 0.82): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = () => {
+      img.onload = () => {
+        const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('canvas-context'));
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('img-load'));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error('file-read'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function PatientAvatarUpload({
+  patient,
+  editable,
+}: {
+  patient: PatientDetail['patient'];
+  editable: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const setAvatar = useMutation({
+    mutationFn: (dataUrl: string | null) =>
+      apiPatch(`/patients/${patient.id}/avatar`, { dataUrl }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient', patient.id] });
+    },
+  });
+
+  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const dataUrl = await resizeImage(file);
+      await setAvatar.mutateAsync(dataUrl);
+    } catch (err) {
+      alert('Impossible de traiter cette image. Réessayez avec un format JPEG ou PNG.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }
+
+  const initials = patient.firstName.charAt(0) + patient.lastName.charAt(0);
+
+  return (
+    <div className="relative shrink-0">
+      <Avatar className="h-20 w-20 ring-2 ring-border shadow-sm">
+        {patient.avatarUrl ? (
+          <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+        ) : null}
+        <AvatarFallback className="bg-gradient-to-br from-primary-light to-secondary text-primary-dark text-2xl font-bold">
+          {initials}
+        </AvatarFallback>
+      </Avatar>
+      {editable && (
+        <>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading || setAvatar.isPending}
+            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-white border-2 border-surface shadow-md flex items-center justify-center hover:bg-primary-dark transition-colors disabled:opacity-60"
+            aria-label="Changer la photo"
+            title="Changer la photo"
+          >
+            <Camera className="w-3.5 h-3.5" />
+          </button>
+          {patient.avatarUrl && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('Retirer la photo et revenir aux initiales ?')) {
+                  setAvatar.mutate(null);
+                }
+              }}
+              disabled={setAvatar.isPending}
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-danger text-white border-2 border-surface shadow flex items-center justify-center hover:bg-danger-dark transition-colors"
+              aria-label="Retirer la photo"
+              title="Retirer la photo"
+            >
+              <X className="w-2.5 h-2.5" />
+            </button>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={onPickFile}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+// ======================================================================
+// Tags patient — affichage + édition inline
+// ======================================================================
+
+function PatientTagsEditor({ patient }: { patient: PatientDetail['patient'] }) {
+  const queryClient = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [draftValue, setDraftValue] = useState('');
+  const currentTags = patient.tags ?? [];
+
+  const save = useMutation({
+    mutationFn: (tags: string[]) => apiPatch(`/patients/${patient.id}`, { tags }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient', patient.id] });
+      setEditing(false);
+    },
+  });
+
+  function toggleTag(tag: string) {
+    const next = currentTags.includes(tag)
+      ? currentTags.filter((t) => t !== tag)
+      : [...currentTags, tag];
+    save.mutate(next);
+  }
+
+  function addCustom() {
+    const v = draftValue.trim().toLowerCase();
+    if (!v) return;
+    if (currentTags.includes(v)) {
+      setDraftValue('');
+      return;
+    }
+    save.mutate([...currentTags, v]);
+    setDraftValue('');
+  }
+
+  return (
+    <div className="mt-2.5">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {currentTags.map((tag) => (
+          <span
+            key={tag}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${tagPalette(tag)}`}
+          >
+            <Tag className="w-2.5 h-2.5" />
+            {tagLabel(tag)}
+            <button
+              type="button"
+              onClick={() => toggleTag(tag)}
+              className="hover:opacity-70"
+              aria-label={`Retirer ${tagLabel(tag)}`}
+            >
+              <X className="w-2.5 h-2.5" />
+            </button>
+          </span>
+        ))}
+        {!editing ? (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-dashed border-border text-text-tertiary hover:text-primary hover:border-primary transition-colors"
+          >
+            <Plus className="w-2.5 h-2.5" />
+            Ajouter un tag
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(false)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-border bg-bg-secondary text-text-secondary hover:bg-bg-secondary/70"
+          >
+            <X className="w-2.5 h-2.5" />
+            Fermer
+          </button>
+        )}
+      </div>
+
+      {editing && (
+        <div className="mt-3 p-3 rounded-lg border border-border bg-bg-secondary/30 space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            {SUGGESTED_TAGS.map((s) => {
+              const active = currentTags.includes(s.value);
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => toggleTag(s.value)}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all ${
+                    active
+                      ? `${s.color} ring-2 ring-offset-1 ring-primary/40`
+                      : `${s.color} opacity-60 hover:opacity-100`
+                  }`}
+                >
+                  {active ? '✓' : '+'} {s.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={draftValue}
+              onChange={(e) => setDraftValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addCustom()}
+              placeholder="Tag personnalisé (ex: vegan, fume occasionnellement…)"
+              maxLength={24}
+              className="flex-1 px-2 py-1 text-xs rounded-md border border-border bg-surface focus:border-primary focus:outline-none"
+            />
+            <Button size="sm" variant="outline" onClick={addCustom} disabled={!draftValue.trim()}>
+              Ajouter
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ======================================================================
+// Timeline notes de suivi — chronologique avec types et auteur
+// ======================================================================
+
+interface FollowUpNote {
+  id: string;
+  content: string;
+  kind: 'NOTE' | 'OBSERVATION' | 'ALERT' | 'CALL' | 'RELAPSE';
+  createdAt: string;
+  appointmentId: string | null;
+  author: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
+}
+
+const NOTE_KIND_META: Record<string, { Icon: typeof StickyNote; color: string; label: string }> = {
+  NOTE: {
+    Icon: StickyNote,
+    color: 'bg-bg-secondary text-text-secondary border-border',
+    label: 'Note',
+  },
+  OBSERVATION: {
+    Icon: Stethoscope,
+    color: 'bg-info-light text-info-dark border-info',
+    label: 'Observation',
+  },
+  ALERT: {
+    Icon: AlertTriangle,
+    color: 'bg-danger-light text-danger-dark border-danger',
+    label: 'Alerte',
+  },
+  CALL: {
+    Icon: PhoneIcon,
+    color: 'bg-primary-lightest text-primary-dark border-primary-light',
+    label: 'Appel',
+  },
+  RELAPSE: {
+    Icon: ActivityIcon,
+    color: 'bg-warning-light text-warning-dark border-warning',
+    label: 'Rechute',
+  },
+};
+
+function FollowUpTimeline({ patientId }: { patientId: string }) {
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const [draft, setDraft] = useState('');
+  const [kind, setKind] = useState<FollowUpNote['kind']>('NOTE');
+
+  const { data } = useQuery({
+    queryKey: ['patient-notes', patientId],
+    queryFn: () => apiGet<{ notes: FollowUpNote[] }>(`/patients/${patientId}/notes`),
+  });
+
+  const addNote = useMutation({
+    mutationFn: (payload: { content: string; kind: FollowUpNote['kind'] }) =>
+      apiPost(`/patients/${patientId}/notes`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient-notes', patientId] });
+      setDraft('');
+      setKind('NOTE');
+    },
+  });
+
+  const deleteNote = useMutation({
+    mutationFn: (id: string) => apiDelete(`/notes/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient-notes', patientId] });
+    },
+  });
+
+  const notes = data?.notes ?? [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquareText className="w-4 h-4 text-primary" />
+          {t('patients.detail.followUp.title', 'Notes de suivi')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {/* Composer */}
+        <div className="rounded-xl border border-border bg-bg-secondary/30 p-4 space-y-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            {Object.entries(NOTE_KIND_META).map(([k, meta]) => {
+              const active = kind === (k as FollowUpNote['kind']);
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setKind(k as FollowUpNote['kind'])}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
+                    active
+                      ? `${meta.color} ring-2 ring-primary/30 shadow-sm`
+                      : `${meta.color} opacity-50 hover:opacity-100`
+                  }`}
+                >
+                  <meta.Icon className="w-3 h-3" />
+                  {meta.label}
+                </button>
+              );
+            })}
+          </div>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={t(
+              'patients.detail.followUp.placeholder',
+              'Notez une observation, un appel passé, une rechute, une alerte…',
+            )}
+            rows={3}
+            maxLength={4000}
+            className="w-full px-3 py-2 text-sm rounded-md border border-border bg-surface focus:border-primary focus:outline-none resize-y"
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-text-tertiary">
+              {draft.length}/4000 — En tant que {user?.firstName} ({user?.role})
+            </span>
+            <Button
+              size="sm"
+              disabled={!draft.trim() || addNote.isPending}
+              onClick={() => addNote.mutate({ content: draft.trim(), kind })}
+            >
+              <Plus className="w-3.5 h-3.5 me-1" />
+              {addNote.isPending
+                ? t('common.loading')
+                : t('patients.detail.followUp.add', 'Ajouter')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        {notes.length === 0 ? (
+          <div className="text-center py-10 text-text-secondary">
+            <MessageSquareText className="w-10 h-10 mx-auto text-text-tertiary mb-2" />
+            <p className="text-sm">
+              {t(
+                'patients.detail.followUp.empty',
+                'Aucune note pour le moment. Ajoutez la première ci-dessus.',
+              )}
+            </p>
+          </div>
+        ) : (
+          <ol className="relative border-s-2 border-border-light ms-3 space-y-5">
+            {notes.map((n) => {
+              const meta = NOTE_KIND_META[n.kind] ?? NOTE_KIND_META.NOTE!;
+              const canDelete =
+                user?.role === 'ADMIN' || (user && n.author.id === user.id);
+              return (
+                <li key={n.id} className="ms-6 relative">
+                  <span
+                    className={`absolute -start-[34px] top-1 inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-surface shadow-sm ${meta.color}`}
+                  >
+                    <meta.Icon className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="rounded-lg border border-border bg-surface p-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold border ${meta.color}`}
+                          >
+                            {meta.label}
+                          </span>
+                          <span className="text-[10px] text-text-tertiary tabular-nums">
+                            {new Date(n.createdAt).toLocaleString(i18n.language, {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm text-text whitespace-pre-line break-words">
+                          {n.content}
+                        </p>
+                        <p className="mt-2 text-[11px] text-text-tertiary">
+                          {n.author.firstName} {n.author.lastName.charAt(0)}. ·{' '}
+                          {n.author.role.toLowerCase()}
+                        </p>
+                      </div>
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm('Supprimer cette note ?')) deleteNote.mutate(n.id);
+                          }}
+                          className="text-text-tertiary hover:text-danger transition-colors p-1"
+                          aria-label="Supprimer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
   );
 }

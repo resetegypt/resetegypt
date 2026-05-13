@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Card } from '@reset/ui';
-import { apiGet } from '../../lib/api';
+import { Avatar, AvatarFallback, AvatarImage, Badge, Button, Card } from '@reset/ui';
+import { apiGet, apiPatch, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 import { useAuthStore } from '../../lib/auth';
 import {
@@ -15,6 +15,15 @@ import {
   Clock,
   Plus,
   Wallet,
+  Users,
+  X,
+  CheckCircle2,
+  CircleAlert,
+  PlayCircle,
+  Phone,
+  MessageCircle,
+  ExternalLink,
+  GripVertical,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -22,13 +31,25 @@ interface Appointment {
   id: string;
   patientId: string;
   scheduledAt: string;
+  duration: number;
   patientName: string;
+  patientPhone: string;
+  patientAvatarUrl: string | null;
+  patientTags: string[];
+  practitionerId: string;
   practitioner: string;
   service: string;
   visitType: string;
   status: string;
   price: number;
+  notes: string | null;
   paidTotal: number | null;
+}
+
+interface Practitioner {
+  id: string;
+  firstName: string;
+  lastName: string;
 }
 
 type ViewMode = 'day' | 'week' | 'month';
@@ -59,11 +80,6 @@ function slotTime(idx: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-// IMPORTANT : indexation par date LOCALE pour matcher correctement les
-// cellules de la grille (qui sont en heure locale) avec les RDV (stockés
-// en UTC mais convertis en local pour l'affichage). toISOString() utilise
-// UTC, donc pour Paris (UTC+1/+2), minuit local devient 22:00/23:00 UTC
-// du jour précédent → décalage d'un jour.
 function localDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -89,22 +105,52 @@ function endOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0);
 }
 
+function slotIsoFromCell(day: Date, slotIdx: number): string {
+  const totalMin = START_HOUR * 60 + slotIdx * SLOT_DURATION_MIN;
+  return new Date(
+    day.getFullYear(),
+    day.getMonth(),
+    day.getDate(),
+    Math.floor(totalMin / 60),
+    totalMin % 60,
+  ).toISOString();
+}
+
+// === Drag & drop helpers (HTML5 natif) ===========================
+// On stocke l'id du RDV dans le dataTransfer. Au drop on PATCH
+// /appointments/:id { scheduledAt: newSlot } et on invalide la query.
+function dragData(id: string): string {
+  return JSON.stringify({ type: 'appointment', id });
+}
+function parseDrag(e: React.DragEvent): { id: string } | null {
+  try {
+    const raw = e.dataTransfer.getData('application/json');
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (obj?.type === 'appointment' && typeof obj.id === 'string') return { id: obj.id };
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
 export function AgendaPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  // Le CA prévu / CA réalisé est strictement réservé à l'admin :
-  // ni les praticiens (ils n'ont pas à voir l'argent), ni les
-  // secrétaires (qui voient déjà la compta dans son module dédié)
-  // n'ont besoin de ces KPI dans l'agenda.
   const showRevenue = user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN';
+
   const [view, setView] = useState<ViewMode>('week');
   const [anchorDate, setAnchorDate] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
   });
+  const [practitionerFilter, setPractitionerFilter] = useState<string | null>(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
 
-  // Calcule la plage [from, to[ selon la vue
   const range = useMemo(() => {
     if (view === 'day') {
       const from = new Date(anchorDate);
@@ -118,7 +164,6 @@ export function AgendaPage() {
       to.setDate(to.getDate() + 7);
       return { from, to };
     }
-    // month — on prend 6 semaines pour remplir la grille calendaire
     const monthStart = startOfMonth(anchorDate);
     const from = startOfWeek(monthStart);
     const to = new Date(from);
@@ -126,7 +171,7 @@ export function AgendaPage() {
     return { from, to };
   }, [view, anchorDate]);
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ['agenda', view, range.from.toISOString(), range.to.toISOString()],
     queryFn: () =>
       apiGet<{ appointments: Appointment[] }>(
@@ -134,7 +179,45 @@ export function AgendaPage() {
       ),
   });
 
-  const appointments = data?.appointments ?? [];
+  // Liste des praticiens pour le filtre (admin only)
+  const { data: practitionersData } = useQuery({
+    queryKey: ['practitioners'],
+    queryFn: () => apiGet<{ practitioners: Practitioner[] }>('/practitioners'),
+    enabled: isAdmin,
+  });
+  const practitioners = practitionersData?.practitioners ?? [];
+
+  const allAppointments = data?.appointments ?? [];
+  // Filtre côté client (les RDV sont déjà chargés)
+  const appointments = practitionerFilter
+    ? allAppointments.filter((a) => a.practitionerId === practitionerFilter)
+    : allAppointments;
+
+  // === Drag & drop mutation ===
+  const moveMutation = useMutation({
+    mutationFn: async ({ id, newScheduledAt }: { id: string; newScheduledAt: string }) =>
+      apiPatch(`/appointments/${id}`, { scheduledAt: newScheduledAt }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agenda'] });
+    },
+    onError: (err: Error) => {
+      const msg = err.message?.includes('TimeSlotConflict')
+        ? t('agenda.dnd.conflict', 'Conflit : un autre RDV existe déjà sur ce créneau.')
+        : t('agenda.dnd.failed', 'Impossible de déplacer le RDV.');
+      alert(msg);
+    },
+  });
+
+  const handleDropOnSlot = useCallback(
+    (day: Date, slotIdx: number) => (e: React.DragEvent) => {
+      e.preventDefault();
+      const data = parseDrag(e);
+      if (!data) return;
+      const newScheduledAt = slotIsoFromCell(day, slotIdx);
+      moveMutation.mutate({ id: data.id, newScheduledAt });
+    },
+    [moveMutation],
+  );
 
   // Indexation par jour/heure
   const byKey = useMemo(() => {
@@ -160,28 +243,16 @@ export function AgendaPage() {
 
   const todayKey = localDateKey(new Date());
   const totalCount = appointments.length;
-  // Capacité = nb de créneaux ouvrables sur la plage de la vue actuelle.
-  // Mois : on prend les jours réels du mois affiché (pas les 42 cellules
-  // de la grille, qui débordent sur le mois précédent/suivant).
   const daysInRange =
-    view === 'day'
-      ? 1
-      : view === 'week'
-        ? 7
-        : endOfMonth(anchorDate).getDate();
+    view === 'day' ? 1 : view === 'week' ? 7 : endOfMonth(anchorDate).getDate();
   const slotsInRange = daysInRange * SLOTS_PER_DAY;
   const occupation = slotsInRange > 0 ? Math.round((totalCount / slotsInRange) * 100) : 0;
-  // CA prévu : somme des prix des RDV (hors annulés/no-show) — ce qu'on
-  //            doit encaisser sur la période.
-  // CA réalisé : somme des paiements TTC effectivement reçus.
   const expectedRevenue = appointments
     .filter((a) => a.status !== 'CANCELLED' && a.status !== 'NO_SHOW')
     .reduce((sum, a) => sum + a.price, 0);
-  const realizedRevenue = appointments.reduce(
-    (sum, a) => sum + (a.paidTotal ?? 0),
-    0,
-  );
+  const realizedRevenue = appointments.reduce((sum, a) => sum + (a.paidTotal ?? 0), 0);
   const toConfirm = appointments.filter((a) => a.status === 'SCHEDULED').length;
+  const arrivedCount = appointments.filter((a) => a.status === 'ARRIVED').length;
 
   // Indicateur "maintenant"
   const [now, setNow] = useState(new Date());
@@ -199,7 +270,7 @@ export function AgendaPage() {
     return idx;
   }, [now]);
 
-  function navigate(direction: -1 | 1 | 0): void {
+  function nav(direction: -1 | 1 | 0): void {
     if (direction === 0) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
@@ -215,13 +286,16 @@ export function AgendaPage() {
     });
   }
 
-  // Subtitle adapté à la vue
   const subtitle =
     view === 'day'
       ? anchorDate.toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
       : view === 'week'
         ? `${range.from.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })} → ${new Date(range.to.getTime() - 1).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })}`
         : anchorDate.toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' });
+
+  const selectedAppointment = selectedAppointmentId
+    ? appointments.find((a) => a.id === selectedAppointmentId) ?? null
+    : null;
 
   return (
     <>
@@ -230,7 +304,6 @@ export function AgendaPage() {
         subtitle={subtitle}
         actions={
           <div className="flex items-center gap-2 flex-wrap">
-            {/* View switcher */}
             <div className="inline-flex rounded-lg border border-border bg-bg-secondary/40 p-1">
               {(['day', 'week', 'month'] as const).map((v) => (
                 <button
@@ -248,37 +321,87 @@ export function AgendaPage() {
               ))}
             </div>
 
-            {/* Navigation */}
             <div className="inline-flex rounded-lg border border-border bg-bg-secondary/40 p-1">
               <button
                 type="button"
-                onClick={() => navigate(-1)}
+                onClick={() => nav(-1)}
                 className="p-1.5 rounded-md text-text-secondary hover:text-text hover:bg-surface transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                onClick={() => navigate(0)}
+                onClick={() => nav(0)}
                 className="px-3 py-1 text-xs font-semibold rounded-md text-text-secondary hover:text-text hover:bg-surface transition-all"
               >
                 {t('agenda.today', "Aujourd'hui")}
               </button>
               <button
                 type="button"
-                onClick={() => navigate(1)}
+                onClick={() => nav(1)}
                 className="p-1.5 rounded-md text-text-secondary hover:text-text hover:bg-surface transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
+
+            <Button asChild size="sm" variant="outline">
+              <Link to="/waiting-list">
+                <Users className="w-3.5 h-3.5 me-1.5" />
+                {t('agenda.waitingList.button', "Liste d'attente")}
+              </Link>
+            </Button>
           </div>
         }
       />
 
       <div className="p-7 space-y-5 max-w-[1600px]">
-        {/* KPI — admin: 5 cards (avec CA prévu + CA réalisé)
-                  secrétaire / praticien: 3 cards (sans argent) */}
+        {/* === Filtre praticien (admin only) === */}
+        {isAdmin && practitioners.length > 1 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-text-tertiary">
+              {t('agenda.filter.practitioner', 'Praticien')}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPractitionerFilter(null)}
+              className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
+                !practitionerFilter
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-bg-secondary text-text-secondary hover:bg-bg-secondary/70 border border-border'
+              }`}
+            >
+              {t('agenda.filter.all', 'Tous')} ({allAppointments.length})
+            </button>
+            {practitioners.map((p) => {
+              const count = allAppointments.filter((a) => a.practitionerId === p.id).length;
+              const active = practitionerFilter === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPractitionerFilter(p.id)}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all flex items-center gap-1.5 ${
+                    active
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'bg-bg-secondary text-text-secondary hover:bg-bg-secondary/70 border border-border'
+                  }`}
+                >
+                  <span>Dr. {p.firstName} {p.lastName.charAt(0)}.</span>
+                  <span
+                    className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-bold ${
+                      active ? 'bg-white/20 text-white' : 'bg-surface text-text-secondary'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* === KPI === */}
         <div
           className={`grid grid-cols-2 gap-4 ${
             showRevenue ? 'md:grid-cols-3 xl:grid-cols-5' : 'md:grid-cols-3'
@@ -322,14 +445,18 @@ export function AgendaPage() {
             />
           )}
           <AgendaKPI
-            Icon={Clock}
-            label={t('agenda.stats.toConfirm', 'À confirmer')}
-            value={toConfirm}
-            tone={toConfirm > 0 ? 'warning' : 'neutral'}
+            Icon={arrivedCount > 0 ? CheckCircle2 : Clock}
+            label={
+              arrivedCount > 0
+                ? t('agenda.stats.arrived', 'À traiter (arrivés)')
+                : t('agenda.stats.toConfirm', 'À confirmer')
+            }
+            value={arrivedCount > 0 ? arrivedCount : toConfirm}
+            tone={arrivedCount > 0 ? 'success' : toConfirm > 0 ? 'warning' : 'neutral'}
           />
         </div>
 
-        {/* Légende services */}
+        {/* === Légende === */}
         <div className="flex items-center gap-4 flex-wrap text-xs text-text-secondary">
           <span className="font-semibold text-text-tertiary uppercase tracking-wide text-[10px]">
             {t('agenda.legend.title', 'Services')} ·
@@ -342,13 +469,16 @@ export function AgendaPage() {
           ))}
         </div>
 
-        {/* Body selon la vue */}
+        {/* === Body === */}
         {view === 'day' && (
           <DayView
             day={anchorDate}
             byKey={byKey}
             currentTimeIndex={currentTimeIndex}
             isToday={localDateKey(anchorDate) === todayKey}
+            onSelectAppointment={setSelectedAppointmentId}
+            onDropAt={handleDropOnSlot}
+            isDragging={moveMutation.isPending}
           />
         )}
         {view === 'week' && (
@@ -358,6 +488,9 @@ export function AgendaPage() {
             todayKey={todayKey}
             currentTimeIndex={currentTimeIndex}
             lang={i18n.language}
+            onSelectAppointment={setSelectedAppointmentId}
+            onDropAt={handleDropOnSlot}
+            isDragging={moveMutation.isPending}
           />
         )}
         {view === 'month' && (
@@ -374,6 +507,22 @@ export function AgendaPage() {
           />
         )}
       </div>
+
+      {/* === Modal détail RDV === */}
+      {selectedAppointment && (
+        <AppointmentDetailModal
+          appointment={selectedAppointment}
+          onClose={() => setSelectedAppointmentId(null)}
+          onChanged={() => {
+            refetch();
+          }}
+          onNavigatePatient={(id) => {
+            setSelectedAppointmentId(null);
+            navigate(`/patients/${id}`);
+          }}
+          showAddToWaitingList={isAdmin || user?.role === 'SECRETARY'}
+        />
+      )}
     </>
   );
 }
@@ -387,16 +536,22 @@ function DayView({
   byKey,
   currentTimeIndex,
   isToday,
+  onSelectAppointment,
+  onDropAt,
+  isDragging,
 }: {
   day: Date;
   byKey: Map<string, Appointment>;
   currentTimeIndex: number | null;
   isToday: boolean;
+  onSelectAppointment: (id: string) => void;
+  onDropAt: (day: Date, slotIdx: number) => (e: React.DragEvent) => void;
+  isDragging: boolean;
 }) {
   const { t } = useTranslation();
   const dayKey = localDateKey(day);
-  const rdvCount = Array.from(byKey.values()).filter((a) =>
-    localDateKey(new Date(a.scheduledAt)) === dayKey,
+  const rdvCount = Array.from(byKey.values()).filter(
+    (a) => localDateKey(new Date(a.scheduledAt)) === dayKey,
   ).length;
 
   return (
@@ -421,21 +576,17 @@ function DayView({
           const isCurrentSlot = isToday && currentTimeIndex !== null && Math.floor(currentTimeIndex) === i;
           const showLine = isCurrentSlot;
           const lineOffsetPct = showLine ? (currentTimeIndex! - i) * 100 : 0;
-
-          const slotIso = new Date(
-            day.getFullYear(),
-            day.getMonth(),
-            day.getDate(),
-            Math.floor((START_HOUR * 60 + i * SLOT_DURATION_MIN) / 60),
-            (START_HOUR * 60 + i * SLOT_DURATION_MIN) % 60,
-          ).toISOString();
+          const slotIso = slotIsoFromCell(day, i);
 
           return (
-            <div
+            <SlotRow
               key={i}
-              className={`relative flex items-stretch min-h-[60px] ${
-                isCurrentSlot ? 'bg-primary/[0.02]' : ''
-              }`}
+              day={day}
+              slotIdx={i}
+              hasAppointment={!!a}
+              onDropAt={onDropAt}
+              className={`min-h-[60px] ${isCurrentSlot ? 'bg-primary/[0.02]' : ''}`}
+              isDragging={isDragging}
             >
               {showLine && (
                 <div
@@ -456,7 +607,10 @@ function DayView({
               </div>
               <div className="flex-1 p-2">
                 {a ? (
-                  <DayAppointmentCard appointment={a} />
+                  <DayAppointmentCard
+                    appointment={a}
+                    onClick={() => onSelectAppointment(a.id)}
+                  />
                 ) : (
                   <Link
                     to={`/appointments/new?slot=${encodeURIComponent(slotIso)}`}
@@ -466,7 +620,7 @@ function DayView({
                   </Link>
                 )}
               </div>
-            </div>
+            </SlotRow>
           );
         })}
       </div>
@@ -474,11 +628,18 @@ function DayView({
   );
 }
 
-function DayAppointmentCard({ appointment }: { appointment: Appointment }) {
+function DayAppointmentCard({
+  appointment,
+  onClick,
+}: {
+  appointment: Appointment;
+  onClick: () => void;
+}) {
   const { t } = useTranslation();
   const a = appointment;
   const sc = SERVICE_COLOR[a.service] ?? SERVICE_COLOR.STRESS!;
   const isConfirmed = a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED';
+  const isArrived = a.status === 'ARRIVED';
   const isCancelled = a.status === 'NO_SHOW' || a.status === 'CANCELLED';
   const initials = a.patientName
     .split(' ')
@@ -487,41 +648,52 @@ function DayAppointmentCard({ appointment }: { appointment: Appointment }) {
     .join('')
     .toUpperCase();
   return (
-    <Link to={`/patients/${a.patientId}`} className="block h-full">
-      <div
-        className={`h-full rounded-lg border ${sc.bar} border-l-4 px-3 py-2 cursor-pointer transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px ${
-          isCancelled
-            ? 'bg-bg-secondary/60 border-border opacity-60 line-through'
+    <button
+      type="button"
+      onClick={onClick}
+      draggable={!isCancelled && a.status !== 'COMPLETED'}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('application/json', dragData(a.id));
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      className={`group h-full w-full text-start rounded-lg border ${sc.bar} border-l-4 px-3 py-2 cursor-pointer transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px ${
+        isCancelled
+          ? 'bg-bg-secondary/60 border-border opacity-60 line-through'
+          : isArrived
+            ? 'bg-primary/15 border-primary/40 ring-1 ring-primary/30'
             : isConfirmed
               ? 'bg-primary-lightest/60 border-border'
               : 'bg-warning-light/40 border-border'
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-light to-secondary text-primary-dark text-xs font-bold flex items-center justify-center shrink-0">
-            {initials}
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <PatientAvatar name={a.patientName} url={a.patientAvatarUrl} size={32} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(a.status)}`} />
+            <span className="text-sm font-semibold text-text truncate">{a.patientName}</span>
+            {a.patientTags.includes('vip') && (
+              <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">
+                VIP
+              </span>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(a.status)}`} />
-              <span className="text-sm font-semibold text-text truncate">{a.patientName}</span>
-            </div>
-            <div className="text-xs text-text-secondary mt-0.5 flex items-center gap-1.5">
-              <span>{SERVICE_ICON[a.service]} {t(`addiction.${a.service}`)}</span>
-              <span className="text-text-tertiary">·</span>
-              <span>{t(`dashboard.visitType.${a.visitType}`)}</span>
-              <span className="text-text-tertiary">·</span>
-              <span>Dr. {a.practitioner}</span>
-            </div>
+          <div className="text-xs text-text-secondary mt-0.5 flex items-center gap-1.5">
+            <span>{SERVICE_ICON[a.service]} {t(`addiction.${a.service}`)}</span>
+            <span className="text-text-tertiary">·</span>
+            <span>{t(`dashboard.visitType.${a.visitType}`)}</span>
+            <span className="text-text-tertiary">·</span>
+            <span>Dr. {a.practitioner}</span>
           </div>
         </div>
+        <GripVertical className="w-3.5 h-3.5 text-text-tertiary/0 group-hover:text-text-tertiary/60 transition-colors shrink-0" />
       </div>
-    </Link>
+    </button>
   );
 }
 
 // =====================================================================
-// SEMAINE (existant simplifié)
+// SEMAINE
 // =====================================================================
 
 function WeekView({
@@ -530,12 +702,18 @@ function WeekView({
   todayKey,
   currentTimeIndex,
   lang,
+  onSelectAppointment,
+  onDropAt,
+  isDragging,
 }: {
   weekStart: Date;
   byKey: Map<string, Appointment>;
   todayKey: string;
   currentTimeIndex: number | null;
   lang: string;
+  onSelectAppointment: (id: string) => void;
+  onDropAt: (day: Date, slotIdx: number) => (e: React.DragEvent) => void;
+  isDragging: boolean;
 }) {
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart);
@@ -587,6 +765,9 @@ function WeekView({
                 todayColIdx={todayColIdx}
                 isCurrentRow={isCurrentRow}
                 currentTimeIndex={currentTimeIndex}
+                onSelectAppointment={onSelectAppointment}
+                onDropAt={onDropAt}
+                isDragging={isDragging}
               />
             );
           })}
@@ -605,6 +786,9 @@ function WeekRow({
   todayColIdx,
   isCurrentRow,
   currentTimeIndex,
+  onSelectAppointment,
+  onDropAt,
+  isDragging,
 }: {
   rowIdx: number;
   time: string;
@@ -614,6 +798,9 @@ function WeekRow({
   todayColIdx: number;
   isCurrentRow: boolean;
   currentTimeIndex: number | null;
+  onSelectAppointment: (id: string) => void;
+  onDropAt: (day: Date, slotIdx: number) => (e: React.DragEvent) => void;
+  isDragging: boolean;
 }) {
   return (
     <>
@@ -626,26 +813,30 @@ function WeekRow({
         const key = `${localDateKey(d)}_${time}`;
         const a = byKey.get(key);
         const isToday = localDateKey(d) === todayKey;
-        const slotIso = new Date(
-          d.getFullYear(),
-          d.getMonth(),
-          d.getDate(),
-          Math.floor((START_HOUR * 60 + rowIdx * SLOT_DURATION_MIN) / 60),
-          (START_HOUR * 60 + rowIdx * SLOT_DURATION_MIN) % 60,
-        ).toISOString();
+        const slotIso = slotIsoFromCell(d, rowIdx);
         const showNowLine = isToday && isCurrentRow && dayIdx === todayColIdx && currentTimeIndex !== null;
         const lineOffsetPct = showNowLine ? (currentTimeIndex - rowIdx) * 100 : 0;
         return (
-          <div
+          <SlotCell
             key={`${rowIdx}-${d.toISOString()}`}
+            day={d}
+            slotIdx={rowIdx}
+            hasAppointment={!!a}
+            onDropAt={onDropAt}
             className={`relative border-b border-border-light p-1 min-h-[52px] ${isToday ? 'bg-primary/[0.02]' : ''}`}
+            isDragging={isDragging}
           >
             {showNowLine && (
               <div className="absolute left-0 right-0 h-[2px] bg-danger z-10 pointer-events-none" style={{ top: `${lineOffsetPct}%` }}>
                 <div className="absolute -left-1 -top-[3px] w-2 h-2 rounded-full bg-danger" />
               </div>
             )}
-            {a ? <WeekAppointmentCard appointment={a} /> : (
+            {a ? (
+              <WeekAppointmentCard
+                appointment={a}
+                onClick={() => onSelectAppointment(a.id)}
+              />
+            ) : (
               <Link
                 to={`/appointments/new?slot=${encodeURIComponent(slotIso)}`}
                 className="group block h-full rounded-md border border-dashed border-transparent hover:border-primary/30 hover:bg-primary/[0.04] transition-all flex items-center justify-center"
@@ -653,45 +844,59 @@ function WeekRow({
                 <Plus className="w-3.5 h-3.5 text-transparent group-hover:text-primary/60 transition-colors" />
               </Link>
             )}
-          </div>
+          </SlotCell>
         );
       })}
     </>
   );
 }
 
-function WeekAppointmentCard({ appointment }: { appointment: Appointment }) {
+function WeekAppointmentCard({
+  appointment,
+  onClick,
+}: {
+  appointment: Appointment;
+  onClick: () => void;
+}) {
   const a = appointment;
   const sc = SERVICE_COLOR[a.service] ?? SERVICE_COLOR.STRESS!;
   const isConfirmed = a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED';
+  const isArrived = a.status === 'ARRIVED';
   const isCancelled = a.status === 'NO_SHOW' || a.status === 'CANCELLED';
   return (
-    <Link to={`/patients/${a.patientId}`} className="block h-full">
-      <div
-        className={`relative h-full rounded-md border ${sc.bar} border-l-4 px-2 py-1.5 cursor-pointer transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px ${
-          isCancelled
-            ? 'bg-bg-secondary/60 border-border opacity-60 line-through'
+    <button
+      type="button"
+      onClick={onClick}
+      draggable={!isCancelled && a.status !== 'COMPLETED'}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('application/json', dragData(a.id));
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      className={`relative h-full w-full text-start rounded-md border ${sc.bar} border-l-4 px-2 py-1.5 cursor-pointer transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px ${
+        isCancelled
+          ? 'bg-bg-secondary/60 border-border opacity-60 line-through'
+          : isArrived
+            ? 'bg-primary/15 border-primary/40 ring-1 ring-primary/30'
             : isConfirmed
               ? 'bg-primary-lightest/60 border-border'
               : 'bg-warning-light/40 border-border'
-        }`}
-      >
-        <div className="flex items-center gap-1.5">
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(a.status)}`} />
-          <span className="text-[11px] font-semibold text-text truncate">{a.patientName}</span>
-        </div>
-        <div className="text-[9px] text-text-secondary mt-0.5 truncate flex items-center gap-1">
-          <span>{SERVICE_ICON[a.service]}</span>
-          <span className="text-text-tertiary">·</span>
-          <span>Dr. {a.practitioner}</span>
-        </div>
+      }`}
+    >
+      <div className="flex items-center gap-1.5">
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(a.status)}`} />
+        <span className="text-[11px] font-semibold text-text truncate">{a.patientName}</span>
       </div>
-    </Link>
+      <div className="text-[9px] text-text-secondary mt-0.5 truncate flex items-center gap-1">
+        <span>{SERVICE_ICON[a.service]}</span>
+        <span className="text-text-tertiary">·</span>
+        <span>Dr. {a.practitioner}</span>
+      </div>
+    </button>
   );
 }
 
 // =====================================================================
-// MOIS — grille calendaire 6×7
+// MOIS
 // =====================================================================
 
 function MonthView({
@@ -720,7 +925,6 @@ function MonthView({
     return d.toLocaleDateString(lang, { weekday: 'short' });
   });
   const monthIdx = anchor.getMonth();
-  const lastDayOfMonth = endOfMonth(anchor).getDate();
 
   return (
     <Card className="overflow-hidden">
@@ -798,10 +1002,6 @@ function MonthView({
                   </div>
                 )}
               </div>
-              {/* coin indicateur si dernier jour du mois pour separation visuelle */}
-              {d.getDate() === lastDayOfMonth && !isOutsideMonth && (
-                <span className="sr-only">fin de mois</span>
-              )}
             </button>
           );
         })}
@@ -811,17 +1011,433 @@ function MonthView({
 }
 
 // =====================================================================
-// Helpers
+// Drop wrapper
 // =====================================================================
+
+function SlotRow({
+  day,
+  slotIdx,
+  hasAppointment,
+  onDropAt,
+  className = '',
+  isDragging,
+  children,
+}: {
+  day: Date;
+  slotIdx: number;
+  hasAppointment: boolean;
+  onDropAt: (day: Date, slotIdx: number) => (e: React.DragEvent) => void;
+  className?: string;
+  isDragging: boolean;
+  children: React.ReactNode;
+}) {
+  const [isOver, setIsOver] = useState(false);
+  return (
+    <div
+      className={`relative flex items-stretch ${className} ${
+        isOver && !hasAppointment ? 'bg-primary/10 ring-2 ring-primary/40 ring-inset' : ''
+      } ${isDragging ? 'transition-colors' : ''}`}
+      onDragOver={(e) => {
+        if (hasAppointment) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (!isOver) setIsOver(true);
+      }}
+      onDragLeave={() => setIsOver(false)}
+      onDrop={(e) => {
+        setIsOver(false);
+        if (hasAppointment) return;
+        onDropAt(day, slotIdx)(e);
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SlotCell({
+  day,
+  slotIdx,
+  hasAppointment,
+  onDropAt,
+  className = '',
+  isDragging,
+  children,
+}: {
+  day: Date;
+  slotIdx: number;
+  hasAppointment: boolean;
+  onDropAt: (day: Date, slotIdx: number) => (e: React.DragEvent) => void;
+  className?: string;
+  isDragging: boolean;
+  children: React.ReactNode;
+}) {
+  const [isOver, setIsOver] = useState(false);
+  return (
+    <div
+      className={`${className} ${
+        isOver && !hasAppointment ? 'bg-primary/10 ring-2 ring-primary/40 ring-inset' : ''
+      } ${isDragging ? 'transition-colors' : ''}`}
+      onDragOver={(e) => {
+        if (hasAppointment) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (!isOver) setIsOver(true);
+      }}
+      onDragLeave={() => setIsOver(false)}
+      onDrop={(e) => {
+        setIsOver(false);
+        if (hasAppointment) return;
+        onDropAt(day, slotIdx)(e);
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// =====================================================================
+// Modal détail RDV
+// =====================================================================
+
+function AppointmentDetailModal({
+  appointment,
+  onClose,
+  onChanged,
+  onNavigatePatient,
+  showAddToWaitingList,
+}: {
+  appointment: Appointment;
+  onClose: () => void;
+  onChanged: () => void;
+  onNavigatePatient: (id: string) => void;
+  showAddToWaitingList: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const a = appointment;
+  const date = new Date(a.scheduledAt);
+  const sc = SERVICE_COLOR[a.service] ?? SERVICE_COLOR.STRESS!;
+  const phoneClean = a.patientPhone?.replace(/[^0-9]/g, '') ?? '';
+
+  const setStatus = useMutation({
+    mutationFn: (status: string) => apiPatch(`/appointments/${a.id}`, { status }),
+    onSuccess: () => {
+      onChanged();
+      onClose();
+    },
+  });
+
+  const addToWaitingList = useMutation({
+    mutationFn: () =>
+      apiPost('/waiting-list', {
+        patientId: a.patientId,
+        service: a.service,
+        priority: 5,
+        notes: `Ajouté depuis RDV ${a.id} (${date.toLocaleString(i18n.language)})`,
+      }),
+    onSuccess: () => {
+      alert(t('agenda.modal.addedToWaitingList', 'Patient ajouté à la liste d\'attente.'));
+    },
+  });
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-text/40 backdrop-blur-sm flex items-center justify-center px-4 py-10"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Hero */}
+        <div className={`px-6 py-5 border-b ${sc.bar} border-l-4`}>
+          <div className="flex items-start gap-4">
+            <PatientAvatar name={a.patientName} url={a.patientAvatarUrl} size={56} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-bold text-text truncate">{a.patientName}</h2>
+                <Badge variant={statusVariantOf(a.status)}>
+                  {t(`appointmentStatus.${a.status}`, a.status)}
+                </Badge>
+                {a.patientTags.includes('vip') && (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                    VIP
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-text-secondary mt-0.5 font-mono">{a.patientPhone}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-md hover:bg-bg-secondary text-text-tertiary transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Détails */}
+        <div className="px-6 py-5 space-y-4">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wider mb-1">
+                {t('agenda.modal.dateTime', 'Date / heure')}
+              </div>
+              <div className="font-semibold text-text">
+                {date.toLocaleDateString(i18n.language, {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
+              </div>
+              <div className="text-text-secondary font-mono text-xs mt-0.5">
+                {date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
+                {' '}· {a.duration} min
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wider mb-1">
+                {t('agenda.modal.service', 'Service')}
+              </div>
+              <div className="font-semibold text-text">
+                {SERVICE_ICON[a.service]} {t(`addiction.${a.service}`)}
+              </div>
+              <div className="text-text-secondary text-xs mt-0.5">
+                {t(`dashboard.visitType.${a.visitType}`)}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wider mb-1">
+                {t('agenda.modal.practitioner', 'Praticien')}
+              </div>
+              <div className="font-semibold text-text">Dr. {a.practitioner}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wider mb-1">
+                {t('agenda.modal.price', 'Prix')}
+              </div>
+              <div className="font-semibold text-text font-mono">
+                {a.price.toLocaleString(i18n.language)} EGP
+              </div>
+              {a.paidTotal !== null && (
+                <div className="text-primary text-xs mt-0.5 font-mono">
+                  ✓ {a.paidTotal.toLocaleString(i18n.language)} EGP encaissé
+                </div>
+              )}
+            </div>
+          </div>
+
+          {a.notes && (
+            <div>
+              <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wider mb-1">
+                {t('agenda.modal.notes', 'Notes')}
+              </div>
+              <p className="text-sm text-text bg-bg-secondary/40 border border-border-light rounded-lg p-3">
+                {a.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Actions rapides : appel, WhatsApp */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" asChild>
+              <a href={`tel:${a.patientPhone}`}>
+                <Phone className="w-3.5 h-3.5 me-1.5" />
+                {t('agenda.modal.call', 'Appeler')}
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={`https://wa.me/${phoneClean}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <MessageCircle className="w-3.5 h-3.5 me-1.5" />
+                WhatsApp
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => onNavigatePatient(a.patientId)}>
+              <ExternalLink className="w-3.5 h-3.5 me-1.5" />
+              {t('agenda.modal.openPatient', 'Fiche patient')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Changements de statut */}
+        <div className="px-6 py-4 border-t border-border-light bg-bg-secondary/30 space-y-3">
+          <div className="text-[10px] uppercase font-semibold text-text-tertiary tracking-wider">
+            {t('agenda.modal.changeStatus', 'Changer le statut')}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {a.status === 'SCHEDULED' && (
+              <StatusButton
+                Icon={CheckCircle2}
+                label={t('appointmentStatus.CONFIRMED', 'Confirmer')}
+                onClick={() => setStatus.mutate('CONFIRMED')}
+                color="info"
+                disabled={setStatus.isPending}
+              />
+            )}
+            {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
+              <StatusButton
+                Icon={CheckCircle2}
+                label={t('appointmentStatus.ARRIVED', "Patient arrivé")}
+                onClick={() => setStatus.mutate('ARRIVED')}
+                color="primary"
+                disabled={setStatus.isPending}
+              />
+            )}
+            {(a.status === 'CONFIRMED' || a.status === 'ARRIVED' || a.status === 'SCHEDULED') && (
+              <StatusButton
+                Icon={PlayCircle}
+                label={t('appointmentStatus.IN_PROGRESS', 'Démarrer séance')}
+                onClick={() => setStatus.mutate('IN_PROGRESS')}
+                color="info"
+                disabled={setStatus.isPending}
+              />
+            )}
+            {a.status === 'IN_PROGRESS' && (
+              <StatusButton
+                Icon={CheckCircle2}
+                label={t('appointmentStatus.COMPLETED', 'Terminer')}
+                onClick={() => setStatus.mutate('COMPLETED')}
+                color="success"
+                disabled={setStatus.isPending}
+              />
+            )}
+            {a.status !== 'CANCELLED' && a.status !== 'COMPLETED' && (
+              <>
+                <StatusButton
+                  Icon={CircleAlert}
+                  label={t('appointmentStatus.NO_SHOW', 'No show')}
+                  onClick={() => setStatus.mutate('NO_SHOW')}
+                  color="warning"
+                  disabled={setStatus.isPending}
+                />
+                <StatusButton
+                  Icon={X}
+                  label={t('appointmentStatus.CANCELLED', 'Annuler')}
+                  onClick={() => {
+                    if (confirm(t('agenda.modal.confirmCancel', 'Annuler ce RDV ? Si un patient est en liste d\'attente, il recevra un email automatiquement.'))) {
+                      setStatus.mutate('CANCELLED');
+                    }
+                  }}
+                  color="danger"
+                  disabled={setStatus.isPending}
+                />
+              </>
+            )}
+          </div>
+          {showAddToWaitingList && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => addToWaitingList.mutate()}
+              disabled={addToWaitingList.isPending}
+              className="text-xs text-text-secondary"
+            >
+              <Users className="w-3.5 h-3.5 me-1.5" />
+              {addToWaitingList.isPending
+                ? t('common.loading')
+                : t('agenda.modal.addToWaitingList', 'Ajouter à la liste d\'attente')}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusButton({
+  Icon,
+  label,
+  onClick,
+  color,
+  disabled,
+}: {
+  Icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+  color: 'primary' | 'success' | 'info' | 'warning' | 'danger';
+  disabled?: boolean;
+}) {
+  const colorMap = {
+    primary: 'bg-primary text-white hover:bg-primary-dark border-primary',
+    success: 'bg-primary-dark text-white hover:bg-primary border-primary-dark',
+    info: 'bg-info text-white hover:bg-info border-info',
+    warning: 'bg-warning text-warning-dark hover:bg-warning-dark hover:text-white border-warning',
+    danger: 'bg-danger-light text-danger-dark hover:bg-danger hover:text-white border-danger',
+  } as const;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-50 ${colorMap[color]}`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </button>
+  );
+}
+
+// =====================================================================
+// Composants utilitaires partagés
+// =====================================================================
+
+export function PatientAvatar({
+  name,
+  url,
+  size = 32,
+}: {
+  name: string;
+  url: string | null | undefined;
+  size?: number;
+}) {
+  const initials = name
+    .split(' ')
+    .map((s) => s.charAt(0))
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+  return (
+    <Avatar style={{ width: size, height: size }}>
+      {url ? <AvatarImage src={url} alt={name} /> : null}
+      <AvatarFallback className="bg-gradient-to-br from-primary-light to-secondary text-primary-dark text-xs font-bold">
+        {initials}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
 
 function statusDot(status: string): string {
   if (status === 'CONFIRMED') return 'bg-primary';
   if (status === 'SCHEDULED') return 'bg-warning';
+  if (status === 'ARRIVED') return 'bg-primary animate-pulse';
   if (status === 'IN_PROGRESS') return 'bg-info animate-pulse';
   if (status === 'COMPLETED') return 'bg-primary-dark';
   if (status === 'NO_SHOW') return 'bg-danger';
   if (status === 'CANCELLED') return 'bg-text-tertiary';
   return 'bg-text-tertiary';
+}
+
+function statusVariantOf(status: string): 'success' | 'warning' | 'info' | 'neutral' | 'danger' {
+  if (status === 'COMPLETED') return 'success';
+  if (status === 'CONFIRMED') return 'success';
+  if (status === 'ARRIVED') return 'info';
+  if (status === 'IN_PROGRESS') return 'info';
+  if (status === 'NO_SHOW') return 'danger';
+  if (status === 'CANCELLED') return 'neutral';
+  return 'warning';
 }
 
 const KPI_TONES = {
@@ -844,7 +1460,6 @@ function AgendaKPI({
   value: string | number;
   suffix?: string;
   tone?: keyof typeof KPI_TONES;
-  /** Pourcentage (0-100+) à afficher sous la valeur — utile pour CA réalisé/prévu */
   ratio?: number | null;
 }) {
   const c = KPI_TONES[tone];

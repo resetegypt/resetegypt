@@ -56,6 +56,7 @@
   "nav": {
     "dashboard": "Dashboard", "agenda": "Calendar", "newAppointment": "New booking",
     "inbox": "Inbox", "patients": "Patients", "intake": "Intake form",
+    "waitingList": "Waiting list",
     "accounting": "Accounting", "stats": "Stats", "adminUsers": "User management",
     "auditLogs": "Audit log", "logout": "Sign out"
   },
@@ -91,7 +92,7 @@
     "visitType": { "FIRST": "1st session", "FOLLOWUP": "Follow-up", "CONSOLIDATION": "Consolidation" }
   },
   "appointmentStatus": {
-    "SCHEDULED": "To confirm", "CONFIRMED": "Confirmed",
+    "SCHEDULED": "To confirm", "CONFIRMED": "Confirmed", "ARRIVED": "Arrived",
     "IN_PROGRESS": "In progress", "COMPLETED": "Completed",
     "NO_SHOW": "No-show", "CANCELLED": "Cancelled"
   },

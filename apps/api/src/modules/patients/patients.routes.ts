@@ -90,6 +90,8 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
         age: true,
         primaryAddiction: true,
         status: true,
+        avatarUrl: true,
+        tags: true,
         createdAt: true,
         preferredLanguage: true,
         governorate: true,
@@ -196,14 +198,22 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     const updateSchema = createPatientSchema.partial().extend({
       status: z.enum(['ACTIVE', 'ARCHIVED', 'LOST']).optional(),
       preferredPractitionerId: z.string().uuid().nullable().optional(),
+      avatarUrl: z.string().nullable().optional(),
+      // tags: tableau de chaînes courtes (max 24 chars chaque, max 12 tags)
+      tags: z.array(z.string().min(1).max(24)).max(12).optional(),
     });
     const partial = updateSchema.safeParse(req.body);
     if (!partial.success) return { error: 'ValidationError', details: partial.error.flatten() };
     const data = partial.data;
+    // Normalise les tags : trim + lowercase + dédoublonne
+    const tags = data.tags
+      ? Array.from(new Set(data.tags.map((t) => t.trim().toLowerCase()).filter(Boolean)))
+      : undefined;
     const updated = await app.prisma.patient.update({
       where: { id },
       data: {
         ...data,
+        tags,
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
         emergencyContact: data.emergencyContact
           ? (data.emergencyContact as unknown as object)
@@ -217,5 +227,97 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       resource: `patient:${id}`,
     });
     return { patient: updated };
+  });
+
+  // === Upload de l'avatar patient ===
+  // Le client envoie une data URL base64 redimensionnée côté navigateur
+  // (max 256x256, ~20KB). On stocke directement dans patient.avatarUrl.
+  // Si on bascule plus tard sur Supabase Storage / S3 il suffira de remplacer
+  // cette route par un upload réel + retour d'URL CDN.
+  app.put('/patients/:id/avatar', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const schema = z.object({
+      dataUrl: z
+        .string()
+        .startsWith('data:image/')
+        .max(200_000, 'Avatar trop lourd (max 200 KB après compression)')
+        .nullable(),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    const updated = await app.prisma.patient.update({
+      where: { id },
+      data: { avatarUrl: parsed.data.dataUrl },
+      select: { id: true, avatarUrl: true },
+    });
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: parsed.data.dataUrl ? 'patient_avatar_set' : 'patient_avatar_removed',
+      resource: `patient:${id}`,
+    });
+    return { patient: updated };
+  });
+
+  // === Notes de suivi (timeline) ===
+  // GET /patients/:id/notes — liste chronologique (récent en premier)
+  // POST /patients/:id/notes — ajoute une note
+  // DELETE /notes/:noteId — supprime (auteur ou ADMIN uniquement)
+  app.get('/patients/:id/notes', async (req) => {
+    const id = (req.params as { id: string }).id;
+    const notes = await app.prisma.followUpNote.findMany({
+      where: { patientId: id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: { select: { id: true, firstName: true, lastName: true, role: true } },
+      },
+      take: 200,
+    });
+    return { notes };
+  });
+
+  app.post('/patients/:id/notes', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const schema = z.object({
+      content: z.string().min(1).max(4000),
+      kind: z.enum(['NOTE', 'OBSERVATION', 'ALERT', 'CALL', 'RELAPSE']).default('NOTE'),
+      appointmentId: z.string().uuid().optional(),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    const note = await app.prisma.followUpNote.create({
+      data: {
+        patientId: id,
+        authorId: req.currentUser!.sub,
+        content: parsed.data.content,
+        kind: parsed.data.kind,
+        appointmentId: parsed.data.appointmentId,
+      },
+      include: {
+        author: { select: { id: true, firstName: true, lastName: true, role: true } },
+      },
+    });
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: 'patient_note_added',
+      resource: `patient:${id}`,
+      details: { noteId: note.id, kind: note.kind },
+    });
+    return reply.status(201).send({ note });
+  });
+
+  app.delete('/notes/:noteId', async (req, reply) => {
+    const noteId = (req.params as { noteId: string }).noteId;
+    const note = await app.prisma.followUpNote.findUnique({ where: { id: noteId } });
+    if (!note) return reply.status(404).send({ error: 'NotFound' });
+    const isAuthor = note.authorId === req.currentUser!.sub;
+    const isAdmin = req.currentUser!.role === 'ADMIN';
+    if (!isAuthor && !isAdmin) return reply.status(403).send({ error: 'Forbidden' });
+    await app.prisma.followUpNote.delete({ where: { id: noteId } });
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: 'patient_note_deleted',
+      resource: `note:${noteId}`,
+    });
+    return { ok: true };
   });
 }

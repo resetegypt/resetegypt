@@ -40,6 +40,7 @@ model User {
   systemSettings       SystemSetting[]
   createdMedicalRecords  MedicalRecord[] @relation("MedicalRecordCreatedBy")
   finalizedMedicalRecords MedicalRecord[] @relation("MedicalRecordFinalizedBy")
+  followUpNotes          FollowUpNote[]  @relation("FollowUpNoteAuthor")
 }
 
 enum Role {
@@ -74,13 +75,21 @@ model Patient {
   createdById             String
   createdBy               User          @relation("CreatedBy", fields: [createdById], references: [id])
   status                  PatientStatus @default(ACTIVE)
+  // Avatar : URL absolue (CDN) OU data URL base64 redimensionnée client-side.
+  // null => initiales du nom (fallback).
+  avatarUrl               String?
+  // Tags libres : VIP, "paie en retard", "allergie laser", "vegan", etc.
+  // Multi-valeur, normalisés en lowercase à la sauvegarde.
+  tags                    String[]      @default([])
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
-  appointments  Appointment[]
-  medicalRecord MedicalRecord?
-  payments      Payment[]
-  messages      Message[]
+  appointments   Appointment[]
+  medicalRecord  MedicalRecord?
+  payments       Payment[]
+  messages       Message[]
+  followUpNotes  FollowUpNote[]
+  waitingEntries WaitingList[]
 
   @@index([phone])
   @@index([lastName, firstName])
@@ -138,6 +147,9 @@ enum VisitType {
 enum AppointmentStatus {
   SCHEDULED
   CONFIRMED
+  // Patient s'est présenté à l'accueil et attend que le médecin l'appelle
+  // (transition entre SCHEDULED/CONFIRMED et IN_PROGRESS).
+  ARRIVED
   IN_PROGRESS
   COMPLETED
   NO_SHOW
@@ -352,4 +364,68 @@ model IpWhitelist {
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
+}
+
+// Notes de suivi libres au fil des séances (timeline).
+// Différent de MedicalRecord (qui est UNE fiche structurée par patient).
+// Chaque note est datée, attachée au patient (et optionnellement à un RDV),
+// horodatée et signée par son auteur (médecin/secrétaire).
+model FollowUpNote {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  authorId      String
+  author        User         @relation("FollowUpNoteAuthor", fields: [authorId], references: [id])
+  content       String
+  // Tag visuel pour la timeline : observation médicale, note secrétaire, alerte, etc.
+  kind          NoteKind     @default(NOTE)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([patientId, createdAt])
+}
+
+enum NoteKind {
+  NOTE          // note générique
+  OBSERVATION   // observation clinique post-séance
+  ALERT         // alerte importante (allergie découverte, etc.)
+  CALL          // appel téléphonique passé
+  RELAPSE       // rechute signalée
+}
+
+// Patients en liste d'attente pour un créneau préféré.
+// Quand un RDV existant est CANCELLED ou NO_SHOW, on cherche les entries
+// matching (service + plage horaire) et on notifie les premiers de la file.
+model WaitingList {
+  id              String            @id @default(uuid())
+  patientId       String
+  patient         Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  service         Addiction
+  // Préférences de créneau (toutes optionnelles) :
+  preferredFrom   DateTime?         // début de la fenêtre acceptable
+  preferredTo     DateTime?         // fin de la fenêtre acceptable
+  preferredDays   String[]          @default([]) // ['MON', 'TUE', 'SAT', ...]
+  preferredHours  String?           // ex: "matin", "après-midi", "18h+"
+  practitionerId  String?           // si le patient veut un médecin spécifique
+  priority        Int               @default(0) // higher = priorisé
+  status          WaitingListStatus @default(WAITING)
+  notifiedAt      DateTime?
+  notifiedSlotAt  DateTime?         // créneau qu'on a proposé
+  bookedAt        DateTime?
+  bookedAppointmentId String?
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([service, status, createdAt])
+  @@index([patientId])
+}
+
+enum WaitingListStatus {
+  WAITING    // dans la file
+  NOTIFIED   // on a envoyé une proposition par email
+  BOOKED     // a accepté et un RDV a été créé
+  EXPIRED    // créneau passé sans réponse
+  CANCELLED  // retiré de la liste
 }

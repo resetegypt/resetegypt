@@ -72,6 +72,7 @@
     "inbox": "Inbox",
     "patients": "Patients",
     "intake": "Fiche d'accueil",
+    "waitingList": "Liste d'attente",
     "accounting": "Comptabilité",
     "stats": "Statistiques",
     "adminUsers": "Gestion comptes",
@@ -124,6 +125,7 @@
   "appointmentStatus": {
     "SCHEDULED": "À confirmer",
     "CONFIRMED": "Confirmé",
+    "ARRIVED": "Arrivé",
     "IN_PROGRESS": "En cours",
     "COMPLETED": "Terminé",
     "NO_SHOW": "No-show",
