@@ -14,6 +14,7 @@ import {
   Activity,
   Clock,
   Plus,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ interface Appointment {
   visitType: string;
   status: string;
   price: number;
+  paidTotal: number | null;
 }
 
 type ViewMode = 'day' | 'week' | 'month';
@@ -165,7 +167,16 @@ export function AgendaPage() {
         : endOfMonth(anchorDate).getDate();
   const slotsInRange = daysInRange * SLOTS_PER_DAY;
   const occupation = slotsInRange > 0 ? Math.round((totalCount / slotsInRange) * 100) : 0;
-  const expectedRevenue = appointments.reduce((sum, a) => sum + a.price, 0);
+  // CA prévu : somme des prix des RDV (hors annulés/no-show) — ce qu'on
+  //            doit encaisser sur la période.
+  // CA réalisé : somme des paiements TTC effectivement reçus.
+  const expectedRevenue = appointments
+    .filter((a) => a.status !== 'CANCELLED' && a.status !== 'NO_SHOW')
+    .reduce((sum, a) => sum + a.price, 0);
+  const realizedRevenue = appointments.reduce(
+    (sum, a) => sum + (a.paidTotal ?? 0),
+    0,
+  );
   const toConfirm = appointments.filter((a) => a.status === 'SCHEDULED').length;
 
   // Indicateur "maintenant"
@@ -262,8 +273,8 @@ export function AgendaPage() {
       />
 
       <div className="p-7 space-y-5 max-w-[1600px]">
-        {/* KPI */}
-        <div className={`grid grid-cols-2 ${isPractitioner ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-4`}>
+        {/* KPI — 3 cards pour praticien, 5 cards pour secrétaire/admin */}
+        <div className={`grid grid-cols-2 ${isPractitioner ? 'md:grid-cols-3' : 'md:grid-cols-3 xl:grid-cols-5'} gap-4`}>
           <AgendaKPI
             Icon={CalendarDays}
             label={t('agenda.stats.bookings', 'Rendez-vous')}
@@ -284,7 +295,21 @@ export function AgendaPage() {
               label={t('agenda.stats.expectedRevenue', 'CA prévu')}
               value={expectedRevenue.toLocaleString(i18n.language)}
               suffix="EGP"
+              tone="neutral"
+            />
+          )}
+          {!isPractitioner && (
+            <AgendaKPI
+              Icon={Wallet}
+              label={t('agenda.stats.realizedRevenue', 'CA réalisé')}
+              value={realizedRevenue.toLocaleString(i18n.language)}
+              suffix="EGP"
               tone="success"
+              ratio={
+                expectedRevenue > 0
+                  ? Math.round((realizedRevenue / expectedRevenue) * 100)
+                  : null
+              }
             />
           )}
           <AgendaKPI
@@ -803,12 +828,15 @@ function AgendaKPI({
   value,
   suffix,
   tone = 'neutral',
+  ratio,
 }: {
   Icon: LucideIcon;
   label: string;
   value: string | number;
   suffix?: string;
   tone?: keyof typeof KPI_TONES;
+  /** Pourcentage (0-100+) à afficher sous la valeur — utile pour CA réalisé/prévu */
+  ratio?: number | null;
 }) {
   const c = KPI_TONES[tone];
   return (
@@ -825,6 +853,21 @@ function AgendaKPI({
         </span>
         {suffix && <span className="text-sm font-medium text-text-tertiary">{suffix}</span>}
       </div>
+      {ratio !== undefined && ratio !== null && (
+        <div className="mt-2">
+          <div className="flex items-center justify-between text-[10px] text-text-tertiary mb-1">
+            <span>{ratio}% du prévu</span>
+          </div>
+          <div className="h-1 w-full bg-bg-secondary rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${
+                ratio >= 80 ? 'bg-primary' : ratio >= 50 ? 'bg-warning' : 'bg-danger'
+              }`}
+              style={{ width: `${Math.min(100, ratio)}%` }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -174,6 +174,7 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       include: {
         patient: { select: { firstName: true, lastName: true, phone: true } },
         practitioner: { select: { firstName: true, lastName: true } },
+        payment: { select: { id: true, total: true } },
       },
     });
 
@@ -190,6 +191,7 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
         visitType: a.visitType,
         status: a.status,
         price: Number(a.price),
+        paidTotal: a.payment ? Number(a.payment.total) : null,
       })),
     };
   });
