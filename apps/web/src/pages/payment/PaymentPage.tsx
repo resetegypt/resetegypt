@@ -143,7 +143,7 @@ export function PaymentPage() {
           title={t('payment.success.title')}
           subtitle={t('payment.success.subtitle', { invoice: success.invoiceNumber })}
         />
-        <div className="p-7 max-w-2xl space-y-4">
+        <div className="p-7 max-w-2xl mx-auto space-y-4">
           <Card>
             <CardContent className="space-y-4 text-center py-8">
               <div className="text-6xl">✅</div>
@@ -253,7 +253,7 @@ export function PaymentPage() {
         title={t('payment.title')}
         subtitle={`${a.patient.firstName} ${a.patient.lastName} · ${t(`addiction.${a.service}`)}`}
       />
-      <div className="p-7 space-y-4 max-w-3xl">
+      <div className="p-7 space-y-4 max-w-3xl mx-auto">
         <Card>
           <CardHeader>
             <CardTitle>🧾 {t('payment.items')}</CardTitle>
