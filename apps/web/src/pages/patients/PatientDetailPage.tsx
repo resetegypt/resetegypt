@@ -6,18 +6,36 @@ import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 import { useAuthStore } from '../../lib/auth';
 
+interface ConsentEntry {
+  accepted: boolean;
+  timestamp: string;
+}
+
 interface PatientDetail {
   patient: {
     id: string;
     firstName: string;
     lastName: string;
+    dateOfBirth: string | null;
+    gender: 'MALE' | 'FEMALE' | null;
     phone: string;
     whatsapp: string | null;
     email: string | null;
+    address: string | null;
     age: number | null;
     governorate: string | null;
     profession: string | null;
+    maritalStatus: string | null;
+    acquisitionSource: string[];
     primaryAddiction: string;
+    previousAttempts: string | null;
+    motivationLevel: string | null;
+    emergencyContact: { name?: string; phone?: string; relationship?: string } | null;
+    consents: {
+      dataProtection?: ConsentEntry;
+      smsAuthorization?: ConsentEntry;
+      nonMedicalAcknowledgement?: ConsentEntry;
+    };
     status: string;
     preferredLanguage: string;
     createdAt: string;
@@ -174,6 +192,161 @@ export function PatientDetailPage() {
           </Card>
         </div>
 
+        {/* === FICHE D'ACCUEIL — toutes les infos saisies à l'admission === */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3 w-full">
+              <CardTitle>📋 {t('patients.detail.intakeSection', "Fiche d'accueil")}</CardTitle>
+              {!isPractitioner && (
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/patients/${patient.id}/edit`}>
+                    ✏️ {t('common.edit', 'Modifier')}
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-border-light">
+              <IntakeSection title={t('patients.intake.identity', 'Identité')} icon="🆔">
+                <Field
+                  label={t('patients.intake.firstName', 'Prénom')}
+                  value={patient.firstName}
+                />
+                <Field
+                  label={t('patients.intake.lastName', 'Nom')}
+                  value={patient.lastName}
+                />
+                <Field
+                  label={t('patients.intake.dateOfBirth', 'Date de naissance')}
+                  value={
+                    patient.dateOfBirth
+                      ? new Date(patient.dateOfBirth).toLocaleDateString(i18n.language)
+                      : '—'
+                  }
+                />
+                <Field
+                  label={t('patients.intake.age', 'Âge')}
+                  value={patient.age ? `${patient.age} ${t('patients.detail.yearsLabel', 'ans')}` : '—'}
+                />
+                <Field
+                  label={t('patients.intake.gender', 'Genre')}
+                  value={
+                    patient.gender === 'MALE'
+                      ? t('patients.intake.male', 'Homme')
+                      : patient.gender === 'FEMALE'
+                        ? t('patients.intake.female', 'Femme')
+                        : '—'
+                  }
+                />
+                <Field
+                  label={t('patients.intake.preferredLanguage', 'Langue préférée')}
+                  value={
+                    patient.preferredLanguage === 'fr'
+                      ? 'Français'
+                      : patient.preferredLanguage === 'ar'
+                        ? 'العربية'
+                        : 'English'
+                  }
+                />
+              </IntakeSection>
+
+              <IntakeSection title={t('patients.intake.contact', 'Contact')} icon="📞">
+                <Field
+                  label={t('patients.intake.phone', 'Téléphone')}
+                  value={patient.phone}
+                  mono
+                />
+                <Field
+                  label={t('patients.intake.whatsapp', 'WhatsApp')}
+                  value={patient.whatsapp ?? '—'}
+                  mono
+                />
+                <Field
+                  label={t('patients.intake.email', 'Email')}
+                  value={patient.email ?? '—'}
+                />
+                <Field
+                  label={t('patients.intake.profession', 'Profession')}
+                  value={patient.profession ?? '—'}
+                />
+                <Field
+                  label={t('patients.intake.address', 'Adresse')}
+                  value={patient.address ?? '—'}
+                  wide
+                />
+                <Field
+                  label={t('patients.intake.governorate', 'Gouvernorat')}
+                  value={patient.governorate ?? '—'}
+                />
+              </IntakeSection>
+
+              <IntakeSection title={t('patients.intake.consultationReason', 'Motif de consultation')} icon="🎯">
+                <Field
+                  label={t('patients.intake.addictionType', 'Type d\'addiction')}
+                  value={`${ADDICTION_ICON[patient.primaryAddiction]} ${t(`addiction.${patient.primaryAddiction}`)}`}
+                />
+                <Field
+                  label={t('patients.intake.previousAttempts', 'Tentatives précédentes')}
+                  value={patient.previousAttempts ?? '—'}
+                />
+                <Field
+                  label={t('patients.intake.motivationLevel', 'Niveau de motivation')}
+                  value={
+                    patient.motivationLevel === 'high'
+                      ? t('patients.intake.motivation.high', 'Élevé')
+                      : patient.motivationLevel === 'medium'
+                        ? t('patients.intake.motivation.medium', 'Moyen')
+                        : patient.motivationLevel === 'low'
+                          ? t('patients.intake.motivation.low', 'Faible')
+                          : '—'
+                  }
+                />
+                <Field
+                  label={t('patients.intake.acquisitionSource', "Source d'acquisition")}
+                  value={
+                    patient.acquisitionSource.length > 0
+                      ? patient.acquisitionSource
+                          .map((s) => t(`patients.intake.sources.${s}`, s))
+                          .join(', ')
+                      : '—'
+                  }
+                  wide
+                />
+              </IntakeSection>
+
+              <IntakeSection title={t('patients.intake.emergencyContact', 'Contact d\'urgence')} icon="🆘">
+                <Field
+                  label={t('patients.intake.emergencyName', 'Nom')}
+                  value={patient.emergencyContact?.name ?? '—'}
+                />
+                <Field
+                  label={t('patients.intake.emergencyPhone', 'Téléphone')}
+                  value={patient.emergencyContact?.phone ?? '—'}
+                  mono
+                />
+              </IntakeSection>
+
+              <IntakeSection title={t('patients.intake.consents', 'Consentements')} icon="🛡️">
+                <ConsentRow
+                  label={t('patients.intake.consent1', 'Protection des données (loi 151/2020)')}
+                  consent={patient.consents.dataProtection}
+                  required
+                />
+                <ConsentRow
+                  label={t('patients.intake.consent2', 'Autorisation SMS / WhatsApp')}
+                  consent={patient.consents.smsAuthorization}
+                />
+                <ConsentRow
+                  label={t('patients.intake.consent3', 'Reconnaissance centre non-médical')}
+                  consent={patient.consents.nonMedicalAcknowledgement}
+                  required
+                />
+              </IntakeSection>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>📜 {t('patients.detail.history')}</CardTitle>
@@ -254,4 +427,96 @@ function statusVariant(s: string): 'success' | 'warning' | 'info' | 'neutral' | 
 function weeksBetween(start: string, end: string): number {
   const ms = new Date(end).getTime() - new Date(start).getTime();
   return Math.floor(ms / (7 * 24 * 60 * 60 * 1000));
+}
+
+function IntakeSection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="px-5 py-4">
+      <h4 className="text-xs font-bold tracking-[0.12em] uppercase text-text-tertiary mb-3 flex items-center gap-1.5">
+        <span>{icon}</span>
+        <span>{title}</span>
+      </h4>
+      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+        {children}
+      </dl>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  mono = false,
+  wide = false,
+}: {
+  label: string;
+  value: string | null | undefined;
+  mono?: boolean;
+  wide?: boolean;
+}) {
+  const isEmpty = !value || value === '—';
+  return (
+    <div className={wide ? 'sm:col-span-2 lg:col-span-3' : ''}>
+      <dt className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">
+        {label}
+      </dt>
+      <dd
+        className={`text-sm mt-0.5 ${isEmpty ? 'text-text-tertiary italic' : 'text-text font-medium'} ${
+          mono ? 'font-mono' : ''
+        }`}
+        data-numeric={mono ? 'true' : undefined}
+      >
+        {value || '—'}
+      </dd>
+    </div>
+  );
+}
+
+function ConsentRow({
+  label,
+  consent,
+  required = false,
+}: {
+  label: string;
+  consent: { accepted: boolean; timestamp: string } | undefined;
+  required?: boolean;
+}) {
+  const accepted = consent?.accepted ?? false;
+  const dateStr = consent?.timestamp
+    ? new Date(consent.timestamp).toLocaleDateString()
+    : null;
+  return (
+    <div className="sm:col-span-2 lg:col-span-3 flex items-start gap-3 py-1">
+      <span
+        className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full text-xs ${
+          accepted
+            ? 'bg-primary-lightest text-primary-dark ring-1 ring-primary-light'
+            : required
+              ? 'bg-danger-light text-danger-dark ring-1 ring-danger-light'
+              : 'bg-bg-secondary text-text-tertiary'
+        }`}
+      >
+        {accepted ? '✓' : required ? '!' : '—'}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-text">
+          {label}
+          {required && <span className="text-danger ms-1">*</span>}
+        </div>
+        {dateStr && (
+          <div className="text-[11px] text-text-tertiary mt-0.5">
+            Signé le {dateStr}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
