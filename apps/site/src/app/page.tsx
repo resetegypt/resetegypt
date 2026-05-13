@@ -38,6 +38,7 @@ export default function HomePage() {
       <Hero />
       <BrandRibbon />
       <ServicesSection />
+      <RegisteredSection />
       <VisitCenterSection />
       <MethodSection />
       <ProcessSection />
@@ -45,6 +46,67 @@ export default function HomePage() {
       <FaqSection />
       <FinalCta />
     </>
+  );
+}
+
+// ============================================================================
+// Registered & Regulated Center — section symétrique avec 2 badges officiels
+// ============================================================================
+
+function RegisteredSection() {
+  return (
+    <Section
+      eyebrow="Centre agréé"
+      title="Un centre enregistré et régulé"
+      subtitle="Notre dispositif laser est certifié et utilisé en pleine conformité avec les normes en vigueur. Les séances sont conduites dans un environnement contrôlé par un praticien certifié."
+      align="center"
+    >
+      {/* Grid 2 colonnes parfaitement symétrique — même taille, même hauteur */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-3xl mx-auto">
+        <BadgeCard
+          src="/photos/badge-moh.png"
+          alt="Ministry of Health Registration"
+          title="Ministry of Health"
+          subtitle="Enregistrement en cours"
+        />
+        <BadgeCard
+          src="/photos/badge-eda.png"
+          alt="EDA — Egyptian Drug Authority"
+          title="EDA · Egyptian Drug Authority"
+          subtitle="Enregistrement en cours"
+        />
+      </div>
+    </Section>
+  );
+}
+
+function BadgeCard({
+  src,
+  alt,
+  title,
+  subtitle,
+}: {
+  src: string;
+  alt: string;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light p-6 lg:p-8 flex flex-col items-center text-center shadow-sm">
+      <div className="aspect-square w-32 sm:w-36 lg:w-40 flex items-center justify-center mb-5">
+        <Image
+          src={src}
+          alt={alt}
+          width={300}
+          height={300}
+          className="object-contain max-w-full max-h-full"
+        />
+      </div>
+      <h3 className="text-base font-bold text-text leading-tight">{title}</h3>
+      <p className="text-xs text-primary font-semibold mt-1.5 tracking-wider uppercase">
+        {subtitle}
+      </p>
+    </div>
   );
 }
 
@@ -110,27 +172,20 @@ function VisitCenterSection() {
             </div>
           </div>
 
-          {/* 2 photos juxtaposées */}
+          {/* Photo unique du centre — plus impactante qu'un duo asymétrique */}
           <div className="relative">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl overflow-hidden aspect-[3/4] ring-2 ring-white/30 shadow-xl translate-y-4">
-                <Image
-                  src="/photos/about-1.png"
-                  alt="Centre RESET — vue intérieure"
-                  width={300}
-                  height={400}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-              <div className="rounded-2xl overflow-hidden aspect-[3/4] ring-2 ring-white/30 shadow-xl -translate-y-4">
-                <Image
-                  src="/photos/method-hero.png"
-                  alt="Méthode RESET — auriculothérapie laser"
-                  width={300}
-                  height={400}
-                  className="object-cover w-full h-full"
-                />
-              </div>
+            <div className="aspect-[4/5] rounded-2xl overflow-hidden ring-2 ring-white/30 shadow-2xl">
+              <Image
+                src="/photos/hero-center.png"
+                alt="Centre RESET — Branch Cairo East CMC"
+                width={600}
+                height={750}
+                className="object-cover w-full h-full"
+              />
+            </div>
+            <div className="absolute -bottom-4 -right-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-primary shadow-xl text-sm font-bold">
+              <Sparkles className="w-4 h-4" />
+              Ouvert 7/7
             </div>
           </div>
         </div>
