@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, CardContent, Input, ResetLogo } from '@reset/ui';
+import {
+  Cigarette,
+  Pill,
+  Wine,
+  Candy,
+  Brain,
+  Check,
+  type LucideIcon,
+} from 'lucide-react';
 import { LANGUAGES, type Lang } from './i18n';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -12,44 +21,57 @@ const SERVICE_IDS = ['TOBACCO', 'DRUGS', 'ALCOHOL', 'SUGAR', 'STRESS'] as const;
 type ServiceId = (typeof SERVICE_IDS)[number];
 
 // Une palette par service, légère et discernable même daltonien.
-// On reste dans l'univers Reset (primary/secondary) avec un accent par service.
+// Icônes Lucide (stroke épuré 1.5px) pour une identité visuelle plus design
+// et cohérente, à la place des emojis.
 const SERVICE_META: Record<
   ServiceId,
-  { icon: string; priceFrom: number; accent: string; iconBg: string; selectedRing: string }
+  {
+    Icon: LucideIcon;
+    priceFrom: number;
+    accent: string;
+    iconBg: string;
+    iconColor: string;
+    selectedRing: string;
+  }
 > = {
   TOBACCO: {
-    icon: '🚬',
+    Icon: Cigarette,
     priceFrom: 1500,
     accent: 'text-amber-700',
     iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
     selectedRing: 'ring-amber-500',
   },
   DRUGS: {
-    icon: '💊',
+    Icon: Pill,
     priceFrom: 1800,
     accent: 'text-purple-700',
     iconBg: 'bg-purple-100',
+    iconColor: 'text-purple-600',
     selectedRing: 'ring-purple-500',
   },
   ALCOHOL: {
-    icon: '🍷',
+    Icon: Wine,
     priceFrom: 1800,
     accent: 'text-rose-700',
     iconBg: 'bg-rose-100',
+    iconColor: 'text-rose-600',
     selectedRing: 'ring-rose-500',
   },
   SUGAR: {
-    icon: '🍬',
+    Icon: Candy,
     priceFrom: 1100,
     accent: 'text-pink-700',
     iconBg: 'bg-pink-100',
+    iconColor: 'text-pink-600',
     selectedRing: 'ring-pink-500',
   },
   STRESS: {
-    icon: '😰',
+    Icon: Brain,
     priceFrom: 900,
     accent: 'text-sky-700',
     iconBg: 'bg-sky-100',
+    iconColor: 'text-sky-600',
     selectedRing: 'ring-sky-500',
   },
 };
@@ -336,26 +358,26 @@ function ServiceSelection({
               aria-pressed={selected}
             >
               {selected && (
-                <span className="absolute top-2.5 end-2.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shadow-md">
-                  ✓
+                <span className="absolute top-2.5 end-2.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white shadow-md">
+                  <Check className="w-3 h-3" strokeWidth={3} />
                 </span>
               )}
 
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-12 h-12 sm:w-14 sm:h-14 ${meta.iconBg} rounded-xl flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0`}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 ${meta.iconBg} rounded-xl flex items-center justify-center shrink-0`}
                   aria-hidden
                 >
-                  {meta.icon}
+                  <meta.Icon
+                    className={`w-6 h-6 sm:w-7 sm:h-7 ${meta.iconColor}`}
+                    strokeWidth={1.75}
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm sm:text-base font-bold text-text leading-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-text leading-tight">
                     {t(`services.${id}`)}
                   </h3>
-                  <p className="text-xs text-text-secondary mt-0.5 leading-snug line-clamp-2">
-                    {t(`services.${id}_DESC`)}
-                  </p>
-                  <div className="mt-2 flex items-baseline gap-1.5">
+                  <div className="mt-1.5 flex items-baseline gap-1.5">
                     <span className="text-[9px] uppercase tracking-wider font-semibold text-text-tertiary">
                       {t('priceFrom')}
                     </span>
