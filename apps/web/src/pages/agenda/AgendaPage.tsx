@@ -92,7 +92,11 @@ function endOfMonth(d: Date): Date {
 export function AgendaPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
-  const isPractitioner = user?.role === 'PRACTITIONER';
+  // Le CA prévu / CA réalisé est strictement réservé à l'admin :
+  // ni les praticiens (ils n'ont pas à voir l'argent), ni les
+  // secrétaires (qui voient déjà la compta dans son module dédié)
+  // n'ont besoin de ces KPI dans l'agenda.
+  const showRevenue = user?.role === 'ADMIN';
   const [view, setView] = useState<ViewMode>('week');
   const [anchorDate, setAnchorDate] = useState(() => {
     const d = new Date();
@@ -273,8 +277,13 @@ export function AgendaPage() {
       />
 
       <div className="p-7 space-y-5 max-w-[1600px]">
-        {/* KPI — 3 cards pour praticien, 5 cards pour secrétaire/admin */}
-        <div className={`grid grid-cols-2 ${isPractitioner ? 'md:grid-cols-3' : 'md:grid-cols-3 xl:grid-cols-5'} gap-4`}>
+        {/* KPI — admin: 5 cards (avec CA prévu + CA réalisé)
+                  secrétaire / praticien: 3 cards (sans argent) */}
+        <div
+          className={`grid grid-cols-2 gap-4 ${
+            showRevenue ? 'md:grid-cols-3 xl:grid-cols-5' : 'md:grid-cols-3'
+          }`}
+        >
           <AgendaKPI
             Icon={CalendarDays}
             label={t('agenda.stats.bookings', 'Rendez-vous')}
@@ -289,7 +298,7 @@ export function AgendaPage() {
             suffix="%"
             tone={occupation > 70 ? 'warning' : 'neutral'}
           />
-          {!isPractitioner && (
+          {showRevenue && (
             <AgendaKPI
               Icon={TrendingUp}
               label={t('agenda.stats.expectedRevenue', 'CA prévu')}
@@ -298,7 +307,7 @@ export function AgendaPage() {
               tone="neutral"
             />
           )}
-          {!isPractitioner && (
+          {showRevenue && (
             <AgendaKPI
               Icon={Wallet}
               label={t('agenda.stats.realizedRevenue', 'CA réalisé')}
