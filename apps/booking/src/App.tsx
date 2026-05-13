@@ -93,10 +93,13 @@ export function App() {
       <header className="bg-primary text-primary-light border-b border-primary-dark">
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3 text-primary-light">
-            <ResetLogo variant="wordmark" className="h-9 w-auto" />
-            <span className="text-[10px] tracking-[0.32em] font-semibold opacity-80">
-              BRANCH CAIRO EAST CMC
-            </span>
+            <ResetLogo variant="full" className="w-12 h-12 rounded-lg" />
+            <div className="leading-tight">
+              <div className="text-base font-extrabold tracking-tight">Reset Yourself</div>
+              <div className="text-[10px] tracking-[0.32em] font-semibold opacity-80">
+                BRANCH CAIRO EAST CMC
+              </div>
+            </div>
           </div>
           <div className="flex gap-1">
             {LANGUAGES.map((lng) => (

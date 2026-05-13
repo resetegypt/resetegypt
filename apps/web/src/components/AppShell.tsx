@@ -92,18 +92,22 @@ export function AppShell() {
   return (
     <div className="min-h-screen grid grid-cols-[264px_1fr] bg-bg">
       <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
-        {/* Brand band — carte arrondie premium avec marge sur les côtés */}
-        <div className="px-3 pt-3">
-          <div className="rounded-2xl bg-gradient-to-br from-primary via-primary to-primary-dark text-primary-light px-4 pt-4 pb-4 relative overflow-hidden shadow-[0_4px_12px_rgba(30,15,186,0.18),inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <div className="absolute -top-20 -right-12 w-48 h-48 rounded-full bg-secondary/15 blur-2xl pointer-events-none" />
+        {/* Brand band — logo officiel + branch label + user card */}
+        <div className="px-3 pt-3 space-y-2">
+          {/* Logo officiel (SVG du graphiste) */}
+          <div className="rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(30,15,186,0.2)]">
+            <ResetLogo variant="full" className="block w-full h-auto" />
+          </div>
+
+          {/* Branch label + user info, sur fond bleu pour cohérence */}
+          <div className="rounded-2xl bg-gradient-to-br from-primary via-primary to-primary-dark text-primary-light px-4 pt-3 pb-4 relative overflow-hidden shadow-[0_4px_12px_rgba(30,15,186,0.18),inset_0_1px_0_rgba(255,255,255,0.08)]">
             <div className="absolute -bottom-16 -left-8 w-32 h-32 rounded-full bg-primary-light/10 blur-2xl pointer-events-none" />
-            <div className="relative flex flex-col items-center">
-              <ResetLogo variant="wordmark" className="h-7 w-auto text-primary-light" />
-              <div className="text-[10px] text-primary-light/75 tracking-[0.28em] font-semibold mt-2.5">
+            <div className="relative text-center mb-3">
+              <div className="text-[10px] text-primary-light/75 tracking-[0.28em] font-semibold">
                 BRANCH CAIRO EAST CMC
               </div>
             </div>
-            <div className="relative mt-4 flex items-center gap-3">
+            <div className="relative flex items-center gap-3">
               <Avatar className="ring-2 ring-white/20 h-10 w-10">
                 <AvatarFallback className="bg-white/15 text-white font-semibold">{initials}</AvatarFallback>
               </Avatar>

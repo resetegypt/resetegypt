@@ -35,12 +35,12 @@ export function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-primary text-primary-light items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary-dark/40 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-secondary/20 blur-3xl" />
-        <div className="relative z-10 text-center">
-          <ResetLogo variant="wordmark" className="h-20 w-auto mx-auto text-primary-light" />
-          <div className="mt-3 text-xs tracking-[0.4em] font-medium text-primary-light/80">
+        <div className="relative z-10 text-center w-full max-w-sm">
+          <ResetLogo variant="full" className="w-72 h-72 mx-auto rounded-3xl shadow-2xl" />
+          <div className="mt-6 text-xs tracking-[0.4em] font-semibold text-primary-light/80">
             BRANCH CAIRO EAST CMC
           </div>
-          <p className="mt-10 text-primary-light/80 text-sm max-w-xs mx-auto leading-relaxed">
+          <p className="mt-8 text-primary-light/80 text-sm max-w-xs mx-auto leading-relaxed">
             {t('auth.heroTagline', "Plateforme métier — auriculothérapie laser, gestion patients et facturation conforme ETA.")}
           </p>
         </div>
@@ -66,8 +66,8 @@ export function LoginPage() {
           </div>
           {/* Logo visible aussi en mobile (où le volet gauche est caché) */}
           <div className="lg:hidden text-center">
-            <ResetLogo variant="wordmark" className="h-10 w-auto mx-auto text-primary" />
-            <div className="text-[10px] tracking-[0.4em] font-medium text-text-secondary mt-2">
+            <ResetLogo variant="full" className="w-28 h-28 mx-auto rounded-2xl" />
+            <div className="text-[10px] tracking-[0.4em] font-semibold text-text-secondary mt-2">
               BRANCH CAIRO EAST CMC
             </div>
           </div>
