@@ -443,21 +443,18 @@ const PILLARS = [
     title: 'Régulation du stress',
     description:
       'Laser de photobiomodulation basse intensité pour apaiser naturellement le système nerveux.',
-    gif: '/photos/pillar-1.gif',
   },
   {
     Icon: Zap,
     title: 'Stimulation auriculaire',
     description:
       'Cible précise sur les points neurologiques qui neutralisent les envies physiques.',
-    gif: '/photos/pillar-2.gif',
   },
   {
     Icon: HeartHandshake,
     title: 'Accompagnement personnel',
     description:
       'Un praticien dédié vous guide pendant et après la transition comportementale.',
-    gif: '/photos/pillar-3.gif',
   },
 ];
 
@@ -515,35 +512,22 @@ function MethodSection() {
           Comment ça marche concrètement
         </h3>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         {PILLARS.map((p, idx) => (
           <div
             key={idx}
-            className="rounded-2xl bg-surface border border-border-light overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
+            className="relative rounded-2xl bg-surface border border-border-light p-7 lg:p-8 hover:border-primary/40 hover:shadow-lg transition-all"
           >
-            {/* GIF en haut */}
-            <div className="relative aspect-video overflow-hidden bg-bg-secondary">
-              <Image
-                src={p.gif}
-                alt={p.title}
-                width={640}
-                height={360}
-                unoptimized
-                className="object-cover w-full h-full"
-              />
-              <span className="absolute top-3 left-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/95 text-primary text-sm font-extrabold shadow-md">
-                {idx + 1}
+            <div className="flex items-start justify-between mb-5">
+              <div className="w-14 h-14 rounded-2xl bg-primary-lightest text-primary flex items-center justify-center">
+                <p.Icon className="w-6 h-6" strokeWidth={1.75} />
+              </div>
+              <span className="text-5xl font-extrabold text-primary/15 tabular-nums leading-none">
+                0{idx + 1}
               </span>
             </div>
-            <div className="p-5 lg:p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary-lightest text-primary flex items-center justify-center">
-                  <p.Icon className="w-4 h-4" strokeWidth={1.75} />
-                </div>
-              </div>
-              <h3 className="text-base font-bold text-text leading-tight">{p.title}</h3>
-              <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
-            </div>
+            <h3 className="text-lg font-bold text-text leading-tight">{p.title}</h3>
+            <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
           </div>
         ))}
       </div>
@@ -574,22 +558,22 @@ function MethodSection() {
 
 const PROCESS = [
   {
+    Icon: HeartHandshake,
     title: 'Consultation initiale',
     description: "Un échange personnalisé pour comprendre votre profil et votre motivation.",
     duration: '15 min',
-    gif: '/photos/process-1.gif',
   },
   {
+    Icon: Zap,
     title: 'Stimulation laser',
     description: 'Application précise sur les points auriculaires.',
     duration: '20–30 min',
-    gif: '/photos/process-2.gif',
   },
   {
+    Icon: CheckCircle2,
     title: 'Recommandations',
     description: 'Conseils simples et actionnables à suivre après votre séance.',
     duration: '5 min',
-    gif: '/photos/process-3.gif',
   },
 ];
 
@@ -600,60 +584,41 @@ function ProcessSection() {
       title="Une heure pour changer de vie"
       subtitle="Le déroulement précis d'une consultation au centre RESET. Simple, rapide, transparent."
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         {PROCESS.map((p, idx) => (
           <div
             key={idx}
-            className="relative rounded-2xl bg-surface border border-border-light overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
+            className="relative rounded-2xl bg-surface border border-border-light p-7 lg:p-8 hover:border-primary/40 hover:shadow-lg transition-all"
           >
-            {/* GIF animé du process */}
-            <div className="relative aspect-video overflow-hidden bg-bg-secondary">
-              <Image
-                src={p.gif}
-                alt={p.title}
-                width={640}
-                height={360}
-                unoptimized
-                className="object-cover w-full h-full"
-              />
-              <div className="absolute top-3 left-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white text-sm font-bold shadow-lg">
-                {idx + 1}
+            <div className="flex items-start justify-between mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md shadow-primary/20">
+                <p.Icon className="w-5 h-5" strokeWidth={1.75} />
               </div>
+              <span className="text-5xl font-extrabold text-primary/15 tabular-nums leading-none">
+                0{idx + 1}
+              </span>
             </div>
-            <div className="p-5 lg:p-6">
-              <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-1.5">
-                Étape 0{idx + 1}
-              </div>
-              <h3 className="text-base font-bold text-text leading-tight">{p.title}</h3>
-              <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
-              <div className="mt-4 inline-flex items-center gap-1 text-xs font-mono tabular-nums text-text-tertiary border border-border-light px-2 py-1 rounded-md">
-                ⏱ {p.duration}
-              </div>
+            <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-1.5">
+              Étape 0{idx + 1}
+            </div>
+            <h3 className="text-base font-bold text-text leading-tight">{p.title}</h3>
+            <p className="text-sm text-text-secondary mt-2 leading-relaxed">{p.description}</p>
+            <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-mono tabular-nums text-text-tertiary border border-border-light px-2.5 py-1 rounded-md">
+              <Sparkles className="w-3 h-3 text-primary" />
+              {p.duration}
             </div>
           </div>
         ))}
       </div>
 
-      {/* 4e étape — suivi avec GIF */}
-      <div className="mt-6 rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light overflow-hidden flex flex-col sm:flex-row">
-        <div className="relative w-full sm:w-1/3 aspect-video sm:aspect-auto sm:min-h-[180px] shrink-0">
-          <Image
-            src="/photos/pillar-4.gif"
-            alt="Suivi long terme"
-            fill
-            unoptimized
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, 33vw"
-          />
+      {/* 4e étape — suivi long terme */}
+      <div className="mt-6 rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light p-6 lg:p-7 flex items-start gap-4 flex-col sm:flex-row">
+        <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
+          <HeartHandshake className="w-5 h-5" />
         </div>
-        <div className="p-6 lg:p-7 flex-1 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
-              <HeartHandshake className="w-5 h-5" />
-            </div>
-            <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase">
-              Étape 04 · Suivi long terme
-            </div>
+        <div className="flex-1">
+          <div className="text-[10px] font-bold tracking-[0.28em] text-primary uppercase mb-1">
+            Étape 04 · Suivi long terme
           </div>
           <h3 className="text-base font-bold text-text">
             Nous restons disponibles pour assurer votre succès durable.
