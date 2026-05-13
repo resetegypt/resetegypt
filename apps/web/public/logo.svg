@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" role="img" aria-label="Reset Yourself">
+  <!-- Background -->
+  <rect width="1500" height="1500" fill="#1E0FBA"/>
+
+  <!-- Wordmark RESET — cyan clair -->
+  <g fill="#79C9EE" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif" font-weight="800" font-size="280" letter-spacing="0">
+    <!-- "RE" -->
+    <text x="290" y="820" textLength="280" lengthAdjust="spacingAndGlyphs">RE</text>
+
+    <!-- S area : S + swirl arrows + red dot -->
+    <g transform="translate(630, 0)">
+      <!-- Lettre S de base -->
+      <text x="0" y="820">S</text>
+
+      <!-- Swirl supérieur : flèche partant du haut droite, courbe vers le milieu gauche -->
+      <g transform="translate(45, 600)" fill="none" stroke="#79C9EE" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Arc du haut -->
+        <path d="M180 30 C 200 70, 180 130, 100 145"/>
+        <!-- Pointe de flèche supérieure (en haut à droite, hampe + barbillons) -->
+        <path d="M180 30 l-40 -10 M180 30 l10 40"/>
+      </g>
+
+      <!-- Swirl inférieur : flèche partant du bas gauche, courbe vers le milieu droite -->
+      <g transform="translate(45, 600)" fill="none" stroke="#79C9EE" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Arc du bas -->
+        <path d="M20 200 C 0 160, 20 100, 100 85"/>
+        <!-- Pointe de flèche inférieure (en bas à gauche) -->
+        <path d="M20 200 l40 10 M20 200 l-10 -40"/>
+      </g>
+
+      <!-- Point rouge corail au centre du swirl -->
+      <circle cx="145" cy="715" r="22" fill="#FF5440"/>
+    </g>
+
+    <!-- "ET" -->
+    <text x="945" y="820" textLength="280" lengthAdjust="spacingAndGlyphs">ET</text>
+  </g>
+
+  <!-- Tagline "YOURSELF" — blanc, espacé -->
+  <text x="750" y="1000" text-anchor="middle" fill="#EDEBFC" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif" font-weight="500" font-size="55" letter-spacing="22">YOURSELF</text>
+</svg>

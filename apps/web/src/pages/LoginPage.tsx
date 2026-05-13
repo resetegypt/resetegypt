@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, CardContent, Input } from '@reset/ui';
+import { Button, Card, CardContent, Input, ResetLogo } from '@reset/ui';
 import { useAuthStore, defaultRouteForRole } from '../lib/auth';
 import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
 
@@ -36,8 +36,10 @@ export function LoginPage() {
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary-dark/40 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-secondary/20 blur-3xl" />
         <div className="relative z-10 text-center">
-          <div className="text-6xl font-extrabold tracking-tight text-primary-light">Reset</div>
-          <div className="mt-2 text-xs tracking-[0.5em] font-medium text-primary-light/80">EGYPT</div>
+          <ResetLogo variant="wordmark" className="h-20 w-auto mx-auto text-primary-light" />
+          <div className="mt-3 text-xs tracking-[0.4em] font-medium text-primary-light/80">
+            BRANCH CAIRO EAST CMC
+          </div>
           <p className="mt-10 text-primary-light/80 text-sm max-w-xs mx-auto leading-relaxed">
             {t('auth.heroTagline', "Plateforme métier — auriculothérapie laser, gestion patients et facturation conforme ETA.")}
           </p>
@@ -64,8 +66,10 @@ export function LoginPage() {
           </div>
           {/* Logo visible aussi en mobile (où le volet gauche est caché) */}
           <div className="lg:hidden text-center">
-            <div className="text-3xl font-extrabold tracking-tight text-primary">Reset</div>
-            <div className="text-[10px] tracking-[0.5em] font-medium text-text-secondary">EGYPT</div>
+            <ResetLogo variant="wordmark" className="h-10 w-auto mx-auto text-primary" />
+            <div className="text-[10px] tracking-[0.4em] font-medium text-text-secondary mt-2">
+              BRANCH CAIRO EAST CMC
+            </div>
           </div>
           <Card>
             <CardContent className="pt-6">

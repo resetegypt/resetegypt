@@ -112,7 +112,7 @@ export function renderInvoiceHtml(payment: Payment, patient: Patient): string {
     <div class="brand-wordmark">Reset</div>
     <div class="brand-branch">BRANCH CAIRO EAST CMC</div>
     <div class="brand-detail">
-      Auriculothérapie & laser non-invasif<br>
+      Auriculothérapie &amp; laser non-invasif<br>
       N Teseen, New Cairo 1<br>
       Le Caire, Égypte 11835<br>
       N° fiscal (TIN) : ${escapeHtml(process.env.CENTER_TAX_ID ?? 'xxx-xxx-xxx')}
@@ -221,11 +221,11 @@ export function renderInvoiceEmailBody(payment: Payment, patient: Patient, appUr
         <!-- Container -->
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background: ${BRAND.surface}; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30, 15, 186, 0.08);">
 
-          <!-- Hero header brandé -->
+          <!-- Hero header brandé avec logo SVG inline -->
           <tr>
-            <td style="background: linear-gradient(135deg, ${BRAND.primary} 0%, ${BRAND.primaryDark} 100%); padding: 36px 32px 32px; color: white; text-align: center; position: relative;">
-              <div style="font-size: 38px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: white;">Reset</div>
-              <div style="font-size: 10px; color: ${BRAND.primaryLight}; letter-spacing: 0.32em; font-weight: 600; margin-top: 8px;">BRANCH CAIRO EAST CMC</div>
+            <td style="background: linear-gradient(135deg, ${BRAND.primary} 0%, ${BRAND.primaryDark} 100%); padding: 36px 32px 32px; color: white; text-align: center;">
+              <img src="${escapeHtml(appUrl)}/logo-wordmark.svg" alt="Reset" width="180" height="48" style="display: inline-block; max-width: 180px; height: auto; filter: brightness(0) invert(1);" />
+              <div style="font-size: 10px; color: ${BRAND.primaryLight}; letter-spacing: 0.32em; font-weight: 600; margin-top: 10px;">BRANCH CAIRO EAST CMC</div>
               <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 14px;">Auriculothérapie & laser non-invasif</div>
             </td>
           </tr>
