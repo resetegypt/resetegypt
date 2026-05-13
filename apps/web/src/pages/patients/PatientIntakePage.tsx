@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
@@ -40,6 +40,15 @@ function nextSlot(): string {
 export function PatientIntakePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Slot pré-rempli si on vient de l'agenda (clic sur un créneau libre)
+  const slotIso = searchParams.get('slot');
+  const slotDate = slotIso ? new Date(slotIso) : null;
+  const slotTime = slotDate
+    ? `${String(slotDate.getHours()).padStart(2, '0')}:${String(slotDate.getMinutes()).padStart(2, '0')}`
+    : nextSlot();
+  const slotDateStr = slotDate ? slotDate.toISOString().slice(0, 10) : null;
+
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -63,10 +72,11 @@ export function PatientIntakePage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Rendez-vous du jour : praticien + heure (par défaut, le prochain créneau libre)
+  // Rendez-vous : praticien + heure (par défaut, prochain créneau libre,
+  // ou bien le créneau choisi sur l'agenda si on vient de là)
   const [bookAppointment, setBookAppointment] = useState(true);
   const [practitionerId, setPractitionerId] = useState<string>('');
-  const [appointmentTime, setAppointmentTime] = useState(nextSlot());
+  const [appointmentTime, setAppointmentTime] = useState(slotTime);
 
   const { data: practitionersData } = useQuery({
     queryKey: ['practitioners'],
@@ -136,11 +146,12 @@ export function PatientIntakePage() {
 
       const patientId = res.patient.id;
 
-      // Si demandé, créer un RDV du jour pour que le docteur voie le patient
-      // immédiatement sur son dashboard.
+      // Si demandé, créer un RDV pour que le docteur voie le patient
+      // sur son dashboard. La date utilisée est celle du créneau cliqué
+      // depuis l'agenda (slotDate) si fournie, sinon aujourd'hui.
       if (bookAppointment && practitionerId && form.primaryAddiction) {
         const [hh, mm] = appointmentTime.split(':');
-        const scheduledAt = new Date();
+        const scheduledAt = slotDate ? new Date(slotDate) : new Date();
         scheduledAt.setHours(parseInt(hh ?? '10', 10), parseInt(mm ?? '0', 10), 0, 0);
         try {
           await apiPost('/appointments', {
@@ -371,10 +382,29 @@ export function PatientIntakePage() {
           <CardHeader>
             <CardTitle>
               📅{' '}
-              {t('patients.intake.appointmentSection', 'Rendez-vous du jour')}
+              {t('patients.intake.appointmentSection', 'Rendez-vous')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {slotDate && (
+              <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-primary-lightest border border-primary-light/40 text-sm">
+                <span className="text-primary-dark font-semibold">📍</span>
+                <div className="flex-1">
+                  <div className="text-primary-dark font-medium">
+                    {t('patients.intake.slotFromAgenda', 'Créneau pré-rempli depuis l\'agenda')}
+                  </div>
+                  <div className="text-xs text-text-secondary mt-0.5" data-numeric>
+                    {slotDate.toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}{' '}
+                    · {slotTime}
+                  </div>
+                </div>
+              </div>
+            )}
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -383,10 +413,15 @@ export function PatientIntakePage() {
                 onChange={(e) => setBookAppointment(e.target.checked)}
               />
               <span className="text-sm">
-                {t(
-                  'patients.intake.bookSameDay',
-                  "Créer un rendez-vous immédiat pour ce patient (apparaîtra sur le dashboard du praticien)",
-                )}
+                {slotDate
+                  ? t(
+                      'patients.intake.bookForSlot',
+                      "Créer le rendez-vous au créneau choisi (apparaîtra sur le dashboard du praticien)",
+                    )
+                  : t(
+                      'patients.intake.bookSameDay',
+                      "Créer un rendez-vous immédiat pour ce patient (apparaîtra sur le dashboard du praticien)",
+                    )}
               </span>
             </label>
             {bookAppointment && (

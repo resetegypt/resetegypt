@@ -127,40 +127,63 @@ export function NewAppointmentPage() {
               </p>
             ) : (
               <>
-                <Input
-                  placeholder={t('newAppointment.patientSearchPlaceholder')}
-                  value={patientSearch}
-                  onChange={(e) => setPatientSearch(e.target.value)}
-                />
-                <div className="max-h-48 overflow-y-auto border border-border rounded">
-                  {patientsData?.patients.slice(0, 10).map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setPatientId(p.id)}
-                      className={`w-full text-start px-3 py-2 text-sm border-b border-border-light last:border-0 ${
-                        patientId === p.id ? 'bg-info-light' : 'hover:bg-bg-secondary'
-                      }`}
-                    >
-                      <strong>
-                        {p.firstName} {p.lastName}
-                      </strong>{' '}
-                      · <span data-numeric>{p.phone}</span> ·{' '}
-                      <span className="text-text-tertiary">
-                        {ADDICTION_ICON[p.primaryAddiction as Addiction]}{' '}
-                        {t(`addiction.${p.primaryAddiction}`)}
-                      </span>
-                    </button>
-                  ))}
-                  {patientsData && patientsData.patients.length === 0 && (
-                    <p className="px-3 py-4 text-sm text-text-secondary">
-                      {t('newAppointment.noPatientFound')}{' '}
-                      <Link to="/patients/intake" className="text-info underline">
-                        {t('newAppointment.createIntakeLink')}
-                      </Link>
-                    </p>
-                  )}
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder={t('newAppointment.patientSearchPlaceholder')}
+                    value={patientSearch}
+                    onChange={(e) => setPatientSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Link
+                    to={`/patients/intake${slotIso ? `?slot=${encodeURIComponent(slotIso)}` : ''}`}
+                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-primary/40 bg-primary-lightest text-primary-dark text-sm font-medium hover:bg-primary hover:text-white transition-all whitespace-nowrap"
+                  >
+                    +{' '}
+                    {t('newAppointment.newPatient', 'Nouveau patient')}
+                  </Link>
                 </div>
+                {patientSearch.length >= 2 && (
+                  <div className="max-h-48 overflow-y-auto border border-border rounded">
+                    {patientsData?.patients.slice(0, 10).map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setPatientId(p.id)}
+                        className={`w-full text-start px-3 py-2 text-sm border-b border-border-light last:border-0 ${
+                          patientId === p.id ? 'bg-info-light' : 'hover:bg-bg-secondary'
+                        }`}
+                      >
+                        <strong>
+                          {p.firstName} {p.lastName}
+                        </strong>{' '}
+                        · <span data-numeric>{p.phone}</span> ·{' '}
+                        <span className="text-text-tertiary">
+                          {ADDICTION_ICON[p.primaryAddiction as Addiction]}{' '}
+                          {t(`addiction.${p.primaryAddiction}`)}
+                        </span>
+                      </button>
+                    ))}
+                    {patientsData && patientsData.patients.length === 0 && (
+                      <p className="px-3 py-4 text-sm text-text-secondary">
+                        {t('newAppointment.noPatientFound')}{' '}
+                        <Link
+                          to={`/patients/intake${slotIso ? `?slot=${encodeURIComponent(slotIso)}` : ''}`}
+                          className="text-primary underline"
+                        >
+                          {t('newAppointment.createIntakeLink')}
+                        </Link>
+                      </p>
+                    )}
+                  </div>
+                )}
+                {patientSearch.length < 2 && !selectedPatient && (
+                  <p className="text-xs text-text-tertiary italic">
+                    {t(
+                      'newAppointment.searchHint',
+                      'Tapez 2 caractères pour chercher un patient existant, ou créez un nouveau patient.',
+                    )}
+                  </p>
+                )}
                 {selectedPatient && (
                   <p className="text-sm">
                     ✓ <strong>{selectedPatient.firstName} {selectedPatient.lastName}</strong>{' '}
