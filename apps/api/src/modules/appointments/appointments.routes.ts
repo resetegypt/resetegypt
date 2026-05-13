@@ -148,6 +148,52 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
+  // Endpoint générique pour les vues jour/mois de l'agenda :
+  // accepte from + to (ISO) et retourne tous les RDV dans cette plage.
+  app.get('/appointments/range', async (req, reply) => {
+    const q = req.query as { from?: string; to?: string };
+    if (!q.from || !q.to) {
+      return reply.status(400).send({ error: 'MissingFromOrTo' });
+    }
+    const from = new Date(q.from);
+    const to = new Date(q.to);
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+      return reply.status(400).send({ error: 'InvalidDate' });
+    }
+
+    const where: Record<string, unknown> = {
+      scheduledAt: { gte: from, lt: to },
+    };
+    if (req.currentUser!.role === 'PRACTITIONER') {
+      where.practitionerId = req.currentUser!.sub;
+    }
+
+    const rows = await app.prisma.appointment.findMany({
+      where,
+      orderBy: { scheduledAt: 'asc' },
+      include: {
+        patient: { select: { firstName: true, lastName: true, phone: true } },
+        practitioner: { select: { firstName: true, lastName: true } },
+      },
+    });
+
+    return {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      appointments: rows.map((a) => ({
+        id: a.id,
+        patientId: a.patientId,
+        scheduledAt: a.scheduledAt.toISOString(),
+        patientName: `${a.patient.firstName} ${a.patient.lastName}`,
+        practitioner: a.practitioner.firstName,
+        service: a.service,
+        visitType: a.visitType,
+        status: a.status,
+        price: Number(a.price),
+      })),
+    };
+  });
+
   app.get('/appointments/:id', async (req, reply) => {
     const id = (req.params as { id: string }).id;
     const a = await app.prisma.appointment.findUnique({
