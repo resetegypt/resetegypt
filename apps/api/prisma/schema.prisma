@@ -42,6 +42,8 @@ model User {
   finalizedMedicalRecords MedicalRecord[] @relation("MedicalRecordFinalizedBy")
   followUpNotes          FollowUpNote[]  @relation("FollowUpNoteAuthor")
   scoreSnapshots         ScoreSnapshot[] @relation("ScoreSnapshotTakenBy")
+  mailbox    Mailbox?
+  sentEmails EmailMessage[] @relation("EmailSentBy")
 }
 
 enum Role {
@@ -92,6 +94,7 @@ model Patient {
   followUpNotes  FollowUpNote[]
   waitingEntries WaitingList[]
   scoreSnapshots ScoreSnapshot[]
+  emailThreads EmailThread[]
 
   @@index([phone])
   @@index([lastName, firstName])
@@ -452,4 +455,100 @@ model ScoreSnapshot {
   takenBy         User?    @relation("ScoreSnapshotTakenBy", fields: [takenById], references: [id])
 
   @@index([patientId, takenAt])
+}
+
+// === Messagerie praticien ===================================================
+// Boîte email privée d'un praticien (1 par user ayant une adresse @reset-egypt.com).
+// Modèles SÉPARÉS du modèle Message (Inbox d'équipe) : isolation structurelle de
+// la confidentialité — la correspondance médicale du médecin ne peut jamais fuiter
+// vers l'Inbox d'équipe accessible à la secrétaire.
+model Mailbox {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  address     String   @unique          // "ahmadalashry@reset-egypt.com"
+  displayName String                    // "Dr Ahmad Al Ashry"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  threads EmailThread[]
+  emails  EmailMessage[]
+}
+
+// Fil de discussion : regroupe les emails d'une même conversation.
+model EmailThread {
+  id           String   @id @default(uuid())
+  mailboxId    String
+  mailbox      Mailbox  @relation(fields: [mailboxId], references: [id], onDelete: Cascade)
+  subject      String
+  participants String[]                 // emails des interlocuteurs (hors mailbox)
+  patientId    String?                  // lié si un interlocuteur est un patient connu
+  patient      Patient? @relation(fields: [patientId], references: [id])
+  lastEmailAt  DateTime
+  unreadCount  Int      @default(0)
+  isArchived   Boolean  @default(false)
+  isStarred    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  emails EmailMessage[]
+
+  @@index([mailboxId, isArchived, lastEmailAt])
+  @@index([mailboxId, isStarred])
+  @@index([patientId])
+}
+
+// Email individuel (entrant ou sortant).
+model EmailMessage {
+  id           String      @id @default(uuid())
+  mailboxId    String
+  mailbox      Mailbox     @relation(fields: [mailboxId], references: [id], onDelete: Cascade)
+  threadId     String
+  thread       EmailThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  direction    Direction                // INBOUND | OUTBOUND (enum existant réutilisé)
+  messageId    String      @unique       // header Message-ID RFC822
+  inReplyTo    String?                  // header In-Reply-To
+  references   String[]    @default([]) // header References
+  fromAddress  String
+  fromName     String?
+  toAddresses  String[]
+  ccAddresses  String[]    @default([])
+  subject      String
+  bodyText     String?     @db.Text
+  bodyHtml     String?     @db.Text
+  snippet      String                   // ~140 premiers caractères, pour la liste
+  status       EmailStatus @default(RECEIVED)
+  isRead       Boolean     @default(false)
+  sentByUserId String?                  // qui a envoyé (OUTBOUND) — null pour INBOUND
+  sentByUser   User?       @relation("EmailSentBy", fields: [sentByUserId], references: [id])
+  sentAt       DateTime                 // date d'envoi (OUTBOUND) ou de réception (INBOUND)
+  createdAt    DateTime    @default(now())
+
+  attachments EmailAttachment[]
+
+  @@index([threadId, sentAt])
+  @@index([mailboxId, isRead])
+  @@index([messageId])
+}
+
+// Pièce jointe : métadonnées en base, fichier dans Supabase Storage.
+model EmailAttachment {
+  id          String       @id @default(uuid())
+  emailId     String
+  email       EmailMessage @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  filename    String
+  contentType String
+  sizeBytes   Int
+  storageKey  String                    // clé Supabase Storage : {mailboxId}/{emailId}/{filename}
+  createdAt   DateTime     @default(now())
+
+  @@index([emailId])
+}
+
+enum EmailStatus {
+  RECEIVED      // email entrant reçu
+  SENDING       // envoi en cours
+  SENT          // envoyé avec succès
+  FAILED        // échec d'envoi
 }
