@@ -43,6 +43,14 @@ export interface EmailMessage {
   subject: string;
   html: string;
   text?: string;
+  /** Expéditeur. Défaut : env.SMTP_FROM. Format : "Nom <email@domaine>". */
+  from?: string;
+  /** Adresse de réponse (Reply-To). */
+  replyTo?: string;
+  /** Destinataires en copie. */
+  cc?: string[];
+  /** Headers RFC822 supplémentaires (ex: In-Reply-To, References, Message-ID). */
+  headers?: Record<string, string>;
   attachments?: Array<{ filename: string; content: string | Buffer; contentType?: string }>;
 }
 
@@ -60,8 +68,11 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
   if (resend) {
     try {
       const result = await resend.emails.send({
-        from: env.SMTP_FROM,
+        from: msg.from ?? env.SMTP_FROM,
         to: msg.to,
+        cc: msg.cc,
+        replyTo: msg.replyTo,
+        headers: msg.headers,
         subject: msg.subject,
         html: msg.html,
         text: msg.text,
@@ -90,8 +101,11 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
   }
   try {
     const info = await transporter.sendMail({
-      from: env.SMTP_FROM,
+      from: msg.from ?? env.SMTP_FROM,
       to: msg.to,
+      cc: msg.cc,
+      replyTo: msg.replyTo,
+      headers: msg.headers,
       subject: msg.subject,
       html: msg.html,
       text: msg.text,
