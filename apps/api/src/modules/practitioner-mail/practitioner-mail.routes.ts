@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { recordAudit } from '../../lib/audit.js';
 import { sendEmail } from '../../lib/email.js';
 import { buildSnippet } from './mail-snippet.js';
-import { uploadAttachment, attachmentKey } from '../../lib/mail-storage.js';
+import { uploadAttachment, attachmentKey, signedAttachmentUrl } from '../../lib/mail-storage.js';
 
 const sendAttachmentSchema = z.object({
   filename: z.string().min(1),
@@ -368,4 +368,26 @@ export async function practitionerMailRoutes(app: FastifyInstance): Promise<void
       return reply.status(201).send({ ok: true, threadId, messageId: message.id });
     },
   );
+
+  // GET /practitioner-mail/attachments/:id — URL signée de téléchargement.
+  app.get('/practitioner-mail/attachments/:id', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const attachment = await app.prisma.emailAttachment.findUnique({
+      where: { id },
+      include: { email: { select: { mailboxId: true, mailbox: { select: { userId: true } } } } },
+    });
+    if (!attachment) {
+      return reply.status(404).send({ error: 'AttachmentNotFound' });
+    }
+    if (!canAccessMailbox(req.currentUser!, { userId: attachment.email.mailbox.userId })) {
+      return reply.status(403).send({ error: 'Forbidden' });
+    }
+    try {
+      const url = await signedAttachmentUrl(attachment.storageKey, 300);
+      return { url, filename: attachment.filename, contentType: attachment.contentType };
+    } catch (err) {
+      app.log.error({ err, attachmentId: id }, 'échec génération URL signée');
+      return reply.status(503).send({ error: 'StorageUnavailable' });
+    }
+  });
 }
