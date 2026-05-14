@@ -15,6 +15,10 @@ const envSchema = z.object({
   SMTP_HOST: z.string().default('localhost'),
   SMTP_PORT: z.coerce.number().default(1025),
   SMTP_FROM: z.string().default('Reset Egypt <noreply@reset-egypt.com>'),
+  // Messagerie praticien
+  INBOUND_EMAIL_SECRET: z.string().optional(), // secret partagé du webhook /inbound/email
+  SUPABASE_URL: z.string().url().optional(),
+  SUPABASE_SERVICE_KEY: z.string().optional(),
   // URLs publiques (pour les emails et CORS)
   APP_URL: z.string().url().default('http://localhost:3000'),
   API_URL: z.string().url().default('http://localhost:3001'),
