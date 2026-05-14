@@ -369,6 +369,17 @@ export async function practitionerMailRoutes(app: FastifyInstance): Promise<void
     },
   );
 
+  // GET /practitioner-mail/unread-count — compteur pour le badge sidebar.
+  app.get('/practitioner-mail/unread-count', async (req, reply) => {
+    const q = req.query as { mailboxId?: string };
+    const mailbox = await loadCallerMailbox(app, req, reply, q.mailboxId);
+    if (!mailbox) return;
+    const unread = await app.prisma.emailThread.count({
+      where: { mailboxId: mailbox.id, isArchived: false, unreadCount: { gt: 0 } },
+    });
+    return { unread };
+  });
+
   // GET /practitioner-mail/attachments/:id — URL signée de téléchargement.
   app.get('/practitioner-mail/attachments/:id', async (req, reply) => {
     const id = (req.params as { id: string }).id;

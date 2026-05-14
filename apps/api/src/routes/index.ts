@@ -12,6 +12,7 @@ import { automationsRoutes } from '../modules/automations/automations.routes.js'
 import { bookingRoutes } from '../modules/booking/booking.routes.js';
 import { waitingListRoutes } from '../modules/waiting-list/waiting-list.routes.js';
 import { inboundRoutes } from '../modules/practitioner-mail/inbound.routes.js';
+import { practitionerMailRoutes } from '../modules/practitioner-mail/practitioner-mail.routes.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(healthRoutes);
@@ -27,4 +28,5 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(automationsRoutes);
   await app.register(waitingListRoutes);
   await app.register(inboundRoutes);
+  await app.register(practitionerMailRoutes);
 }
