@@ -24,6 +24,7 @@
     "@fastify/sensible": "^5.5.0",
     "@prisma/client": "^5.13.0",
     "@reset/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.105.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^8.0.0",
     "bcryptjs": "^2.4.3",
