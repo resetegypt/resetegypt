@@ -1,12 +1,14 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage, Badge, Button, ResetLogo } from '@reset/ui';
 import { useAuthStore } from '../lib/auth';
+import { useMailboxAccess } from '../pages/mail/useMailboxAccess';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
 import {
   LayoutDashboard,
   Calendar,
   Inbox,
+  Mail,
   Users,
   Wallet,
   BarChart3,
@@ -38,7 +40,7 @@ interface NavItem {
   roles?: Array<'ADMIN' | 'PRACTITIONER' | 'SECRETARY'>;
   section: 'work' | 'admin';
   /** Si défini, affiche un badge avec une valeur dynamique. */
-  badgeKey?: 'inboxUnread';
+  badgeKey?: 'inboxUnread' | 'mailUnread';
 }
 
 const NAV: NavItem[] = [
@@ -59,6 +61,13 @@ const NAV: NavItem[] = [
     Icon: Bell,
     roles: ['SECRETARY', 'ADMIN'],
     section: 'work',
+  },
+  {
+    to: '/courrier',
+    label: 'nav.mail',
+    Icon: Mail,
+    section: 'work',
+    badgeKey: 'mailUnread',
   },
   {
     to: '/accounting',
@@ -111,7 +120,10 @@ export function AppShell() {
     navigate('/login', { replace: true });
   }
 
-  const visibleNav = NAV.filter((item) => !item.roles || item.roles.includes(user.role));
+  const visibleNav = NAV.filter((item) => {
+    if (item.to === '/courrier') return hasMailbox;
+    return !item.roles || item.roles.includes(user.role);
+  });
   const workNav = visibleNav.filter((n) => n.section === 'work');
   const adminNav = visibleNav.filter((n) => n.section === 'admin');
 
@@ -125,7 +137,8 @@ export function AppShell() {
     enabled: user.role !== 'PRACTITIONER',
   });
   const inboxUnread = unreadData?.unread ?? 0;
-  const badges = { inboxUnread };
+  const { hasAccess: hasMailbox, unread: mailUnread } = useMailboxAccess();
+  const badges = { inboxUnread, mailUnread };
 
   // === Hook événements RDV : sons + notifications desktop =================
   // Détecte les transitions importantes (ARRIVED / IN_PROGRESS / nouveau msg)
@@ -242,7 +255,7 @@ function NavSection({
   label: string;
   items: NavItem[];
   t: (k: string) => string;
-  badges: { inboxUnread: number };
+  badges: { inboxUnread: number; mailUnread: number };
 }) {
   return (
     <div>

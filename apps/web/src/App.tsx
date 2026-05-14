@@ -19,6 +19,7 @@ import { AccountingPage } from './pages/accounting/AccountingPage';
 import { StatsPage } from './pages/stats/StatsPage';
 import { InboxPage } from './pages/inbox/InboxPage';
 import { WaitingListPage } from './pages/waiting-list/WaitingListPage';
+import { MailPage } from './pages/mail/MailPage';
 import { AppShell } from './components/AppShell';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -62,6 +63,7 @@ function AnimatedRoutes() {
             <Route path="accounting" element={<PageMotion><AccountingPage /></PageMotion>} />
             <Route path="inbox" element={<PageMotion><InboxPage /></PageMotion>} />
             <Route path="waiting-list" element={<PageMotion><WaitingListPage /></PageMotion>} />
+            <Route path="courrier" element={<PageMotion><MailPage /></PageMotion>} />
             <Route path="stats" element={<PageMotion><StatsPage /></PageMotion>} />
           </Route>
         </Route>
