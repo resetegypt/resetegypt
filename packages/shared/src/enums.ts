@@ -44,3 +44,6 @@ export type MessageStatus = (typeof MESSAGE_STATUSES)[number];
 
 export const SUPPORTED_LOCALES = ['fr', 'ar', 'en'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
+
+export const EMAIL_STATUSES = ['RECEIVED', 'SENDING', 'SENT', 'FAILED'] as const;
+export type EmailStatus = (typeof EMAIL_STATUSES)[number];
