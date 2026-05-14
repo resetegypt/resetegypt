@@ -1,0 +1,11 @@
+name = "reset-inbound-email"
+main = "src/index.ts"
+compatibility_date = "2024-05-01"
+
+# Les secrets se définissent via `wrangler secret put <NOM>` (jamais en clair ici) :
+#   wrangler secret put RESET_API_URL
+#   wrangler secret put INBOUND_EMAIL_SECRET
+#   wrangler secret put GMAIL_FALLBACK
+#
+# Le binding "email routing" se configure dans le dashboard Cloudflare :
+#   Email -> Email Routing -> Routes -> ahmadalashry@reset-egypt.com -> Send to a Worker -> reset-inbound-email
