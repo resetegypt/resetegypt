@@ -97,3 +97,6 @@ storage/
 
 # Site scraping outputs (~27 MB)
 /scraped/
+
+# Git worktrees (isolated workspaces)
+.worktrees/
