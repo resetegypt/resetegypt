@@ -94,4 +94,118 @@ export async function practitionerMailRoutes(app: FastifyInstance): Promise<void
       })),
     };
   });
+
+  // GET /practitioner-mail/threads/:id — un thread + tous ses emails.
+  app.get('/practitioner-mail/threads/:id', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const q = req.query as { mailboxId?: string };
+    const mailbox = await loadCallerMailbox(app, req, reply, q.mailboxId);
+    if (!mailbox) return;
+
+    const thread = await app.prisma.emailThread.findUnique({
+      where: { id },
+      include: {
+        patient: { select: { id: true, firstName: true, lastName: true } },
+        emails: {
+          orderBy: { sentAt: 'asc' },
+          include: {
+            attachments: {
+              select: { id: true, filename: true, contentType: true, sizeBytes: true },
+            },
+          },
+        },
+      },
+    });
+    if (!thread || thread.mailboxId !== mailbox.id) {
+      return reply.status(404).send({ error: 'ThreadNotFound' });
+    }
+
+    return {
+      thread: {
+        id: thread.id,
+        subject: thread.subject,
+        participants: thread.participants,
+        patientId: thread.patientId,
+        patientName: thread.patient
+          ? `${thread.patient.firstName} ${thread.patient.lastName}`
+          : null,
+        lastEmailAt: thread.lastEmailAt.toISOString(),
+        unreadCount: thread.unreadCount,
+        isArchived: thread.isArchived,
+        isStarred: thread.isStarred,
+        snippet: thread.emails[thread.emails.length - 1]?.snippet ?? '',
+        lastFrom: thread.emails[thread.emails.length - 1]?.fromAddress ?? '',
+      },
+      messages: thread.emails.map((m) => ({
+        id: m.id,
+        threadId: m.threadId,
+        direction: m.direction,
+        fromAddress: m.fromAddress,
+        fromName: m.fromName,
+        toAddresses: m.toAddresses,
+        ccAddresses: m.ccAddresses,
+        subject: m.subject,
+        bodyText: m.bodyText,
+        bodyHtml: m.bodyHtml,
+        isRead: m.isRead,
+        sentAt: m.sentAt.toISOString(),
+        attachments: m.attachments,
+      })),
+    };
+  });
+
+  // POST /practitioner-mail/threads/:id/read — marque tout le thread comme lu.
+  app.post('/practitioner-mail/threads/:id/read', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const body = (req.body ?? {}) as { mailboxId?: string };
+    const mailbox = await loadCallerMailbox(app, req, reply, body.mailboxId);
+    if (!mailbox) return;
+
+    const thread = await app.prisma.emailThread.findUnique({ where: { id } });
+    if (!thread || thread.mailboxId !== mailbox.id) {
+      return reply.status(404).send({ error: 'ThreadNotFound' });
+    }
+    await app.prisma.emailMessage.updateMany({
+      where: { threadId: id, isRead: false },
+      data: { isRead: true },
+    });
+    await app.prisma.emailThread.update({ where: { id }, data: { unreadCount: 0 } });
+    return { ok: true };
+  });
+
+  // POST /practitioner-mail/threads/:id/archive — toggle isArchived.
+  app.post('/practitioner-mail/threads/:id/archive', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const body = (req.body ?? {}) as { mailboxId?: string };
+    const mailbox = await loadCallerMailbox(app, req, reply, body.mailboxId);
+    if (!mailbox) return;
+
+    const thread = await app.prisma.emailThread.findUnique({ where: { id } });
+    if (!thread || thread.mailboxId !== mailbox.id) {
+      return reply.status(404).send({ error: 'ThreadNotFound' });
+    }
+    const updated = await app.prisma.emailThread.update({
+      where: { id },
+      data: { isArchived: !thread.isArchived },
+    });
+    return { ok: true, isArchived: updated.isArchived };
+  });
+
+  // POST /practitioner-mail/threads/:id/star — toggle isStarred.
+  app.post('/practitioner-mail/threads/:id/star', async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const body = (req.body ?? {}) as { mailboxId?: string };
+    const mailbox = await loadCallerMailbox(app, req, reply, body.mailboxId);
+    if (!mailbox) return;
+
+    const thread = await app.prisma.emailThread.findUnique({ where: { id } });
+    if (!thread || thread.mailboxId !== mailbox.id) {
+      return reply.status(404).send({ error: 'ThreadNotFound' });
+    }
+    const updated = await app.prisma.emailThread.update({
+      where: { id },
+      data: { isStarred: !thread.isStarred },
+    });
+    return { ok: true, isStarred: updated.isStarred };
+  });
 }
