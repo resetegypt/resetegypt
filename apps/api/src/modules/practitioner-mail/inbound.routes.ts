@@ -9,6 +9,14 @@ import { uploadAttachment, attachmentKey } from '../../lib/mail-storage.js';
 const THIRTY_MB = 30 * 1024 * 1024;
 
 export async function inboundRoutes(app: FastifyInstance): Promise<void> {
+  // Rate-limit du webhook : encapsulé dans ce plugin, ne touche que /inbound/email.
+  // 120 req/min est très large pour un Worker qui forwarde 1 email à la fois,
+  // mais throttle un éventuel brute-force du secret.
+  await app.register(import('@fastify/rate-limit'), {
+    max: 120,
+    timeWindow: '1 minute',
+  });
+
   // Route NON authentifiée par JWT : machine-à-machine, protégée par secret partagé.
   app.post('/inbound/email', { bodyLimit: THIRTY_MB }, async (req, reply) => {
     // 1. Fail-closed : si le secret n'est pas configuré, on rejette tout.

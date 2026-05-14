@@ -58,6 +58,15 @@ async function loadCallerMailbox(
     reply.status(403).send({ error: 'Forbidden' });
     return null;
   }
+  // Traçabilité : un ADMIN qui consulte une mailbox dont il n'est pas propriétaire
+  // est journalisé (la mailbox contient de la correspondance médicale privée).
+  if (user.role === 'ADMIN' && user.sub !== mailbox.userId) {
+    await recordAudit(app.prisma, req, {
+      userId: user.sub,
+      action: 'practitioner_mail_admin_access',
+      resource: `mailbox:${mailbox.id}`,
+    });
+  }
   return {
     id: mailbox.id,
     userId: mailbox.userId,
