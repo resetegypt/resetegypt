@@ -24,7 +24,7 @@ export class StorageNotConfiguredError extends Error {
 
 /** Construit la clé de stockage d'une pièce jointe. */
 export function attachmentKey(mailboxId: string, emailId: string, filename: string): string {
-  const safe = filename.replace(/[^\w.\-]/g, '_');
+  const safe = filename.replace(/[^\w.-]/g, '_');
   return `${mailboxId}/${emailId}/${safe}`;
 }
 

@@ -9,7 +9,7 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
   }));
 
   app.get('/health/deep', async () => {
-    let db: 'ok' | 'down' = 'down';
+    let db: 'ok' | 'down';
     try {
       await app.prisma.$queryRaw`SELECT 1`;
       db = 'ok';

@@ -585,7 +585,6 @@ function CommandPalette({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results, selectedIdx, navigate, onClose]);
 
   return (

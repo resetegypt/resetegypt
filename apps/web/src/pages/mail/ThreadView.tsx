@@ -29,7 +29,6 @@ export function ThreadView({ threadId, onBack, onReply }: Props) {
         qc.invalidateQueries({ queryKey: ['mail-unread'] });
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.thread.id]);
 
   const archiveMut = useMutation({
