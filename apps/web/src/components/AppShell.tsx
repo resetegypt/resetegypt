@@ -111,6 +111,8 @@ export function AppShell() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  const { hasAccess: hasMailbox, unread: mailUnread } = useMailboxAccess();
+
   if (!user) return null;
 
   const initials = (user.firstName.charAt(0) ?? '') + (user.lastName.charAt(0) ?? '');
@@ -137,7 +139,6 @@ export function AppShell() {
     enabled: user.role !== 'PRACTITIONER',
   });
   const inboxUnread = unreadData?.unread ?? 0;
-  const { hasAccess: hasMailbox, unread: mailUnread } = useMailboxAccess();
   const badges = { inboxUnread, mailUnread };
 
   // === Hook événements RDV : sons + notifications desktop =================
