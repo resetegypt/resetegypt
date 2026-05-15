@@ -66,13 +66,11 @@
   },
   "auth": {
     "login": "Connexion",
-    "loginSubtitle": "Espace staff Reset Egypt",
     "email": "Email",
     "password": "Mot de passe",
     "rememberMe": "Rester connecté 7 jours",
     "signIn": "Se connecter",
     "logout": "Se déconnecter",
-    "devCredentialsHint": "Dev : direction@reset-egypt.com / TempPass123!",
     "accessDenied": "Accès refusé",
     "roleRequired": "Cette page nécessite le rôle"
   },

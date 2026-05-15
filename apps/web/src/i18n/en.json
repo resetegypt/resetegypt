@@ -43,13 +43,11 @@
   "roles": { "ADMIN": "ADMIN", "PRACTITIONER": "PRACTITIONER", "SECRETARY": "SECRETARY" },
   "auth": {
     "login": "Sign in",
-    "loginSubtitle": "Reset Egypt staff portal",
     "email": "Email",
     "password": "Password",
     "rememberMe": "Stay signed in for 7 days",
     "signIn": "Sign in",
     "logout": "Sign out",
-    "devCredentialsHint": "Dev: direction@reset-egypt.com / TempPass123!",
     "accessDenied": "Access denied",
     "roleRequired": "This page requires role"
   },

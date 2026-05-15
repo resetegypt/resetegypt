@@ -75,7 +75,6 @@ export function LoginPage() {
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <h2 className="text-lg font-semibold text-primary">{t('auth.login')}</h2>
-                <p className="text-sm text-text-secondary">{t('auth.loginSubtitle')}</p>
 
               <div>
                 <label className="block text-xs font-medium mb-1">{t('auth.email')}</label>
@@ -118,9 +117,6 @@ export function LoginPage() {
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? t('common.loading') : t('auth.signIn')}
               </Button>
-              <p className="text-xs text-center text-text-tertiary pt-2">
-                {t('auth.devCredentialsHint')}
-              </p>
               </form>
             </CardContent>
           </Card>

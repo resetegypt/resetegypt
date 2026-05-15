@@ -55,13 +55,11 @@
   },
   "auth": {
     "login": "تسجيل الدخول",
-    "loginSubtitle": "بوابة موظفي ريسيت",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "rememberMe": "البقاء متصلاً 7 أيام",
     "signIn": "دخول",
     "logout": "تسجيل الخروج",
-    "devCredentialsHint": "تطوير: direction@reset-egypt.com / TempPass123!",
     "accessDenied": "الوصول مرفوض",
     "roleRequired": "هذه الصفحة تتطلب دور"
   },
