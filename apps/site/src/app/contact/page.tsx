@@ -6,7 +6,7 @@ import { Section } from '../../components/Section';
 export const metadata: Metadata = {
   title: 'Contact — RESET Le Caire',
   description:
-    'Centre RESET — Branch Cairo East CMC. N Teseen, New Cairo 1, Le Caire 11835. Ouvert 11h-22h tous les jours. Réservation en ligne ou par WhatsApp.',
+    'Centre RESET — Branch Cairo East CMC. CMC, Teseen, New Cairo, Le Caire, Égypte. Ouvert 11h-22h tous les jours. Réservation en ligne ou par WhatsApp.',
 };
 
 const HOURS = [
@@ -82,8 +82,8 @@ export default function ContactPage() {
               Visitez RESET
             </h2>
             <p className="mt-4 text-base text-text-secondary leading-relaxed">
-              N Teseen, New Cairo 1<br />
-              Le Caire 11835, Égypte
+              CMC, Teseen, New Cairo<br />
+              Le Caire, Égypte
             </p>
             <p className="mt-4 text-sm text-text-tertiary">
               Technologie certifiée, accompagnement expert. Nous sommes dédiés à vous offrir la

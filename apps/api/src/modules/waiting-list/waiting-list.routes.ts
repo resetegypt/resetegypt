@@ -250,7 +250,7 @@ function renderWaitingListNotificationEmail(d: WaitingNotifData): string {
       <tr><td style="padding:24px 32px 32px;">
         <div style="border-top:1px solid ${BRAND.borderLight};padding-top:18px;text-align:center;color:${BRAND.textTertiary};font-size:11px;line-height:1.6;">
           <strong style="color:${BRAND.primary};">Reset Egypt — Branch Cairo East CMC</strong><br>
-          N Teseen, New Cairo 1, Le Caire 11835 · Égypte<br>
+          CMC, Teseen, New Cairo · Le Caire, Égypte<br>
           <a href="${escapeHtml(d.appUrl)}" style="color:${BRAND.primary};text-decoration:none;">reset-egypt.com</a>
         </div>
       </td></tr>

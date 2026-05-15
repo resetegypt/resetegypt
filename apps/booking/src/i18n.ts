@@ -74,7 +74,7 @@ const fr = {
   whatsappNotice: 'Vous recevrez une confirmation WhatsApp sous peu.',
   confirmationNumber: 'Numéro de confirmation',
   appointmentLabel: 'RDV :',
-  centerAddress: 'Reset Egypt · N Teseen, New Cairo, Le Caire',
+  centerAddress: 'Reset Egypt · CMC, Teseen, New Cairo, Le Caire',
   required: '*',
   services: {
     TOBACCO: 'Sevrage tabagique',
@@ -194,7 +194,7 @@ const en = {
   whatsappNotice: 'You will receive a WhatsApp confirmation shortly.',
   confirmationNumber: 'Confirmation number',
   appointmentLabel: 'Booking:',
-  centerAddress: 'Reset Egypt · N Teseen, New Cairo',
+  centerAddress: 'Reset Egypt · CMC, Teseen, New Cairo',
   required: '*',
   services: {
     TOBACCO: 'Quit smoking',

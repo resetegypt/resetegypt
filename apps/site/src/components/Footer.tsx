@@ -113,9 +113,9 @@ export function Footer() {
               <div className="flex items-start gap-2">
                 <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-white/80" />
                 <span>
-                  CMC, N Teseen, New Cairo 1
+                  CMC, Teseen, New Cairo
                   <br />
-                  Le Caire 11835, Égypte
+                  Le Caire, Égypte
                 </span>
               </div>
               <div className="flex items-center gap-2">

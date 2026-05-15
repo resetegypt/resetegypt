@@ -320,7 +320,7 @@ const fr: Dict = {
       "Réservez votre première consultation en moins de 2 minutes. Sans engagement, sans médicament, sans douleur.",
     ctaBook: 'Réserver ma séance',
     ctaPhone: 'Nous joindre',
-    address: '📍 CMC, N Teseen, New Cairo 1 · Le Caire · Ouvert 11h-22h tous les jours',
+    address: '📍 CMC, Teseen, New Cairo · Le Caire · Ouvert 11h-22h tous les jours',
   },
   footer: {
     description:
@@ -515,7 +515,7 @@ const en: Dict = {
       'Book your first consultation in less than 2 minutes. No commitment, no medication, no pain.',
     ctaBook: 'Book my session',
     ctaPhone: 'Contact us',
-    address: '📍 CMC, N Teseen, New Cairo 1 · Cairo · Open 11 AM - 10 PM every day',
+    address: '📍 CMC, Teseen, New Cairo · Cairo · Open 11 AM - 10 PM every day',
   },
   footer: {
     description:
@@ -706,7 +706,7 @@ const ar: Dict = {
     description: 'احجز استشارتك الأولى في أقل من دقيقتين. بلا التزام، بلا دواء، بلا ألم.',
     ctaBook: 'احجز جلستي',
     ctaPhone: 'تواصل معنا',
-    address: '📍 CMC، شارع التسعين، القاهرة الجديدة 1 · القاهرة · مفتوح 11ص - 10م يومياً',
+    address: '📍 CMC، شارع التسعين، القاهرة الجديدة · القاهرة · مفتوح 11ص - 10م يومياً',
   },
   footer: {
     description:

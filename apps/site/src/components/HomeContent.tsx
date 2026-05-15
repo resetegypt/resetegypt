@@ -205,9 +205,9 @@ function VisitCenterSection({ dict, locale }: Props) {
               <div className="flex items-start gap-2">
                 <span className="text-secondary mt-0.5">📍</span>
                 <span>
-                  CMC, N Teseen, New Cairo 1
+                  CMC, Teseen, New Cairo
                   <br />
-                  Le Caire 11835, Égypte
+                  Le Caire, Égypte
                 </span>
               </div>
               <div className="flex items-center gap-2">

@@ -74,9 +74,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               telephone: '+20 1xx xxx xxxx',
               address: {
                 '@type': 'PostalAddress',
-                streetAddress: 'N Teseen, New Cairo 1',
-                addressLocality: 'Le Caire',
-                postalCode: '11835',
+                streetAddress: 'CMC, Teseen',
+                addressLocality: 'New Cairo, Le Caire',
                 addressCountry: 'EG',
               },
               priceRange: 'EGP',

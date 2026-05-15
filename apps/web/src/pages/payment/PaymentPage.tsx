@@ -418,7 +418,7 @@ export function PaymentPage() {
               <div>
                 <p className="text-text-tertiary uppercase text-[10px]">{t('payment.issuer')}</p>
                 <strong>Reset Egypt</strong>
-                <p className="text-text-secondary">N Teseen, New Cairo</p>
+                <p className="text-text-secondary">CMC, Teseen, New Cairo</p>
               </div>
               <div>
                 <p className="text-text-tertiary uppercase text-[10px]">{t('payment.patient')}</p>

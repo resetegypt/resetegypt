@@ -113,9 +113,9 @@ export function renderInvoiceHtml(payment: Payment, patient: Patient): string {
     <div class="brand-branch">BRANCH CAIRO EAST CMC</div>
     <div class="brand-detail">
       Auriculothérapie &amp; laser non-invasif<br>
-      N Teseen, New Cairo 1<br>
-      Le Caire, Égypte 11835<br>
-      N° fiscal (TIN) : ${escapeHtml(process.env.CENTER_TAX_ID ?? 'xxx-xxx-xxx')}
+      CMC, Teseen, New Cairo<br>
+      Le Caire, Égypte<br>
+      ${escapeHtml(process.env.CENTER_EMAIL ?? 'secretary@reset-egypt.com')}
     </div>
   </div>
   <div class="invoice-meta">
@@ -130,7 +130,7 @@ export function renderInvoiceHtml(payment: Payment, patient: Patient): string {
   <div class="party">
     <div class="party-label">Émetteur</div>
     <div class="party-name">Reset Egypt</div>
-    <div class="party-detail">N Teseen, New Cairo 1<br>Le Caire 11835<br>${escapeHtml(process.env.CENTER_PHONE ?? '+201xxxxxxxxx')}</div>
+    <div class="party-detail">CMC, Teseen, New Cairo<br>Le Caire, Égypte<br>${escapeHtml(process.env.CENTER_EMAIL ?? 'secretary@reset-egypt.com')}</div>
   </div>
   <div class="party">
     <div class="party-label">Patient</div>
@@ -311,7 +311,7 @@ export function renderInvoiceEmailBody(payment: Payment, patient: Patient, appUr
                 <tr>
                   <td style="text-align: center; color: ${BRAND.textTertiary}; font-size: 11px; line-height: 1.7;">
                     <strong style="color: ${BRAND.primary}; font-size: 12px;">Reset Egypt — Branch Cairo East CMC</strong><br>
-                    N Teseen, New Cairo 1, Le Caire 11835 · Égypte<br>
+                    CMC, Teseen, New Cairo · Le Caire, Égypte<br>
                     Centre de bien-être non médical · Auriculothérapie + photobiomodulation laser<br>
                     <a href="${escapeHtml(appUrl)}" style="color: ${BRAND.primary}; text-decoration: none; margin-top: 8px; display: inline-block;">reset-egypt.com</a>
                     <div style="margin-top: 14px; font-size: 10px; color: ${BRAND.textTertiary};">
