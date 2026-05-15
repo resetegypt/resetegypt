@@ -1,0 +1,2 @@
+# Empty dir to satisfy Vercel's static output check for API-only project.
+# All routes are handled by apps/api/api/index.ts (serverless function).
