@@ -100,3 +100,13 @@ storage/
 
 # Git worktrees (isolated workspaces)
 .worktrees/
+
+# Playwright MCP artefacts (local snapshots)
+.playwright-mcp/
+
+# Migration snapshots (opérationnel local, pas source)
+docs/migration-snapshots/
+
+# Scripts de mise en service contenant des secrets en dur (NE JAMAIS COMMITTER)
+scripts/mailbox-go-live.sh
+/go.sh

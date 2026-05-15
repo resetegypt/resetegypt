@@ -128,19 +128,19 @@ export default function ContactPage() {
       </section>
 
       {/* SOCIAL */}
-      <Section eyebrow="Sur Instagram" title="@resetegypt" align="center">
+      <Section eyebrow="Sur Instagram" title="@reset_eg" align="center">
         <div className="max-w-xl mx-auto text-center">
           <p className="text-base text-text-secondary leading-relaxed">
             Suivez RESET sur Instagram pour les nouvelles, témoignages et conseils.
           </p>
           <a
-            href="https://instagram.com/resetegypt"
+            href="https://instagram.com/reset_eg"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2 mt-6 px-6 py-3 text-sm font-semibold bg-text text-white rounded-xl hover:bg-text/90 transition-colors"
           >
             <Instagram className="w-4 h-4" />
-            Suivre @resetegypt
+            Suivre @reset_eg
           </a>
         </div>
       </Section>

@@ -4,9 +4,9 @@
 // ajoute-la dans les 3 langues, ou laisse en français pour fallback.
 // ============================================================================
 
-export const LOCALES = ['fr', 'en', 'ar'] as const;
+export const LOCALES = ['ar', 'fr', 'en'] as const;
 export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = 'fr';
+export const DEFAULT_LOCALE: Locale = 'ar';
 export const RTL_LOCALES: Locale[] = ['ar'];
 
 export const LOCALE_LABEL: Record<Locale, string> = {

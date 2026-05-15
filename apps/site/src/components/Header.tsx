@@ -15,17 +15,17 @@ import {
 } from '../lib/i18n';
 
 function detectLocale(pathname: string): Locale {
-  // Pathname formats: '/', '/en', '/en/about', '/ar/services/smoking', '/about'
-  // Si le 1er segment est 'en' ou 'ar', c'est la locale. Sinon FR par défaut.
+  // Pathname formats: '/', '/fr', '/fr/about', '/en/services/smoking', '/ar/about'
+  // AR est la langue par défaut (pas de préfixe). FR et EN sont préfixés.
   const seg = pathname.split('/').filter(Boolean)[0];
-  if (seg === 'en' || seg === 'ar') return seg;
+  if (seg === 'fr' || seg === 'en' || seg === 'ar') return seg;
   return DEFAULT_LOCALE;
 }
 
 function stripLocale(pathname: string): string {
-  // Retire le préfixe /en ou /ar pour récupérer le chemin "neutre"
+  // Retire le préfixe /fr, /en ou /ar pour récupérer le chemin "neutre"
   const segs = pathname.split('/').filter(Boolean);
-  if (segs[0] === 'en' || segs[0] === 'ar') segs.shift();
+  if (segs[0] === 'fr' || segs[0] === 'en' || segs[0] === 'ar') segs.shift();
   return '/' + segs.join('/');
 }
 
@@ -75,10 +75,10 @@ export function Header() {
             <Image
               src="/logo-yourself.png"
               alt="Reset Yourself"
-              width={420}
-              height={160}
+              width={988}
+              height={300}
               priority
-              className="block h-10 lg:h-14 w-auto transition-transform group-hover:scale-105"
+              className="block h-12 sm:h-12 lg:h-14 w-auto transition-transform group-hover:scale-105"
             />
             <div className="leading-tight hidden md:block ms-1">
               <div className="text-[9px] lg:text-[10px] tracking-[0.28em] font-semibold text-text-tertiary">
@@ -159,9 +159,10 @@ function LangSwitcher({ current, neutralPath }: { current: Locale; neutralPath: 
           <Link
             key={lng}
             href={localizedPath(neutralPath, lng)}
+            style={isActive ? { backgroundColor: '#100090', color: '#fff' } : undefined}
             className={`px-2 sm:px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
               isActive
-                ? 'bg-surface shadow-sm text-text'
+                ? 'shadow-sm'
                 : 'text-text-secondary hover:text-text'
             }`}
           >

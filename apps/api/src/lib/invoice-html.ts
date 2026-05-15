@@ -296,15 +296,6 @@ export function renderInvoiceEmailBody(payment: Payment, patient: Patient, appUr
               : ''
           }
 
-          <!-- CTA -->
-          <tr>
-            <td style="padding: 28px 32px 0; text-align: center;">
-              <a href="${escapeHtml(appUrl)}/patients/${escapeHtml(patient.id)}" style="display: inline-block; background: ${BRAND.primary}; color: white; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(30, 15, 186, 0.25); letter-spacing: 0.01em;">
-                Voir mon dossier patient →
-              </a>
-            </td>
-          </tr>
-
           <!-- Closing -->
           <tr>
             <td style="padding: 28px 32px 0; color: ${BRAND.textSecondary}; font-size: 14px;">

@@ -59,10 +59,10 @@ export default function AboutPage() {
 
       {/* === KPI ============================================================= */}
       <section className="bg-primary text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-3 gap-8 text-center">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 grid grid-cols-3 gap-2 sm:gap-6 lg:gap-8 text-center">
           <KpiBlock value="90%" label="Taux de succès" />
-          <KpiBlock value="∞" label="Vies remises sur les rails" />
-          <KpiBlock value="★★★★★" label="Excellence du service" />
+          <KpiBlock value="∞" label="Vies remises" />
+          <KpiBlock value="★★★★★" label="Excellence" stars />
         </div>
       </section>
 
@@ -98,7 +98,7 @@ export default function AboutPage() {
           <div className="relative">
             <div className="aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-black/5 shadow-2xl shadow-primary/20">
               <Image
-                src="/photos/practitioner.jpeg"
+                src="/photos/practitioner.webp"
                 alt="Praticien certifié — méthode RESET"
                 width={569}
                 height={749}
@@ -148,22 +148,6 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      {/* === KEYWORDS BAND =================================================== */}
-      <section className="bg-primary text-white overflow-hidden">
-        <div className="flex animate-marquee whitespace-nowrap py-5">
-          {[...Array(2)].map((_, copy) => (
-            <div key={copy} className="flex items-center gap-10 px-6 text-sm font-bold tracking-[0.32em]">
-              {['SANS DOULEUR', 'UNE SÉANCE', '100% NATUREL', 'PROUVÉ SCIENTIFIQUEMENT', 'ZÉRO ENVIES', 'RÉSULTATS RAPIDES', 'RESET NEURONAL', 'NON-INVASIF'].map((w, i) => (
-                <span key={`${copy}-${i}`} className="flex items-center gap-10">
-                  {w}
-                  <Sparkles className="w-4 h-4 text-secondary" />
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* === CTA ============================================================= */}
       <section className="py-20 lg:py-28 text-center px-4">
         <div className="max-w-2xl mx-auto">
@@ -186,13 +170,19 @@ export default function AboutPage() {
   );
 }
 
-function KpiBlock({ value, label }: { value: string; label: string }) {
+function KpiBlock({ value, label, stars }: { value: string; label: string; stars?: boolean }) {
   return (
     <div>
-      <div className="text-4xl lg:text-6xl font-extrabold tracking-tight leading-none tabular-nums">
+      <div
+        className={`font-extrabold tracking-tight leading-none tabular-nums ${
+          stars
+            ? 'text-base sm:text-3xl lg:text-5xl tracking-tighter'
+            : 'text-2xl sm:text-4xl lg:text-6xl'
+        }`}
+      >
         {value}
       </div>
-      <div className="text-[10px] lg:text-xs tracking-[0.28em] font-bold text-primary-light/80 uppercase mt-3">
+      <div className="text-[9px] sm:text-[10px] lg:text-xs tracking-[0.18em] sm:tracking-[0.28em] font-bold text-primary-light/80 uppercase mt-2 sm:mt-3 leading-tight">
         {label}
       </div>
     </div>

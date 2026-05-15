@@ -7,7 +7,7 @@ import { getDict, localizedPath, DEFAULT_LOCALE, type Locale } from '../lib/i18n
 
 function detectLocale(pathname: string): Locale {
   const seg = pathname.split('/').filter(Boolean)[0];
-  if (seg === 'en' || seg === 'ar') return seg;
+  if (seg === 'fr' || seg === 'en' || seg === 'ar') return seg;
   return DEFAULT_LOCALE;
 }
 
@@ -31,8 +31,11 @@ export function Footer() {
   ];
 
   return (
-    <footer className="mt-20 lg:mt-32 bg-primary text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+    <footer className="mt-20 lg:mt-32 bg-gradient-to-br from-primary via-[#160A99] to-[#100090] text-white relative overflow-hidden">
+      {/* Halos décoratifs pour la profondeur */}
+      <div aria-hidden className="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
+      <div aria-hidden className="absolute -bottom-32 -right-20 w-96 h-96 rounded-full bg-danger/8 blur-3xl pointer-events-none" />
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="lg:col-span-2 max-w-md">
@@ -50,7 +53,7 @@ export function Footer() {
 
             <div className="mt-6 flex items-center gap-3">
               <a
-                href="https://instagram.com/resetegypt"
+                href="https://instagram.com/reset_eg"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"

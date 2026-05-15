@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang="ar" dir="rtl" className={inter.variable}>
       <head>
         <script
           type="application/ld+json"
