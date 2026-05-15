@@ -8,9 +8,11 @@
 | Admin (web)            | https://reset-web-virid.vercel.app              | ✅ LIVE         |
 | Booking public         | https://reset-booking.vercel.app                | ✅ LIVE         |
 | DB Supabase            | aws-0-eu-west-1 / project pubrtdtigucvhjydtifo  | ✅ migré + seed |
-| Comptes seed           | direction@reset-egypt.com / TempPass123!        | ✅ admin        |
-|                        | dr.ahmadalashry@reset-egypt.com / TempPass123!  | ✅ praticien    |
-|                        | sara@reset-egypt.com / TempPass123!             | ✅ secrétaire   |
+| Comptes prod           | direction@reset-egypt.com  (admin)              | ✅ live         |
+|                        | dr.ahmadalashry@reset-egypt.com (praticien)     | ✅ live         |
+|                        | sara@reset-egypt.com  (secrétaire)              | ✅ live         |
+|                        | nora@reset-egypt.com  (secrétaire)              | ✅ live         |
+|                        | (mots de passe confiés en privé)                |                 |
 
 Custom domains ajoutés côté Vercel (`verified: true`) — il manque juste le DNS IONOS.
 

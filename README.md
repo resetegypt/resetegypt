@@ -73,14 +73,16 @@ pnpm dev
 - MailHog : http://localhost:8025 (si Docker)
 - Prisma Studio : `pnpm db:studio` → http://localhost:5555
 
-### Identifiants de dev (seed)
+### Comptes (prod)
 
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
-| Admin | direction@reset-egypt.com | TempPass123! |
-| Praticien (Dr Ahmad Al Ashry) | dr.ahmadalashry@reset-egypt.com | TempPass123! |
-| Secrétaire (Sara) | sara@reset-egypt.com | TempPass123! |
-| Secrétaire (Nora) | nora@reset-egypt.com | TempPass123! |
+| Rôle | Email |
+|------|-------|
+| Admin | direction@reset-egypt.com |
+| Praticien (Dr Ahmad Al Ashry) | dr.ahmadalashry@reset-egypt.com |
+| Secrétaire (Sara) | sara@reset-egypt.com |
+| Secrétaire (Nora) | nora@reset-egypt.com |
+
+> Mots de passe confiés au client en privé (jamais commités). Pour développement local, lancer `pnpm db:seed` régénère des comptes avec le mot de passe par défaut défini dans `apps/api/prisma/seed.ts` — **à changer immédiatement avant tout déploiement**.
 
 ## Fonctionnalités
 
