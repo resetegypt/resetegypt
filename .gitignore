@@ -107,6 +107,5 @@ storage/
 # Migration snapshots (opérationnel local, pas source)
 docs/migration-snapshots/
 
-# Scripts de mise en service contenant des secrets en dur (NE JAMAIS COMMITTER)
-scripts/mailbox-go-live.sh
-/go.sh
+# Mailbox go-live — fichier de secrets local (NE JAMAIS COMMITTER)
+scripts/mailbox-go-live.env
