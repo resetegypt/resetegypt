@@ -78,8 +78,7 @@ pnpm dev
 | Rôle | Email | Mot de passe |
 |------|-------|--------------|
 | Admin | direction@reset-egypt.com | TempPass123! |
-| Praticien (Dr. Reda) | dr.reda@reset-egypt.com | TempPass123! |
-| Praticien (Dr. Layla) | dr.layla@reset-egypt.com | TempPass123! |
+| Praticien (Dr Ahmad Al Ashry) | dr.ahmadalashry@reset-egypt.com | TempPass123! |
 | Secrétaire (Sara) | sara@reset-egypt.com | TempPass123! |
 | Secrétaire (Nora) | nora@reset-egypt.com | TempPass123! |
 
@@ -245,7 +244,7 @@ reset/
 - [ ] 2FA TOTP pour admin (recommandé)
 - [ ] IP whitelist activable depuis admin UI
 - [ ] Vrais identifiants centre (TIN, numéro commercial, adresse)
-- [ ] Vrais noms praticiens (Dr. Reda / Dr. Layla = placeholders)
+- [x] Vrais noms praticiens (Dr Ahmad Al Ashry — Reda/Layla désactivés)
 
 ## Documentation
 

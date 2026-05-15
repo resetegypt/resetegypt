@@ -6,8 +6,7 @@ const prisma = new PrismaClient();
 const PASSWORD_PLAIN = 'TempPass123!';
 
 const PRACTITIONERS_DATA = [
-  { email: 'dr.reda@reset-egypt.com', firstName: 'Reda', lastName: 'Hassan' },
-  { email: 'dr.layla@reset-egypt.com', firstName: 'Layla', lastName: 'Mansour' },
+  { email: 'dr.ahmadalashry@reset-egypt.com', firstName: 'Ahmad', lastName: 'Al Ashry' },
 ] as const;
 
 const SECRETARIES_DATA = [
@@ -219,7 +218,7 @@ async function main() {
   console.log('🎉 Seed complete!');
   console.log(`\nLogin credentials (dev only):`);
   console.log(`  Admin       : direction@reset-egypt.com / ${PASSWORD_PLAIN}`);
-  console.log(`  Practitioner: dr.reda@reset-egypt.com / ${PASSWORD_PLAIN}`);
+  console.log(`  Practitioner: dr.ahmadalashry@reset-egypt.com / ${PASSWORD_PLAIN}`);
   console.log(`  Secretary   : sara@reset-egypt.com / ${PASSWORD_PLAIN}`);
 }
 

@@ -603,7 +603,7 @@ function AddToWaitingListModal({
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   maxLength={2000}
-                  placeholder="Ex: revient de vacances le 15, préfère Dr. Reda…"
+                  placeholder="Ex: revient de vacances le 15, préfère le créneau matin…"
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-surface focus:border-primary focus:outline-none resize-y"
                 />
               </div>

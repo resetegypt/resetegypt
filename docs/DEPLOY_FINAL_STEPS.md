@@ -9,7 +9,7 @@
 | Booking public         | https://reset-booking.vercel.app                | ✅ LIVE         |
 | DB Supabase            | aws-0-eu-west-1 / project pubrtdtigucvhjydtifo  | ✅ migré + seed |
 | Comptes seed           | direction@reset-egypt.com / TempPass123!        | ✅ admin        |
-|                        | dr.reda@reset-egypt.com / TempPass123!          | ✅ praticien    |
+|                        | dr.ahmadalashry@reset-egypt.com / TempPass123!  | ✅ praticien    |
 |                        | sara@reset-egypt.com / TempPass123!             | ✅ secrétaire   |
 
 Custom domains ajoutés côté Vercel (`verified: true`) — il manque juste le DNS IONOS.
@@ -112,7 +112,7 @@ open https://reset-egypt.com/admin  # → redirige vers app.reset-egypt.com/logi
 ## 🔒 Sécurité — actions à faire après le go-live
 
 1. **Changer les mots de passe seed** (`TempPass123!`) via la page profil
-2. **Supprimer/désactiver les comptes de démo** non utilisés (dr.layla, nora si pas réels)
+2. **Supprimer/désactiver les comptes de démo** non utilisés (dr.reda, dr.layla, nora si pas réels)
 3. **Configurer un IP whitelist** (table `IpWhitelist`) pour l'admin si vous voulez
 4. **Sauvegardes Supabase** : actives par défaut sur le plan gratuit (point-in-time recovery 7 jours)
 5. **Monitoring** : Vercel envoie déjà les logs runtime ; ajoutez Sentry plus tard si besoin
