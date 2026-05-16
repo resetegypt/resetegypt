@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage, Badge, Button, ResetLogo } from '@reset/ui';
 import { useAuthStore } from '../lib/auth';
 import { useMailboxAccess } from '../pages/mail/useMailboxAccess';
@@ -22,6 +22,8 @@ import {
   CornerDownLeft,
   ArrowUpDown,
   Bell,
+  Menu,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -95,9 +97,16 @@ const NAV: NavItem[] = [
 
 export function AppShell() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
   const { t, i18n } = useTranslation();
   const [cmdkOpen, setCmdkOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Ferme le drawer mobile à chaque changement de route (clic sur un NavLink)
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
 
   // Ouverture du command palette via Ctrl/Cmd + K
   useEffect(() => {
@@ -147,8 +156,48 @@ export function AppShell() {
   useAppointmentEventsNotifier();
 
   return (
-    <div className="min-h-screen grid grid-cols-[264px_1fr] bg-bg">
-      <aside className="bg-surface border-r border-border h-screen sticky top-0 overflow-y-auto flex flex-col">
+    <div className="min-h-screen md:grid md:grid-cols-[264px_1fr] bg-bg">
+      {/* Mobile header — visible < md, hamburger + logo + avatar */}
+      <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-3 px-3 py-2.5 bg-surface border-b border-border">
+        <button
+          type="button"
+          onClick={() => setMobileNavOpen(true)}
+          className="p-2 -ml-2 rounded-lg hover:bg-bg-secondary transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5 text-text" />
+        </button>
+        <div className="flex-1 max-w-[160px]">
+          <ResetLogo variant="wordmark" className="block w-full h-auto" />
+        </div>
+        <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+          <AvatarFallback className="bg-primary text-white text-xs font-semibold">{initials}</AvatarFallback>
+        </Avatar>
+      </header>
+
+      {/* Backdrop pour mobile drawer */}
+      {mobileNavOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      <aside
+        className={`bg-surface border-r border-border h-screen overflow-y-auto flex flex-col
+          ${mobileNavOpen ? 'fixed inset-y-0 start-0 z-50 w-72 shadow-2xl' : 'hidden'}
+          md:flex md:sticky md:top-0 md:shadow-none md:w-auto md:z-auto md:static`}
+      >
+        {/* Bouton fermer (mobile uniquement) */}
+        <button
+          type="button"
+          onClick={() => setMobileNavOpen(false)}
+          className="md:hidden absolute top-3 end-3 p-2 rounded-lg hover:bg-bg-secondary transition-colors z-10"
+          aria-label="Close menu"
+        >
+          <X className="w-5 h-5 text-text" />
+        </button>
         {/* Brand band — logo officiel + branch label + user card */}
         <div className="px-3 pt-3 space-y-2">
           {/* Logo officiel (SVG du graphiste) */}
