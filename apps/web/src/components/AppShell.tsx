@@ -883,7 +883,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="px-7 py-6 border-b border-border bg-surface flex items-center justify-between gap-4 flex-wrap">
+    <div className="px-4 sm:px-7 py-4 sm:py-6 border-b border-border bg-surface flex items-center justify-between gap-3 sm:gap-4 flex-wrap">
       <div className="min-w-0">
         <h1 className="text-2xl font-bold tracking-tight leading-tight">{title}</h1>
         {subtitle && <p className="text-sm text-text-secondary mt-1">{subtitle}</p>}

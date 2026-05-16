@@ -182,7 +182,7 @@ export function PatientIntakePage() {
   return (
     <>
       <PageHeader title={t('patients.intake.title')} subtitle={t('patients.intake.subtitle')} />
-      <form onSubmit={submit} className="p-7 space-y-4 max-w-4xl">
+      <form onSubmit={submit} className="p-4 sm:p-7 space-y-4 max-w-4xl">
         <Card>
           <CardHeader>
             <CardTitle>🆔 {t('patients.intake.identity')}</CardTitle>

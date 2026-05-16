@@ -96,7 +96,7 @@ export function AccountingPage() {
           </Button>
         }
       />
-      <div className="p-7 space-y-4 max-w-7xl">
+      <div className="p-4 sm:p-7 space-y-4 max-w-7xl">
         <Card>
           <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
             <div>

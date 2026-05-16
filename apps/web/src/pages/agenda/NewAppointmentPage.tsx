@@ -115,7 +115,7 @@ export function NewAppointmentPage() {
   return (
     <>
       <PageHeader title={t('newAppointment.title')} subtitle={t('newAppointment.subtitle')} />
-      <form onSubmit={submit} className="p-7 space-y-4 max-w-4xl">
+      <form onSubmit={submit} className="p-4 sm:p-7 space-y-4 max-w-4xl">
         <Card>
           <CardHeader>
             <CardTitle>👤 {t('newAppointment.patient')}</CardTitle>

@@ -218,7 +218,7 @@ export function PatientDetailPage() {
           </>
         }
       />
-      <div className="p-7 space-y-6 max-w-6xl">
+      <div className="p-4 sm:p-7 space-y-6 max-w-6xl">
         <Card>
           <CardContent className="flex items-start gap-4">
             <PatientAvatarUpload

@@ -118,7 +118,7 @@ export function DashboardPage() {
     return (
       <>
         <PageHeader title={greeting} subtitle={dateLabel} />
-        <div className="p-7 space-y-6 max-w-7xl">
+        <div className="p-4 sm:p-7 space-y-6 max-w-7xl">
           <SkelKpiGrid count={user?.role === 'PRACTITIONER' ? 3 : 4} />
           <SkelList rows={4} />
         </div>

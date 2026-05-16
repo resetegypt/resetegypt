@@ -58,7 +58,7 @@ export function PatientsListPage() {
           </Link>
         }
       />
-      <div className="p-7 max-w-7xl">
+      <div className="p-4 sm:p-7 max-w-7xl">
         <Card>
           <div className="px-5 py-4 border-b border-border-light flex items-center justify-between gap-3 flex-wrap">
             <div className="inline-flex rounded-lg border border-border bg-bg-secondary/40 p-1">

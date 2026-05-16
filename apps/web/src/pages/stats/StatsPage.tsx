@@ -94,7 +94,7 @@ export function StatsPage() {
     return (
       <>
         <PageHeader title={t('stats.title')} subtitle={t('common.loading')} />
-        <div className="p-7 space-y-5 max-w-7xl">
+        <div className="p-4 sm:p-7 space-y-5 max-w-7xl">
           <SkelKpiGrid count={4} />
           <SkelChart />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

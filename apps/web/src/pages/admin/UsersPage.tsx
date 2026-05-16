@@ -75,7 +75,7 @@ export function UsersPage() {
         subtitle={t('users.subtitle')}
         actions={<CreateUserDialog onCreated={() => refetch()} />}
       />
-      <div className="p-7 space-y-6 max-w-7xl">
+      <div className="p-4 sm:p-7 space-y-6 max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent>
@@ -120,7 +120,8 @@ export function UsersPage() {
             />
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[600px]">
               <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
                 <tr>
                   <th className="text-start px-4 py-2">{t('users.columns.name')}</th>
@@ -203,6 +204,7 @@ export function UsersPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </CardContent>
         </Card>
       </div>

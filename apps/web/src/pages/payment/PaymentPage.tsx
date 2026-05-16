@@ -143,7 +143,7 @@ export function PaymentPage() {
           title={t('payment.success.title')}
           subtitle={t('payment.success.subtitle', { invoice: success.invoiceNumber })}
         />
-        <div className="p-7 max-w-2xl mx-auto space-y-4">
+        <div className="p-4 sm:p-7 max-w-2xl mx-auto space-y-4">
           <Card>
             <CardContent className="space-y-4 text-center py-8">
               <div className="text-6xl">✅</div>
@@ -262,7 +262,7 @@ export function PaymentPage() {
             {items.map((it, idx) => (
               <div
                 key={idx}
-                className="px-4 py-3 border-b border-border last:border-0 grid grid-cols-[1fr_80px_120px_40px] gap-2 items-center"
+                className="px-4 py-3 border-b border-border last:border-0 flex flex-col gap-2 sm:grid sm:grid-cols-[1fr_80px_120px_40px] sm:items-center"
               >
                 <Input
                   value={it.description}

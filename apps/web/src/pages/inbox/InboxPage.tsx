@@ -93,8 +93,8 @@ export function InboxPage() {
   return (
     <>
       <PageHeader title={t('inbox.title')} subtitle={t('inbox.subtitle')} />
-      <div className="grid grid-cols-[320px_1fr_280px] h-[calc(100vh-100px)]">
-        <aside className="border-e border-border bg-surface overflow-y-auto">
+      <div className="lg:grid lg:grid-cols-[320px_1fr_280px] h-[calc(100vh-100px)]">
+        <aside className={`${selectedKey ? 'hidden lg:block' : 'block'} border-e border-border bg-surface overflow-y-auto`}>
           <div className="p-3 border-b border-border">
             <Input placeholder={t('inbox.searchPlaceholder')} />
           </div>
@@ -124,10 +124,18 @@ export function InboxPage() {
           ))}
         </aside>
 
-        <section className="flex flex-col bg-bg-secondary/40 overflow-hidden">
+        <section className={`${selected ? 'flex' : 'hidden lg:flex'} flex-col bg-bg-secondary/40 overflow-hidden`}>
           {selected ? (
             <>
               <div className="bg-surface border-b border-border p-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedKey(null)}
+                  className="lg:hidden p-1.5 -ml-1 rounded hover:bg-bg-secondary"
+                  aria-label="Back to conversations"
+                >
+                  ←
+                </button>
                 <Avatar>
                   <AvatarFallback>
                     {(selected.patientName ?? selected.externalAddress).charAt(0).toUpperCase()}
@@ -205,7 +213,7 @@ export function InboxPage() {
           )}
         </section>
 
-        <aside className="border-s border-border bg-surface overflow-y-auto p-4">
+        <aside className="hidden lg:block border-s border-border bg-surface overflow-y-auto p-4">
           {selected ? (
             <>
               <Card>

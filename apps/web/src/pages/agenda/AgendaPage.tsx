@@ -306,7 +306,7 @@ export function AgendaPage() {
     return (
       <>
         <PageHeader title={t('agenda.title', 'Agenda')} subtitle={subtitle} />
-        <div className="p-7 space-y-5 max-w-[1600px]">
+        <div className="p-4 sm:p-7 space-y-5 max-w-[1600px]">
           <SkelKpiGrid count={showRevenue ? 5 : 3} />
           <SkelAgendaWeek />
         </div>

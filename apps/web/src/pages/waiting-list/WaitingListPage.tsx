@@ -190,7 +190,7 @@ export function WaitingListPage() {
         }
       />
 
-      <div className="p-7 space-y-6 max-w-[1400px]">
+      <div className="p-4 sm:p-7 space-y-6 max-w-[1400px]">
         {isLoading ? (
           <SkelList rows={4} />
         ) : entries.length === 0 ? (

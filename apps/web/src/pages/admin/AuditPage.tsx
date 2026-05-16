@@ -24,13 +24,14 @@ export function AuditPage() {
   return (
     <>
       <PageHeader title={t('audit.title')} subtitle={t('audit.subtitle')} />
-      <div className="p-7 max-w-7xl">
+      <div className="p-4 sm:p-7 max-w-7xl">
         <Card>
           <CardHeader>
             <CardTitle>📜 {t('audit.recentEvents')}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[700px]">
               <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
                 <tr>
                   <th className="text-start px-4 py-2">{t('audit.columns.date')}</th>
@@ -64,6 +65,7 @@ export function AuditPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </CardContent>
         </Card>
       </div>

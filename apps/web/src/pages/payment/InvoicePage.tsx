@@ -104,7 +104,7 @@ export function InvoicePage() {
           </>
         }
       />
-      <div className="p-7 space-y-4 max-w-4xl">
+      <div className="p-4 sm:p-7 space-y-4 max-w-4xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card>
             <CardContent>

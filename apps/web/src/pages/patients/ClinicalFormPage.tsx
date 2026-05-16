@@ -280,7 +280,7 @@ export function ClinicalFormPage() {
         </aside>
 
         {/* Main */}
-        <div className="p-7 max-w-4xl">
+        <div className="p-4 sm:p-7 max-w-4xl">
           {canEdit && (
             <div
               className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg border mb-5 text-sm ${
