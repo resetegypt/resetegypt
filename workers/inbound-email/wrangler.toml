@@ -1,6 +1,7 @@
 name = "reset-inbound-email"
 main = "src/index.ts"
 compatibility_date = "2024-05-01"
+workers_dev = false
 
 # Les secrets se définissent via `wrangler secret put <NOM>` (jamais en clair ici) :
 #   wrangler secret put RESET_API_URL
