@@ -84,6 +84,8 @@
     "stats": "الإحصائيات",
     "adminUsers": "إدارة الحسابات",
     "auditLogs": "سجل التدقيق",
+    "availability": "التوفر",
+    "settings": "الإعدادات",
     "logout": "خروج"
   },
   "dashboard": {

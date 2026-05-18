@@ -15,8 +15,15 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // injectManifest = on fournit notre propre sw.ts (push handler custom)
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'logo-icon.svg', 'apple-touch-icon.png', 'offline.html'],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+      },
       manifest: {
         name: 'Reset Egypt — Staff',
         short_name: 'Reset',
@@ -37,50 +44,14 @@ export default defineConfig({
           { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
         ],
       },
-      workbox: {
-        // Pré-cache du shell statique
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // Stratégies réseau :
-        runtimeCaching: [
-          {
-            // API : NetworkFirst — données fraîches privilégiées, fallback cache si offline
-            urlPattern: /^https:\/\/api\.reset-egypt\.com\/.*/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // Google Fonts
-            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gfonts-cache',
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
-        // SPA fallback (page online) + offline.html quand le client est offline
-        // et tente d'accéder à une nouvelle route pas dans le cache
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/internal\//],
-      },
-      // Quand la navigation échoue (offline + route non cachée), Workbox sert offline.html
-      // via la stratégie configurée ci-dessus + ce fichier en includeAssets.
       devOptions: { enabled: false },
     }),
-    // Sentry source maps — uploaded à chaque build de prod si auth token présent
     sentryEnabled &&
       sentryVitePlugin({
         org: process.env.SENTRY_ORG!,
         project: process.env.SENTRY_PROJECT!,
         authToken: process.env.SENTRY_AUTH_TOKEN!,
         sourcemaps: { assets: ['./dist/**/*.js', './dist/**/*.js.map'] },
-        // Ne pas bloquer le build si Sentry est down / mal configuré
         errorHandler: (err) => {
           // eslint-disable-next-line no-console
           console.warn('[sentry-vite-plugin] skipped:', err.message);
@@ -99,9 +70,7 @@ export default defineConfig({
     },
   },
   build: {
-    // Source maps activées pour permettre Sentry de les uploader
     sourcemap: true,
-    // Code-splitting agressif : chaque page route en chunk séparé
     rollupOptions: {
       output: {
         manualChunks: {

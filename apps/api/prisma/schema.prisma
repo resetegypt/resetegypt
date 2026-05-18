@@ -50,6 +50,8 @@ model User {
   scoreSnapshots         ScoreSnapshot[] @relation("ScoreSnapshotTakenBy")
   mailbox    Mailbox?
   sentEmails EmailMessage[] @relation("EmailSentBy")
+  availability PractitionerAvailability[] @relation("PractitionerAvail")
+  timeOff      PractitionerTimeOff[]      @relation("PractitionerTimeOff")
 }
 
 enum Role {
@@ -334,6 +336,58 @@ enum MessageStatus {
   DELIVERED
   READ
   FAILED
+}
+
+/// Subscription Web Push (browser) — 1 par device par user.
+/// On purge celles qui renvoient 410 (Gone) ou 404 lors du push.
+model PushSubscription {
+  id           String   @id @default(uuid())
+  userId       String
+  endpoint     String   @unique
+  p256dh       String   // clé publique client (base64url)
+  auth         String   // secret auth (base64url)
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Disponibilités hebdomadaires d'un praticien.
+/// Une ligne par (practitionerId, dayOfWeek) — dayOfWeek = 0 (dim) à 6 (sam).
+/// startMinutes / endMinutes = minutes depuis minuit local Cairo (UTC+2).
+/// Ex: 10h-14h = 600-840. Plusieurs lignes pour pause déjeuner : 600-720 + 780-1140.
+/// isActive = false → praticien indisponible ce jour (override fériés / vacances).
+model PractitionerAvailability {
+  id              String   @id @default(uuid())
+  practitionerId  String
+  practitioner    User     @relation("PractitionerAvail", fields: [practitionerId], references: [id], onDelete: Cascade)
+  dayOfWeek       Int      // 0-6
+  startMinutes    Int      // 0-1439
+  endMinutes      Int      // 0-1440
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([practitionerId, dayOfWeek, startMinutes])
+  @@index([practitionerId])
+}
+
+/// Exceptions ponctuelles : congés, formation, jour férié, créneau spécial.
+/// Si type=TIME_OFF, le créneau est INDISPONIBLE même si availability OK.
+/// Si type=EXTRA, le créneau est DISPONIBLE même si availability OFF.
+model PractitionerTimeOff {
+  id              String   @id @default(uuid())
+  practitionerId  String
+  practitioner    User     @relation("PractitionerTimeOff", fields: [practitionerId], references: [id], onDelete: Cascade)
+  startAt         DateTime
+  endAt           DateTime
+  type            String   @default("TIME_OFF") // TIME_OFF | EXTRA
+  reason          String?
+  createdAt       DateTime @default(now())
+
+  @@index([practitionerId, startAt])
+  @@index([startAt, endAt])
 }
 
 model AutomationWorkflow {

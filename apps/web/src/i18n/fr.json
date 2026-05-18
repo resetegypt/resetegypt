@@ -95,6 +95,8 @@
     "stats": "Statistiques",
     "adminUsers": "Gestion comptes",
     "auditLogs": "Journal d'audit",
+    "availability": "Disponibilités",
+    "settings": "Paramètres",
     "logout": "Déconnexion"
   },
   "dashboard": {

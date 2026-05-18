@@ -33,4 +33,6 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(waitingListRoutes);
   await app.register(inboundRoutes);
   await app.register(practitionerMailRoutes);
+  await app.register(pushRoutes);
+  await app.register(availabilityRoutes);
 }

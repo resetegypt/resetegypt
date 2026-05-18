@@ -65,7 +65,10 @@
     "waitingList": "Waiting list",
     "mail": "Mail",
     "accounting": "Accounting", "stats": "Stats", "adminUsers": "User management",
-    "auditLogs": "Audit log", "logout": "Sign out"
+    "auditLogs": "Audit log",
+    "availability": "Availability",
+    "settings": "Settings",
+    "logout": "Sign out"
   },
   "dashboard": {
     "greeting": "Hi",

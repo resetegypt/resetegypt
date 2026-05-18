@@ -7,6 +7,8 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/admin/UsersPage';
 import { AuditPage } from './pages/admin/AuditPage';
+import { AvailabilityPage } from './pages/admin/AvailabilityPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { PatientsListPage } from './pages/patients/PatientsListPage';
 import { PatientIntakePage } from './pages/patients/PatientIntakePage';
 import { PatientDetailPage } from './pages/patients/PatientDetailPage';
@@ -65,6 +67,7 @@ function AnimatedRoutes() {
             <Route path="waiting-list" element={<PageMotion><WaitingListPage /></PageMotion>} />
             <Route path="courrier" element={<PageMotion><MailPage /></PageMotion>} />
             <Route path="stats" element={<PageMotion><StatsPage /></PageMotion>} />
+            <Route path="settings" element={<PageMotion><SettingsPage /></PageMotion>} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute roles={['ADMIN']} />}>
@@ -72,6 +75,7 @@ function AnimatedRoutes() {
             <Route path="admin/dashboard" element={<PageMotion><StatsPage /></PageMotion>} />
             <Route path="admin/users" element={<PageMotion><UsersPage /></PageMotion>} />
             <Route path="admin/audit" element={<PageMotion><AuditPage /></PageMotion>} />
+            <Route path="admin/availability" element={<PageMotion><AvailabilityPage /></PageMotion>} />
           </Route>
         </Route>
         <Route
