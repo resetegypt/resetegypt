@@ -9,12 +9,13 @@ import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, login, loading, error } = useAuthStore();
+  const { user, login, loading, error, totpChallenge, verifyTotp, cancelTotp } = useAuthStore();
   const { t, i18n } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
 
   if (user) {
     const from = (location.state as { from?: string } | null)?.from;
@@ -24,7 +25,22 @@ export function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     try {
-      const u = await login(email.trim(), password, rememberMe);
+      const res = await login(email.trim(), password, rememberMe);
+      if (res.totpRequired) {
+        // L'UI passe automatiquement en mode TOTP via totpChallenge
+        return;
+      }
+      if (res.user) navigate(defaultRouteForRole(res.user.role), { replace: true });
+    } catch {
+      /* error already in store */
+    }
+  }
+
+  async function handleTotpSubmit(e: FormEvent) {
+    e.preventDefault();
+    try {
+      const u = await verifyTotp(totpCode.trim());
+      setTotpCode('');
       navigate(defaultRouteForRole(u.role), { replace: true });
     } catch {
       /* error already in store */
@@ -75,6 +91,45 @@ export function LoginPage() {
           </div>
           <Card>
             <CardContent className="pt-6">
+              {totpChallenge ? (
+                <form onSubmit={handleTotpSubmit} className="space-y-4">
+                  <h2 className="text-lg font-semibold text-primary">
+                    {t('auth.totpTitle', 'Code de vérification 2FA')}
+                  </h2>
+                  <p className="text-xs text-text-secondary">
+                    {t('auth.totpPrompt', 'Ouvre ton app d\'authentification (Google Authenticator, Authy…) et entre le code à 6 chiffres.')}
+                  </p>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="\d{6,8}"
+                    maxLength={8}
+                    required
+                    autoFocus
+                    placeholder="000000"
+                    value={totpCode}
+                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                    className="text-center text-2xl font-mono tracking-widest"
+                  />
+                  {error && (
+                    <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>
+                  )}
+                  <Button type="submit" disabled={loading || totpCode.length < 6} className="w-full">
+                    {loading ? t('common.loading') : t('auth.totpVerify', 'Vérifier')}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => { cancelTotp(); setTotpCode(''); }}
+                    className="block w-full text-xs text-text-secondary hover:text-text underline mt-2"
+                  >
+                    {t('auth.totpCancel', '← Recommencer la connexion')}
+                  </button>
+                  <p className="text-[11px] text-text-tertiary mt-3 text-center">
+                    {t('auth.totpBackupHint', 'Tu peux aussi utiliser un de tes codes de secours.')}
+                  </p>
+                </form>
+              ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <h2 className="text-lg font-semibold text-primary">{t('auth.login')}</h2>
 
@@ -131,6 +186,7 @@ export function LoginPage() {
                 {loading ? t('common.loading') : t('auth.signIn')}
               </Button>
               </form>
+              )}
             </CardContent>
           </Card>
         </div>

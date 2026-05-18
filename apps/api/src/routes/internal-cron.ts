@@ -8,6 +8,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import { executeAutomations } from '../modules/automations/executor.js';
+import { runBackup } from '../../scripts/backup-db.js';
 
 export async function internalCronRoutes(app: FastifyInstance): Promise<void> {
   // GET car Vercel Cron utilise GET par défaut
@@ -24,5 +25,29 @@ export async function internalCronRoutes(app: FastifyInstance): Promise<void> {
     const result = await executeAutomations(app);
     app.log.info({ result }, '[cron] automations tick executed');
     return { ok: true, ...result };
+  });
+
+  // Backup BDD quotidien → Cloudflare R2 (ou S3)
+  // No-op si BACKUP_S3_BUCKET pas configuré (renvoie 200 skipped).
+  app.get('/internal/cron/backup-db', async (req, reply) => {
+    const secret = process.env.CRON_SECRET;
+    if (!secret) return reply.status(404).send({ error: 'NotFound' });
+    if (req.headers.authorization !== `Bearer ${secret}`) {
+      return reply.status(404).send({ error: 'NotFound' });
+    }
+    if (!process.env.BACKUP_S3_BUCKET) {
+      return { ok: true, skipped: true, reason: 'BACKUP_S3_BUCKET_not_configured' };
+    }
+    try {
+      const result = await runBackup();
+      app.log.info({ result }, '[cron] backup-db completed');
+      return result;
+    } catch (err) {
+      app.log.error({ err }, '[cron] backup-db failed');
+      return reply.status(500).send({
+        ok: false,
+        error: (err as Error).message.slice(0, 500),
+      });
+    }
   });
 }

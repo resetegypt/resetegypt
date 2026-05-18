@@ -16,16 +16,25 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   initialized: boolean;
+  /** Si non null, l'étape 2 du login (TOTP) est requise avec ce challenge JWT. */
+  totpChallenge: string | null;
   init: () => Promise<void>;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<CurrentUser>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+  ) => Promise<{ user: CurrentUser | null; totpRequired: boolean }>;
+  verifyTotp: (code: string) => Promise<CurrentUser>;
+  cancelTotp: () => void;
   logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: false,
   error: null,
   initialized: false,
+  totpChallenge: null,
   init: async () => {
     set({ loading: true });
     try {
@@ -40,15 +49,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
   login: async (email, password, rememberMe = false) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, totpChallenge: null });
     try {
-      const { user } = await apiPost<{ user: CurrentUser }>('/auth/login', {
-        email,
-        password,
-        rememberMe,
-      });
+      const res = await apiPost<
+        { user: CurrentUser } | { totpRequired: true; challenge: string }
+      >('/auth/login', { email, password, rememberMe });
+      if ('totpRequired' in res && res.totpRequired) {
+        set({ loading: false, totpChallenge: res.challenge });
+        return { user: null, totpRequired: true };
+      }
+      const { user } = res as { user: CurrentUser };
       set({ user, loading: false });
-      return user;
+      return { user, totpRequired: false };
     } catch (err) {
       const message =
         err instanceof ApiError
@@ -64,13 +76,34 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw err;
     }
   },
+  verifyTotp: async (code) => {
+    const challenge = get().totpChallenge;
+    if (!challenge) throw new Error('no_active_totp_challenge');
+    set({ loading: true, error: null });
+    try {
+      const { user } = await apiPost<{ user: CurrentUser }>('/auth/2fa/verify', {
+        challenge,
+        code,
+      });
+      set({ user, loading: false, totpChallenge: null });
+      return user;
+    } catch (err) {
+      const message =
+        err instanceof ApiError && err.status === 401
+          ? 'Code incorrect ou expiré'
+          : 'Erreur de vérification 2FA';
+      set({ loading: false, error: message });
+      throw err;
+    }
+  },
+  cancelTotp: () => set({ totpChallenge: null, error: null }),
   logout: async () => {
     try {
       await apiPost('/auth/logout');
     } catch {
       // swallow
     }
-    set({ user: null, error: null });
+    set({ user: null, error: null, totpChallenge: null });
   },
 }));
 

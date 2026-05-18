@@ -359,6 +359,49 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     });
     return { practitioners: list };
   });
+
+  // CSV export — rendez-vous (admin only, pour comptable / bilan / analyse)
+  app.get('/appointments/export.csv', async (req, reply) => {
+    if (req.currentUser?.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'Forbidden' });
+    }
+    const q = req.query as { from?: string; to?: string };
+    const where: Record<string, unknown> = {};
+    if (q.from || q.to) {
+      where.scheduledAt = {
+        ...(q.from && { gte: new Date(q.from) }),
+        ...(q.to && { lte: new Date(q.to) }),
+      };
+    }
+    const appts = await app.prisma.appointment.findMany({
+      where,
+      orderBy: { scheduledAt: 'asc' },
+      include: {
+        patient: { select: { firstName: true, lastName: true, phone: true } },
+        practitioner: { select: { firstName: true, lastName: true } },
+      },
+    });
+    const headers = [
+      'ID', 'Date', 'Heure', 'Patient', 'Téléphone', 'Praticien',
+      'Service', 'Type', 'Statut', 'Source', 'Prix', 'Durée (min)', 'Notes',
+    ];
+    const rows = appts.map((a) => [
+      a.id,
+      a.scheduledAt.toISOString().slice(0, 10),
+      a.scheduledAt.toISOString().slice(11, 16),
+      `${a.patient.firstName} ${a.patient.lastName}`,
+      a.patient.phone,
+      `${a.practitioner.firstName} ${a.practitioner.lastName}`,
+      a.service, a.visitType, a.status, a.source,
+      Number(a.price).toFixed(2), a.duration,
+      a.notes ?? '',
+    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    reply
+      .header('Content-Type', 'text/csv; charset=utf-8')
+      .header('Content-Disposition', `attachment; filename="reset-egypt-rdv-${new Date().toISOString().slice(0, 10)}.csv"`);
+    return csv;
+  });
 }
 
 // === Notification auto de la liste d'attente ===

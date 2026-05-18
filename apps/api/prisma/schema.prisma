@@ -31,6 +31,12 @@ model User {
   passwordChangedAt DateTime @default(now())
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  // 2FA TOTP (Google Authenticator / Authy / 1Password) — base32 otplib format.
+  // totpEnabled doit être true ET totpSecret non null pour exiger 2FA au login.
+  // backupCodes = 10 codes one-shot (8 chars), à régénérer après épuisement.
+  totpSecret   String?
+  totpEnabled  Boolean  @default(false)
+  backupCodes  String[] @default([])
 
   appointments         Appointment[]   @relation("PractitionerAppointments")
   createdPatients      Patient[]       @relation("CreatedBy")

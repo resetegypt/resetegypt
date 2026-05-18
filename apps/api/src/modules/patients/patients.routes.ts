@@ -56,6 +56,9 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
   app.get('/patients', async (req) => {
     const params = req.query as { search?: string; status?: string };
     const q = params.search?.trim();
+    // Normalisation tel : si l'input ressemble à un numéro (chiffres + + - espaces),
+    // on retire les non-chiffres pour matcher la BDD qui stocke en E.164 brut.
+    const phoneNormalized = q && /^[+\d\s\-().]+$/.test(q) ? q.replace(/\D/g, '') : null;
     // Par défaut on n'inclut PAS les patients archivés (sinon les listes
     // sont polluées par les ex-patients). status=all OU status=ARCHIVED
     // pour les voir explicitement.
@@ -69,13 +72,24 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     const conditions: Record<string, unknown>[] = [];
     if (statusFilter) conditions.push({ status: statusFilter });
     if (q) {
-      conditions.push({
-        OR: [
-          { firstName: { contains: q, mode: 'insensitive' } },
-          { lastName: { contains: q, mode: 'insensitive' } },
-          { phone: { contains: q } },
-        ],
-      });
+      const orConditions: Record<string, unknown>[] = [
+        { firstName: { contains: q, mode: 'insensitive' } },
+        { lastName: { contains: q, mode: 'insensitive' } },
+        { phone: { contains: q } },
+        { email: { contains: q, mode: 'insensitive' } },
+      ];
+      if (phoneNormalized && phoneNormalized.length >= 4) {
+        // Match "01234567890" → tous les patients dont le phone contient
+        // ces chiffres consécutifs (ignore +20, espaces, etc.)
+        orConditions.push({ phone: { contains: phoneNormalized } });
+        // Sans le préfixe pays (Égypte = 20)
+        if (phoneNormalized.startsWith('20')) {
+          orConditions.push({ phone: { contains: phoneNormalized.slice(2) } });
+        } else if (phoneNormalized.startsWith('0')) {
+          orConditions.push({ phone: { contains: phoneNormalized.slice(1) } });
+        }
+      }
+      conditions.push({ OR: orConditions });
     }
     const where = conditions.length ? { AND: conditions } : undefined;
 
@@ -406,5 +420,50 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     if (!isAuthor && !isAdmin) return reply.status(403).send({ error: 'Forbidden' });
     await app.prisma.scoreSnapshot.delete({ where: { id } });
     return { ok: true };
+  });
+
+  // CSV export — patients (admin only, pour comptable / migration / sauvegarde)
+  app.get('/patients/export.csv', async (req, reply) => {
+    if (req.currentUser?.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'Forbidden' });
+    }
+    const patients = await app.prisma.patient.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        whatsapp: true,
+        email: true,
+        dateOfBirth: true,
+        age: true,
+        gender: true,
+        governorate: true,
+        primaryAddiction: true,
+        status: true,
+        preferredLanguage: true,
+        tags: true,
+        createdAt: true,
+      },
+    });
+    const headers = [
+      'ID', 'Prénom', 'Nom', 'Téléphone', 'WhatsApp', 'Email',
+      'Date de naissance', 'Age', 'Genre', 'Gouvernorat',
+      'Addiction principale', 'Statut', 'Langue', 'Tags', 'Créé le',
+    ];
+    const rows = patients.map((p) => [
+      p.id, p.firstName, p.lastName, p.phone, p.whatsapp ?? '', p.email ?? '',
+      p.dateOfBirth ? p.dateOfBirth.toISOString().slice(0, 10) : '',
+      p.age ?? '', p.gender ?? '', p.governorate ?? '',
+      p.primaryAddiction, p.status, p.preferredLanguage,
+      (p.tags ?? []).join('; '),
+      p.createdAt.toISOString(),
+    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    reply
+      .header('Content-Type', 'text/csv; charset=utf-8')
+      .header('Content-Disposition', `attachment; filename="reset-egypt-patients-${new Date().toISOString().slice(0, 10)}.csv"`);
+    return csv;
   });
 }

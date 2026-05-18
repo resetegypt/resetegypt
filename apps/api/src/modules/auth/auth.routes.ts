@@ -70,7 +70,27 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
     await app.prisma.user.update({
       where: { id: user.id },
-      data: { failedAttempts: 0, lastLoginAt: new Date() },
+      data: { failedAttempts: 0 },
+    });
+
+    // 2FA TOTP : si activé, on n'émet PAS le JWT session — on renvoie un
+    // "challenge" JWT court-vie (5 min) que le client doit échanger contre
+    // un vrai JWT via POST /auth/2fa/verify { challenge, code }.
+    if (user.totpEnabled && user.totpSecret) {
+      const challenge = await reply.jwtSign(
+        { sub: user.id, purpose: 'totp', rememberMe: !!rememberMe },
+        { expiresIn: '5m' },
+      );
+      await recordAudit(app.prisma, req, {
+        userId: user.id,
+        action: 'login_password_ok_awaiting_2fa',
+      });
+      return reply.status(200).send({ totpRequired: true, challenge });
+    }
+
+    await app.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
     });
 
     const token = await reply.jwtSign(
