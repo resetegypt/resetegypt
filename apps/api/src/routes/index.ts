@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health.js';
+import { internalCronRoutes } from './internal-cron.js';
 import { authRoutes } from '../modules/auth/auth.routes.js';
 import { usersRoutes } from '../modules/users/users.routes.js';
 import { patientsRoutes } from '../modules/patients/patients.routes.js';
@@ -16,6 +17,7 @@ import { practitionerMailRoutes } from '../modules/practitioner-mail/practitione
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(healthRoutes);
+  await app.register(internalCronRoutes);
   await app.register(bookingRoutes);
   await app.register(authRoutes);
   await app.register(usersRoutes);

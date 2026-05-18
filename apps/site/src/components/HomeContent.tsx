@@ -44,7 +44,7 @@ function Hero({ dict, locale }: Props) {
     <section className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
       <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden">
         <Image
-          src="/photos/hero-bg.png"
+          src="/photos/hero-bg.webp"
           alt=""
           fill
           priority
@@ -235,7 +235,7 @@ function VisitCenterSection({ dict, locale }: Props) {
           <div className="relative">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden ring-2 ring-white/30 shadow-2xl">
               <Image
-                src="/photos/about-method.png"
+                src="/photos/about-method.webp"
                 alt={v.title1}
                 width={600}
                 height={750}

@@ -4,11 +4,25 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { App } from './App';
 import { queryClient } from './lib/query-client';
 import { initSentry, Sentry } from './lib/sentry';
+import { registerSW } from 'virtual:pwa-register';
 import './i18n';
 import './styles/globals.css';
 
 // Init Sentry au plus tôt (avant React render). No-op si VITE_SENTRY_DSN absente.
 initSentry();
+
+// PWA service worker — auto-update silencieux. Affiche un toast natif si une
+// nouvelle version est dispo après recharge.
+registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    // L'autoUpdate de VitePWA gère le refresh, on log juste
+    console.log('[pwa] new content available, will update on next reload');
+  },
+  onOfflineReady() {
+    console.log('[pwa] app ready to work offline');
+  },
+});
 
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');

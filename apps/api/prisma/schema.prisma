@@ -338,6 +338,29 @@ model AutomationWorkflow {
   steps     Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  runs AutomationRun[]
+}
+
+/// Idempotency + audit trail for fired automation steps.
+/// contextKey examples: "appt-{appointmentId}" / "patient-{patientId}-{yyyymmdd}".
+model AutomationRun {
+  id         String   @id @default(uuid())
+  workflowId String
+  workflow   AutomationWorkflow @relation(fields: [workflowId], references: [id])
+  contextKey String
+  stepIndex  Int
+  channel    String
+  template   String
+  status     String   @default("PENDING") // PENDING | SENT | SKIPPED | FAILED
+  toAddress  String?
+  messageId  String?  // ID retourné par Resend (ou autre provider)
+  error      String?
+  firedAt    DateTime @default(now())
+
+  @@unique([workflowId, contextKey, stepIndex])
+  @@index([firedAt])
+  @@index([status])
 }
 
 model AuditLog {

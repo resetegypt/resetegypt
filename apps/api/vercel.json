@@ -2,7 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile=false --prod=false",
-  "buildCommand": "cd ../.. && pnpm --filter @reset/api exec prisma generate",
+  "buildCommand": "cd ../.. && pnpm --filter @reset/api exec prisma generate && pnpm --filter @reset/api exec prisma migrate deploy",
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "crons": [
+    { "path": "/internal/cron/automations", "schedule": "*/15 * * * *" }
+  ]
 }
