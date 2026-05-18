@@ -167,8 +167,13 @@ export function AppShell() {
         >
           <Menu className="w-5 h-5 text-text" />
         </button>
-        <div className="flex-1 max-w-[160px]">
-          <ResetLogo variant="wordmark" className="block w-full h-auto" />
+        <div className="flex-1 flex justify-center">
+          <img
+            src="/logo-yourself.png"
+            alt="Reset Yourself"
+            className="block h-9 w-auto"
+            draggable={false}
+          />
         </div>
         <Avatar className="h-9 w-9 ring-2 ring-primary/20">
           <AvatarFallback className="bg-primary text-white text-xs font-semibold">{initials}</AvatarFallback>
