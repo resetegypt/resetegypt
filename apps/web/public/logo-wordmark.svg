@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Variante sans fond, sans tagline. La couleur des lettres suit currentColor pour s'adapter au contexte (light/dark). Le point reste corail (#FF5440). -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-label="Reset">
-  <g fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif" font-weight="800" font-size="280" letter-spacing="0">
-    <text x="40" y="260">RE</text>
-
-    <g transform="translate(380, -360)">
-      <text x="0" y="620">S</text>
-      <g transform="translate(45, 360)" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M180 30 C 200 70, 180 130, 100 145"/>
-        <path d="M180 30 l-40 -10 M180 30 l10 40"/>
-      </g>
-      <g transform="translate(45, 360)" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 200 C 0 160, 20 100, 100 85"/>
-        <path d="M20 200 l40 10 M20 200 l-10 -40"/>
-      </g>
-      <circle cx="145" cy="475" r="22" fill="#FF5440"/>
-    </g>
-
-    <text x="700" y="260">ET</text>
-  </g>
+<!-- Wordmark Reset — text continu "RESET" propre, point corail (#FF5440) en accent sur le E.
+     Couleur des lettres = currentColor pour s'adapter au contexte (light/dark/RTL). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-label="Reset">
+  <text
+    x="50%"
+    y="148"
+    text-anchor="middle"
+    fill="currentColor"
+    font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif"
+    font-weight="800"
+    font-size="170"
+    letter-spacing="-4"
+  >RESET</text>
+  <!-- Point corail signature de la marque, posé au-dessus du "E" final (titre stylisé) -->
+  <circle cx="538" cy="38" r="16" fill="#FF5440"/>
 </svg>
