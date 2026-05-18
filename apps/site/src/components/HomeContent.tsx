@@ -311,7 +311,7 @@ function MethodSection({ dict, locale }: Props) {
               <div className="w-14 h-14 rounded-2xl bg-primary-lightest text-primary flex items-center justify-center">
                 <p.Icon className="w-6 h-6" strokeWidth={1.75} />
               </div>
-              <span className="text-5xl font-extrabold text-primary/15 tabular-nums leading-none">
+              <span className="text-5xl font-extrabold text-primary/35 tabular-nums leading-none">
                 0{idx + 1}
               </span>
             </div>
@@ -357,7 +357,7 @@ function ProcessSection({ dict }: { dict: Dict }) {
               <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md shadow-primary/20">
                 <s.Icon className="w-5 h-5" strokeWidth={1.75} />
               </div>
-              <span className="text-5xl font-extrabold text-primary/15 tabular-nums leading-none">
+              <span className="text-5xl font-extrabold text-primary/35 tabular-nums leading-none">
                 0{idx + 1}
               </span>
             </div>

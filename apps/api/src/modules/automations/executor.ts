@@ -36,6 +36,7 @@ interface ExecuteResult {
   candidatesFound: number;
   runsCreated: number;
   sent: number;
+  sentViaFallback: number; // canal d'origine indisponible, email fallback utilisé
   skipped: number;
   failed: number;
   errors: string[];
@@ -69,6 +70,7 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
     candidatesFound: 0,
     runsCreated: 0,
     sent: 0,
+    sentViaFallback: 0,
     skipped: 0,
     failed: 0,
     errors: [],
@@ -82,7 +84,12 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
 
     for (let stepIndex = 0; stepIndex < steps.length; stepIndex++) {
       const step = steps[stepIndex]!;
-      let candidates: Array<{ contextKey: string; toAddress: string | null; vars: Record<string, string> }> = [];
+      let candidates: Array<{
+        contextKey: string;
+        toAddress: string | null;
+        emailFallback: string | null;
+        vars: Record<string, string>;
+      }> = [];
 
       try {
         switch (wf.trigger) {
@@ -104,6 +111,7 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
               .map((a) => ({
                 contextKey: `appt-${a.id}`,
                 toAddress: pickAddress(step.channel, a.patient),
+                emailFallback: a.patient.email,
                 vars: {
                   patientFirstName: a.patient.firstName,
                   patientLastName: a.patient.lastName,
@@ -135,6 +143,7 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             candidates = rows.map((p) => ({
               contextKey: `patient-${p.id}-${yyyymmdd(now)}`,
               toAddress: pickAddress(step.channel, p),
+              emailFallback: p.email,
               vars: { patientFirstName: p.firstName, patientLastName: p.lastName, language: p.preferredLanguage },
             }));
             break;
@@ -158,6 +167,7 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             candidates = rows.map((p) => ({
               contextKey: `patient-${p.id}-${yyyymmdd(now)}-reactivation`,
               toAddress: pickAddress(step.channel, p),
+              emailFallback: p.email,
               vars: { patientFirstName: p.firstName, patientLastName: p.lastName, language: p.preferredLanguage },
             }));
             break;
@@ -175,45 +185,76 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
       result.candidatesFound += candidates.length;
 
       // Pour chaque candidat : crée un AutomationRun PENDING (transactionnel,
-      // skip si déjà existant), puis dispatch
+      // skip si déjà existant), puis dispatch avec email fallback automatique
       for (const candidate of candidates) {
-        if (!candidate.toAddress) {
-          // Pas d'adresse pour ce channel → record SKIPPED quand même pour audit
-          await safeCreateRun(app, wf.id, candidate.contextKey, stepIndex, step, candidate.toAddress, 'SKIPPED', null, 'no_address_for_channel');
+        // Détermine si on peut envoyer via le canal d'origine + détermine le canal effectif
+        const channelConfigured = isChannelConfigured(step.channel);
+        const useFallback = !channelConfigured && !!candidate.emailFallback && step.channel !== 'EMAIL';
+        const effectiveChannel = useFallback ? 'EMAIL' : step.channel;
+        const effectiveAddress = useFallback ? candidate.emailFallback : candidate.toAddress;
+
+        if (!effectiveAddress) {
+          await safeCreateRun(
+            app,
+            wf.id,
+            candidate.contextKey,
+            stepIndex,
+            step,
+            null,
+            'SKIPPED',
+            null,
+            `no_address_for_${step.channel.toLowerCase()}_and_no_email_fallback`,
+          );
           result.skipped++;
           continue;
         }
 
-        const created = await safeCreateRun(app, wf.id, candidate.contextKey, stepIndex, step, candidate.toAddress, 'PENDING', null, null);
+        const created = await safeCreateRun(
+          app,
+          wf.id,
+          candidate.contextKey,
+          stepIndex,
+          step,
+          effectiveAddress,
+          'PENDING',
+          null,
+          null,
+        );
         if (!created) continue; // déjà fait
         result.runsCreated++;
 
-        // Dispatch
-        if (step.channel === 'EMAIL') {
+        // Dispatch via canal effectif
+        if (effectiveChannel === 'EMAIL') {
           const rendered = renderTemplate(step.template, candidate.vars);
           try {
             const sendResult = await sendEmail({
-              to: candidate.toAddress,
+              to: effectiveAddress,
               subject: rendered.subject,
               html: rendered.html,
               text: rendered.text,
             });
+            const fallbackTag = useFallback ? ` (fallback from ${step.channel})` : '';
             if (sendResult.sent && !sendResult.mocked) {
               await app.prisma.automationRun.update({
                 where: { id: created.id },
-                data: { status: 'SENT', messageId: sendResult.messageId ?? null },
+                data: {
+                  status: 'SENT',
+                  messageId: sendResult.messageId ?? null,
+                  error: useFallback ? `email_fallback_from_${step.channel.toLowerCase()}` : null,
+                },
               });
-              result.sent++;
+              if (useFallback) result.sentViaFallback++;
+              else result.sent++;
             } else if (sendResult.mocked) {
               await app.prisma.automationRun.update({
                 where: { id: created.id },
-                data: { status: 'SKIPPED', error: 'email_mock_mode' },
+                data: { status: 'SKIPPED', error: `email_mock_mode${fallbackTag}` },
               });
               result.skipped++;
             } else {
               await app.prisma.automationRun.update({
                 where: { id: created.id },
-                data: { status: 'FAILED', error: sendResult.error ?? 'unknown_send_error' },
+                data: { status: 'FAILED', error: (sendResult.error ?? 'unknown_send_error') + fallbackTag },
               });
               result.failed++;
             }
@@ -225,10 +266,10 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             result.failed++;
           }
         } else {
-          // WHATSAPP / SMS / autres : pas encore câblés → SKIPPED + audit
+          // WHATSAPP / SMS effectivement choisi : pas encore câblé → SKIPPED + audit
           await app.prisma.automationRun.update({
             where: { id: created.id },
-            data: { status: 'SKIPPED', error: `channel_${step.channel.toLowerCase()}_not_configured` },
+            data: { status: 'SKIPPED', error: `channel_${effectiveChannel.toLowerCase()}_not_configured_and_no_email_fallback` },
           });
           result.skipped++;
         }
@@ -252,6 +293,26 @@ function pickAddress(
       return patient.phone;
     default:
       return null;
+  }
+}
+
+/**
+ * Indique si un canal est effectivement configuré pour l'envoi en prod.
+ * - EMAIL : toujours dispo (Resend configuré, sinon mock log)
+ * - WHATSAPP : requiert WHATSAPP_TOKEN + WHATSAPP_PHONE_ID
+ * - SMS : requiert TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN
+ * - Autres (INSTAGRAM, MESSENGER) : pas câblés
+ */
+function isChannelConfigured(channel: WorkflowStep['channel']): boolean {
+  switch (channel) {
+    case 'EMAIL':
+      return true;
+    case 'WHATSAPP':
+      return !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID);
+    case 'SMS':
+      return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
+    default:
+      return false;
   }
 }
 

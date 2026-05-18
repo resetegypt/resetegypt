@@ -1,13 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
+
+// Sentry source maps : actif uniquement si SENTRY_AUTH_TOKEN + SENTRY_ORG + SENTRY_PROJECT
+// présents au moment du build. Vercel doit avoir ces 3 env vars set. En local : no-op.
+const sentryEnabled = !!(
+  process.env.SENTRY_AUTH_TOKEN &&
+  process.env.SENTRY_ORG &&
+  process.env.SENTRY_PROJECT
+);
 
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'logo-icon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.png', 'logo-icon.svg', 'apple-touch-icon.png', 'offline.html'],
       manifest: {
         name: 'Reset Egypt — Staff',
         short_name: 'Reset',
@@ -55,13 +64,29 @@ export default defineConfig({
             },
           },
         ],
-        // SPA fallback
+        // SPA fallback (page online) + offline.html quand le client est offline
+        // et tente d'accéder à une nouvelle route pas dans le cache
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/internal\//],
       },
+      // Quand la navigation échoue (offline + route non cachée), Workbox sert offline.html
+      // via la stratégie configurée ci-dessus + ce fichier en includeAssets.
       devOptions: { enabled: false },
     }),
-  ],
+    // Sentry source maps — uploaded à chaque build de prod si auth token présent
+    sentryEnabled &&
+      sentryVitePlugin({
+        org: process.env.SENTRY_ORG!,
+        project: process.env.SENTRY_PROJECT!,
+        authToken: process.env.SENTRY_AUTH_TOKEN!,
+        sourcemaps: { assets: ['./dist/**/*.js', './dist/**/*.js.map'] },
+        // Ne pas bloquer le build si Sentry est down / mal configuré
+        errorHandler: (err) => {
+          // eslint-disable-next-line no-console
+          console.warn('[sentry-vite-plugin] skipped:', err.message);
+        },
+      }),
+  ].filter(Boolean),
   server: {
     port: 3000,
     strictPort: true,
@@ -74,6 +99,8 @@ export default defineConfig({
     },
   },
   build: {
+    // Source maps activées pour permettre Sentry de les uploader
+    sourcemap: true,
     // Code-splitting agressif : chaque page route en chunk séparé
     rollupOptions: {
       output: {

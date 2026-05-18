@@ -76,6 +76,12 @@
     "accessDenied": "Accès refusé",
     "roleRequired": "Cette page nécessite le rôle"
   },
+  "pwa": {
+    "install": "Installer l'app",
+    "dismiss": "Ignorer pendant 7 jours",
+    "iosTitle": "Installer sur iPhone",
+    "iosSteps": "Dans Safari, touche le bouton Partager (carré avec flèche), puis « Sur l'écran d'accueil »"
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "agenda": "Agenda",

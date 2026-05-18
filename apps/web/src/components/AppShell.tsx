@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage, Badge, Button, ResetLogo } from '@reset/ui';
+import { InstallPWA } from './InstallPWA';
 import { useAuthStore } from '../lib/auth';
 import { useMailboxAccess } from '../pages/mail/useMailboxAccess';
 import { useTranslation } from 'react-i18next';
@@ -275,6 +276,7 @@ export function AppShell() {
               </button>
             ))}
           </div>
+          <InstallPWA />
           <Button
             variant="ghost"
             size="sm"

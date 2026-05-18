@@ -53,6 +53,12 @@
     "accessDenied": "Access denied",
     "roleRequired": "This page requires role"
   },
+  "pwa": {
+    "install": "Install app",
+    "dismiss": "Dismiss for 7 days",
+    "iosTitle": "Install on iPhone",
+    "iosSteps": "In Safari, tap the Share button (square with arrow), then 'Add to Home Screen'"
+  },
   "nav": {
     "dashboard": "Dashboard", "agenda": "Calendar", "newAppointment": "New booking",
     "inbox": "Inbox", "patients": "Patients", "intake": "Intake form",
