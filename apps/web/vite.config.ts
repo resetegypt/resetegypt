@@ -7,14 +7,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'logo-icon.svg'],
+      includeAssets: ['favicon.png', 'logo-icon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Reset Egypt — Staff',
-        short_name: 'Reset Staff',
+        short_name: 'Reset',
         description:
           "Plateforme métier Reset Egypt — auriculothérapie laser, gestion patients, agenda et facturation conforme ETA.",
-        theme_color: '#4f46e5',
-        background_color: '#0f172a',
+        theme_color: '#1E0FBA',
+        background_color: '#1E0FBA',
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',
@@ -25,6 +25,7 @@ export default defineConfig({
           { src: '/pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: '/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: '/pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
         ],
       },
       workbox: {
