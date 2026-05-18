@@ -59,6 +59,8 @@ coverage/
 *.lcov
 playwright-report/
 test-results/
+apps/web/test-results/
+apps/web/playwright-report/
 
 # Prisma
 prisma/.env
