@@ -41,7 +41,9 @@ interface ExecuteResult {
   errors: string[];
 }
 
-const TICK_WINDOW_MIN = 15; // doit matcher le cron schedule
+// Doit matcher la fréquence du cron Vercel : si cron daily, mettre 1440 min.
+// Override via env CRON_TICK_WINDOW_MIN. Vercel Hobby = daily seulement, Pro = */15.
+const TICK_WINDOW_MIN = parseInt(process.env.CRON_TICK_WINDOW_MIN ?? '1440', 10);
 
 function stepOffsetMs(step: WorkflowStep): number {
   if (step.offsetHours !== undefined) return step.offsetHours * 60 * 60 * 1000;
@@ -115,9 +117,8 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
           }
 
           case 'patient_birthday': {
-            // Birthday workflow tire 1×/an à offsetHours (ex: 9h le matin)
-            const targetHour = step.offsetHours ?? 9;
-            if (now.getHours() !== targetHour || now.getMinutes() >= TICK_WINDOW_MIN) break;
+            // Birthday workflow : 1×/jour (idempotency contextKey inclut yyyymmdd)
+            // Le check d'heure est désactivé sur cron daily.
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
             // Patients dont l'anniversaire (mois+jour) = aujourd'hui
@@ -140,8 +141,7 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
           }
 
           case 'inactive_60_days': {
-            // Trigger 1×/jour à 10h
-            if (now.getHours() !== 10 || now.getMinutes() >= TICK_WINDOW_MIN) break;
+            // Trigger 1×/jour ; idempotency contextKey inclut yyyymmdd
             const cutoff = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
             const rows = await app.prisma.$queryRaw<Array<{
               id: string; firstName: string; lastName: string; email: string | null;

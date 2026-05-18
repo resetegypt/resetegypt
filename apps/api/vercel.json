@@ -6,6 +6,6 @@
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
   "regions": ["fra1"],
   "crons": [
-    { "path": "/internal/cron/automations", "schedule": "*/15 * * * *" }
+    { "path": "/internal/cron/automations", "schedule": "0 7 * * *" }
   ]
 }
