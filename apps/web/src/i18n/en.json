@@ -46,6 +46,8 @@
     "email": "Email",
     "password": "Password",
     "rememberMe": "Stay signed in for 7 days",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "signIn": "Sign in",
     "logout": "Sign out",
     "accessDenied": "Access denied",

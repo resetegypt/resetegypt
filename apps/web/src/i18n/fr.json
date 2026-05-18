@@ -69,6 +69,8 @@
     "email": "Email",
     "password": "Mot de passe",
     "rememberMe": "Rester connecté 7 jours",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
     "signIn": "Se connecter",
     "logout": "Se déconnecter",
     "accessDenied": "Accès refusé",

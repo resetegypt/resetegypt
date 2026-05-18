@@ -58,6 +58,8 @@
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "rememberMe": "البقاء متصلاً 7 أيام",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
     "signIn": "دخول",
     "logout": "تسجيل الخروج",
     "accessDenied": "الوصول مرفوض",

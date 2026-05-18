@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button, Card, CardContent, Input, ResetLogo } from '@reset/ui';
 import { useAuthStore, defaultRouteForRole } from '../lib/auth';
 import { SUPPORTED_LANGUAGES, type Language } from '../i18n';
@@ -12,6 +13,7 @@ export function LoginPage() {
   const { t, i18n } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   if (user) {
@@ -89,13 +91,24 @@ export function LoginPage() {
 
               <div>
                 <label className="block text-xs font-medium mb-1">{t('auth.password')}</label>
-                <Input
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    aria-label={showPassword ? t('auth.hidePassword', 'Masquer le mot de passe') : t('auth.showPassword', 'Afficher le mot de passe')}
+                    className="absolute inset-y-0 end-0 px-3 flex items-center text-text-secondary hover:text-text transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
