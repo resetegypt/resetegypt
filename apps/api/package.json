@@ -25,6 +25,7 @@
     "@fastify/sensible": "^6.0.4",
     "@prisma/client": "^5.13.0",
     "@reset/shared": "workspace:*",
+    "@sentry/node": "^10.53.1",
     "@supabase/supabase-js": "^2.105.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^8.0.0",

@@ -22,6 +22,10 @@ const envSchema = z.object({
   // URLs publiques (pour les emails et CORS)
   APP_URL: z.string().url().default('http://localhost:3000'),
   API_URL: z.string().url().default('http://localhost:3001'),
+  // Monitoring (Sentry — optionnel; si absent, init no-op)
+  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_ENVIRONMENT: z.string().default('production'),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -3,12 +3,16 @@ import Fastify from 'fastify';
 import sensible from '@fastify/sensible';
 import { env } from './env.js';
 import { loggerOptions } from './lib/logger.js';
+import { initSentry, attachSentryToFastify } from './lib/sentry.js';
 import { registerHelmet } from './plugins/helmet.js';
 import { registerCors } from './plugins/cors.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import prismaPlugin from './plugins/prisma.js';
 import authPlugin from './plugins/auth.js';
 import { registerRoutes } from './routes/index.js';
+
+// Init Sentry au plus tôt (avant tout import de logique métier qui pourrait throw)
+initSentry();
 
 export async function buildApp() {
   const app = Fastify({ logger: loggerOptions, trustProxy: true });
@@ -19,6 +23,7 @@ export async function buildApp() {
   await app.register(authPlugin);
   registerErrorHandler(app);
   await registerRoutes(app);
+  attachSentryToFastify(app);
   return app;
 }
 
