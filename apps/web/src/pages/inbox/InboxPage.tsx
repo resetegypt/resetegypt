@@ -242,7 +242,6 @@ export function InboxPage() {
                   </Button>
                 </div>
               )}
-              <p className="text-xs text-text-tertiary mt-6">{t('inbox.mockNote')}</p>
             </>
           ) : null}
         </aside>

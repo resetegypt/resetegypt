@@ -279,6 +279,11 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     const parsed = patchSchema.safeParse(req.body);
     if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const body = parsed.data;
+    // SECURITE — réassignation de praticien limitée à ADMIN.
+    // Un PRACTITIONER ou SECRETARY ne peut pas voler ou refiler un RDV.
+    if (body.practitionerId && req.currentUser!.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'AdminRequiredForReassignment' });
+    }
     const update: Record<string, unknown> = {};
     if (body.status) update.status = body.status;
     if (body.notes !== undefined) update.notes = body.notes;
@@ -385,7 +390,8 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       'ID', 'Date', 'Heure', 'Patient', 'Téléphone', 'Praticien',
       'Service', 'Type', 'Statut', 'Source', 'Prix', 'Durée (min)', 'Notes',
     ];
-    const rows = appts.map((a) => [
+    const { csvRow } = await import('../../lib/crypto-helpers.js');
+    const rows = appts.map((a) => csvRow([
       a.id,
       a.scheduledAt.toISOString().slice(0, 10),
       a.scheduledAt.toISOString().slice(11, 16),
@@ -395,8 +401,13 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       a.service, a.visitType, a.status, a.source,
       Number(a.price).toFixed(2), a.duration,
       a.notes ?? '',
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
+    ]));
+    const csv = [csvRow(headers), ...rows].join('\n');
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: 'appointments_csv_export',
+      details: { count: appts.length, from: q.from, to: q.to },
+    });
     reply
       .header('Content-Type', 'text/csv; charset=utf-8')
       .header('Content-Disposition', `attachment; filename="reset-egypt-rdv-${new Date().toISOString().slice(0, 10)}.csv"`);

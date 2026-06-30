@@ -4,6 +4,7 @@ import { randomUUID, createHash } from 'node:crypto';
 import { recordAudit } from '../../lib/audit.js';
 import { sendEmail } from '../../lib/email.js';
 import { renderInvoiceHtml, renderInvoiceEmailBody } from '../../lib/invoice-html.js';
+import { env } from '../../env.js';
 
 const lineItemSchema = z.object({
   description: z.string(),
@@ -237,7 +238,7 @@ export async function paymentsRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const html = renderInvoiceEmailBody(payment, payment.patient, 'https://app.reset-egypt.com');
+    const html = renderInvoiceEmailBody(payment, payment.patient, env.APP_URL);
     const invoiceHtml = renderInvoiceHtml(payment, payment.patient);
     const result = await sendEmail({
       to: target,
@@ -300,25 +301,22 @@ export async function paymentsRoutes(app: FastifyInstance): Promise<void> {
       'UUID ETA',
       'Email envoyé',
     ];
-    const rows = payments.map((p) =>
-      [
-        p.createdAt.toISOString(),
-        p.invoiceNumber,
-        `${p.patient.firstName} ${p.patient.lastName}`,
-        p.patient.phone,
-        Number(p.subtotal).toFixed(2),
-        Number(p.discount).toFixed(2),
-        Number(p.vat).toFixed(2),
-        Number(p.total).toFixed(2),
-        p.paymentMethod,
-        p.paymentRef ?? '',
-        p.etaUuid ?? '',
-        p.emailSentAt ? p.emailSentAt.toISOString() : '',
-      ]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(','),
-    );
-    const csv = [headers.join(','), ...rows].join('\n');
+    const { csvRow } = await import('../../lib/crypto-helpers.js');
+    const rows = payments.map((p) => csvRow([
+      p.createdAt.toISOString(),
+      p.invoiceNumber,
+      `${p.patient.firstName} ${p.patient.lastName}`,
+      p.patient.phone,
+      Number(p.subtotal).toFixed(2),
+      Number(p.discount).toFixed(2),
+      Number(p.vat).toFixed(2),
+      Number(p.total).toFixed(2),
+      p.paymentMethod,
+      p.paymentRef ?? '',
+      p.etaUuid ?? '',
+      p.emailSentAt ? p.emailSentAt.toISOString() : '',
+    ]));
+    const csv = [csvRow(headers), ...rows].join('\n');
 
     reply
       .header('Content-Type', 'text/csv; charset=utf-8')

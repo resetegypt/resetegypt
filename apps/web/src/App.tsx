@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AnimatePresence, motion } from 'framer-motion';
 import { ToastProvider } from './lib/toast';
 import { useAuthStore, defaultRouteForRole } from './lib/auth';
+import { setUnauthorizedHandler } from './lib/api';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/admin/UsersPage';
@@ -30,6 +32,14 @@ export function App() {
 
   useEffect(() => {
     init();
+    // 401 interceptor : session expirée côté API → on logout client-side
+    // (efface user du store) et BrowserRouter redirige vers /login.
+    setUnauthorizedHandler(() => {
+      const { user, logout } = useAuthStore.getState();
+      if (user) {
+        logout().catch(() => undefined);
+      }
+    });
   }, [init]);
 
   return (
@@ -78,10 +88,8 @@ function AnimatedRoutes() {
             <Route path="admin/availability" element={<PageMotion><AvailabilityPage /></PageMotion>} />
           </Route>
         </Route>
-        <Route
-          path="*"
-          element={user ? <Navigate to={defaultRouteForRole(user.role)} replace /> : <Navigate to="/login" replace />}
-        />
+        {/* 404 explicite — pas de redirect silencieux qui cache les vraies typos */}
+        <Route path="*" element={user ? <NotFoundPage /> : <Navigate to="/login" replace />} />
       </Routes>
     </AnimatePresence>
   );

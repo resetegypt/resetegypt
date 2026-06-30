@@ -24,36 +24,37 @@ import { authenticator } from 'otplib';
 // Tolérance ±30s (window=1 step de 30s)
 authenticator.options = { window: 1 };
 import QRCode from 'qrcode';
-import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { recordAudit } from '../../lib/audit.js';
 import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_SEC } from '../../plugins/auth.js';
 import { env } from '../../env.js';
+import {
+  encryptSecret,
+  decryptSecret,
+  hashBackupCode,
+  findMatchingBackupCode,
+} from '../../lib/crypto-helpers.js';
 
 const TOTP_ISSUER = 'Reset Egypt';
 const BACKUP_CODE_COUNT = 10;
 
-function generateBackupCodes(): string[] {
-  // 10 codes de 8 chars hex (4 bytes) — environ 32 bits d'entropie chacun
-  return Array.from({ length: BACKUP_CODE_COUNT }, () =>
+/** Génère 10 codes de 8 chars hex. Renvoie {plain, hashes} — plain affiché à
+ *  l'utilisateur UNE fois, hashes stockés en DB.
+ */
+async function generateBackupCodes(): Promise<{ plain: string[]; hashes: string[] }> {
+  const plain = Array.from({ length: BACKUP_CODE_COUNT }, () =>
     randomBytes(4).toString('hex').toUpperCase(),
   );
+  const hashes = await Promise.all(plain.map((c) => hashBackupCode(c)));
+  return { plain, hashes };
 }
 
-function consumeBackupCode(codes: string[], submitted: string): string[] | null {
-  const target = submitted.trim().toUpperCase();
-  // timing-safe compare pour éviter timing attacks
-  for (let i = 0; i < codes.length; i++) {
-    const c = codes[i]!;
-    if (c.length === target.length) {
-      const a = Buffer.from(c);
-      const b = Buffer.from(target);
-      if (timingSafeEqual(a, b)) {
-        // Retourne la liste sans ce code
-        return [...codes.slice(0, i), ...codes.slice(i + 1)];
-      }
-    }
-  }
-  return null;
+/** Tente de consommer un backup code parmi la liste de hashes stockée.
+ *  Renvoie la nouvelle liste sans le code consommé, ou null si aucun match. */
+async function consumeBackupCode(hashes: string[], submitted: string): Promise<string[] | null> {
+  const idx = await findMatchingBackupCode(submitted, hashes);
+  if (idx < 0) return null;
+  return [...hashes.slice(0, idx), ...hashes.slice(idx + 1)];
 }
 
 export async function totpRoutes(app: FastifyInstance): Promise<void> {
@@ -82,11 +83,11 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
     const secret = authenticator.generateSecret(); // base32, 20 bytes
     const otpauth = authenticator.keyuri(user.email, TOTP_ISSUER, secret);
     const qrDataUrl = await QRCode.toDataURL(otpauth, { width: 240, margin: 1 });
-    // Stockage temporaire du secret jusqu'à activation par /enable
-    // (on l'écrit en DB avec totpEnabled=false ; activé seulement à /enable)
+    // SECURITE : secret stocké CHIFFRE (AES-256-GCM) en BDD. Fuite BDD ne
+    // donne plus accès à totp codes — il faut aussi ENCRYPTION_KEY.
     await app.prisma.user.update({
       where: { id: req.currentUser!.sub },
-      data: { totpSecret: secret, totpEnabled: false },
+      data: { totpSecret: encryptSecret(secret), totpEnabled: false },
     });
     return { secret, otpauth, qrDataUrl };
   });
@@ -106,13 +107,17 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
     if (user.totpEnabled) {
       return reply.status(400).send({ error: 'already_enabled' });
     }
-    if (!authenticator.check(parsed.data.code, user.totpSecret)) {
+    const decryptedSecret = decryptSecret(user.totpSecret);
+    if (!decryptedSecret) {
+      return reply.status(500).send({ error: 'decrypt_failed' });
+    }
+    if (!authenticator.check(parsed.data.code, decryptedSecret)) {
       return reply.status(400).send({ error: 'invalid_code' });
     }
-    const backupCodes = generateBackupCodes();
+    const { plain: backupCodes, hashes } = await generateBackupCodes();
     await app.prisma.user.update({
       where: { id: req.currentUser!.sub },
-      data: { totpEnabled: true, backupCodes },
+      data: { totpEnabled: true, backupCodes: hashes },
     });
     await recordAudit(app.prisma, req, {
       userId: req.currentUser!.sub,
@@ -134,8 +139,9 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
     if (!user?.totpEnabled || !user.totpSecret) {
       return reply.status(400).send({ error: 'not_enabled' });
     }
-    const codeOk = authenticator.check(parsed.data.code, user.totpSecret);
-    const backupOk = !codeOk && !!consumeBackupCode(user.backupCodes, parsed.data.code);
+    const decryptedSecret = decryptSecret(user.totpSecret);
+    const codeOk = !!decryptedSecret && authenticator.check(parsed.data.code, decryptedSecret);
+    const backupOk = !codeOk && !!(await consumeBackupCode(user.backupCodes, parsed.data.code));
     if (!codeOk && !backupOk) {
       return reply.status(400).send({ error: 'invalid_code' });
     }
@@ -163,11 +169,12 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
     if (!user?.totpEnabled || !user.totpSecret) {
       return reply.status(400).send({ error: 'not_enabled' });
     }
-    if (!authenticator.check(parsed.data.code, user.totpSecret)) {
+    const decryptedSecret = decryptSecret(user.totpSecret);
+    if (!decryptedSecret || !authenticator.check(parsed.data.code, decryptedSecret)) {
       return reply.status(400).send({ error: 'invalid_code' });
     }
-    const backupCodes = generateBackupCodes();
-    await app.prisma.user.update({ where: { id: req.currentUser!.sub }, data: { backupCodes } });
+    const { plain: backupCodes, hashes } = await generateBackupCodes();
+    await app.prisma.user.update({ where: { id: req.currentUser!.sub }, data: { backupCodes: hashes } });
     return { ok: true, backupCodes };
   });
 
@@ -221,11 +228,12 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(400).send({ error: '2fa_not_configured' });
     }
 
-    const codeOk = authenticator.check(parsed.data.code, user.totpSecret);
+    const decryptedSecret = decryptSecret(user.totpSecret);
+    const codeOk = !!decryptedSecret && authenticator.check(parsed.data.code, decryptedSecret);
     let backupCodeConsumed = false;
     let remainingBackupCodes = user.backupCodes;
     if (!codeOk) {
-      const consumed = consumeBackupCode(user.backupCodes, parsed.data.code);
+      const consumed = await consumeBackupCode(user.backupCodes, parsed.data.code);
       if (consumed === null) {
         return reply.status(401).send({ error: 'invalid_code' });
       }

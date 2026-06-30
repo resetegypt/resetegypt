@@ -13,6 +13,18 @@ export class ApiError extends Error {
   }
 }
 
+// Callback global pour gérer les 401 (session expirée) — wiré depuis App.tsx
+// au démarrage. Skip /auth/me et /auth/login pour éviter une boucle.
+let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(fn: () => void): void {
+  onUnauthorized = fn;
+}
+function shouldHandleUnauth(path: string): boolean {
+  return !path.startsWith('/auth/login')
+    && !path.startsWith('/auth/me')
+    && !path.startsWith('/auth/password/');
+}
+
 export async function api<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
   let url: string;
   if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -43,7 +55,12 @@ export async function api<T = unknown>(path: string, init: RequestInit = {}): Pr
         }
       })()
     : null;
-  if (!res.ok) throw new ApiError(res.status, data);
+  if (!res.ok) {
+    if (res.status === 401 && shouldHandleUnauth(path) && onUnauthorized) {
+      onUnauthorized();
+    }
+    throw new ApiError(res.status, data);
+  }
   return data as T;
 }
 

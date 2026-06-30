@@ -92,17 +92,17 @@ const TEMPLATES: Record<string, TemplateDef> = {
   welcome_j0: {
     fr: (v) => ({
       subject: `À tout à l'heure chez Reset Egypt`,
-      text: `Bonjour ${v.patientFirstName},\n\nVotre RDV est dans ~2h avec ${v.practitionerName}.\n\nN Teseen, New Cairo (à proximité de la CMC). Parking sur place.\n\nÀ tout à l'heure !`,
+      text: `Bonjour ${v.patientFirstName},\n\nVotre RDV est confirmé aujourd'hui avec ${v.practitionerName}.\n\nN Teseen, New Cairo (à proximité de la CMC). Parking sur place.\n\nÀ tout à l'heure !`,
       html: wrap(`<p>Bonjour <strong>${v.patientFirstName}</strong>,</p><p>Votre RDV est <strong>dans ~2h</strong> avec ${v.practitionerName}.</p><p>📍 <em>N Teseen, New Cairo (à proximité de la CMC). Parking sur place.</em></p><p>À tout à l'heure !</p>`, 'fr'),
     }),
     en: (v) => ({
       subject: `See you soon at Reset Egypt`,
-      text: `Hello ${v.patientFirstName},\n\nYour appointment is in ~2h with ${v.practitionerName}.\n\nN Teseen, New Cairo (near CMC). Parking available.\n\nSee you soon!`,
+      text: `Hello ${v.patientFirstName},\n\nYour appointment is confirmed today with ${v.practitionerName}.\n\nN Teseen, New Cairo (near CMC). Parking available.\n\nSee you soon!`,
       html: wrap(`<p>Hello <strong>${v.patientFirstName}</strong>,</p><p>Your appointment is <strong>in ~2h</strong> with ${v.practitionerName}.</p><p>📍 <em>N Teseen, New Cairo (near CMC). Parking available.</em></p><p>See you soon!</p>`, 'en'),
     }),
     ar: (v) => ({
       subject: `نراك قريبا في ريسيت إيجبت`,
-      text: `مرحبا ${v.patientFirstName}،\n\nموعدك بعد ~ساعتين مع ${v.practitionerName}.\n\nN Teseen، New Cairo (بالقرب من CMC). يوجد موقف سيارات.\n\nنراك قريبا!`,
+      text: `مرحبا ${v.patientFirstName}،\n\nموعدك مؤكد اليوم مع ${v.practitionerName}.\n\nN Teseen، New Cairo (بالقرب من CMC). يوجد موقف سيارات.\n\nنراك قريبا!`,
       html: wrap(`<p>مرحبا <strong>${v.patientFirstName}</strong>،</p><p>موعدك <strong>بعد ~ساعتين</strong> مع ${v.practitionerName}.</p><p>📍 <em>N Teseen، New Cairo (بالقرب من CMC). يوجد موقف سيارات.</em></p><p>نراك قريبا!</p>`, 'ar'),
     }),
   },

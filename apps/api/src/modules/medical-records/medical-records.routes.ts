@@ -104,12 +104,46 @@ export async function medicalRecordsRoutes(app: FastifyInstance): Promise<void> 
     }
     const data = parsed.data;
 
-    // Vérifier que le patient existe
+    // Vérifier que le patient existe + ownership pour PRACTITIONER
     const patient = await app.prisma.patient.findUnique({
       where: { id: patientId },
-      select: { id: true },
+      select: { id: true, preferredPractitionerId: true },
     });
     if (!patient) return reply.status(404).send({ error: 'PatientNotFound' });
+
+    // SECURITE — un PRACTITIONER ne peut éditer que les fiches de ses propres patients
+    // (preferredPractitionerId OR a un RDV passé avec lui). ADMIN passe partout.
+    if (req.currentUser!.role === 'PRACTITIONER') {
+      const isOwn = patient.preferredPractitionerId === req.currentUser!.sub
+        || (await app.prisma.appointment.findFirst({
+          where: { patientId, practitionerId: req.currentUser!.sub },
+          select: { id: true },
+        })) !== null;
+      if (!isOwn) {
+        await recordAudit(app.prisma, req, {
+          userId: req.currentUser!.sub,
+          action: 'medical_record_write_forbidden',
+          resource: `patient:${patientId}`,
+          details: { reason: 'not_assigned_practitioner' },
+        });
+        return reply.status(403).send({ error: 'NotYourPatient' });
+      }
+    }
+
+    // SECURITE — fiche déjà finalisée : modification interdite sauf ADMIN.
+    // (Loi médicale : un dossier signé est figé, un avenant doit être créé séparément.)
+    const existingCheck = await app.prisma.medicalRecord.findUnique({
+      where: { patientId },
+      select: { id: true, finalizedAt: true },
+    });
+    if (existingCheck?.finalizedAt && req.currentUser!.role !== 'ADMIN') {
+      await recordAudit(app.prisma, req, {
+        userId: req.currentUser!.sub,
+        action: 'medical_record_write_blocked_finalized',
+        resource: `medicalRecord:${existingCheck.id}`,
+      });
+      return reply.status(409).send({ error: 'AlreadyFinalized', message: 'Fiche déjà signée — création d\'avenant requise.' });
+    }
 
     // BMI auto-calculé
     const bmi =

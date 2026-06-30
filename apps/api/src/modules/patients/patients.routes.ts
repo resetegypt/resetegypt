@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { recordAudit } from '../../lib/audit.js';
+import { csvRow } from '../../lib/crypto-helpers.js';
 
 const consentSchema = z.object({
   accepted: z.boolean(),
@@ -207,7 +208,7 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     return reply.status(201).send({ patient });
   });
 
-  app.patch('/patients/:id', async (req) => {
+  app.patch('/patients/:id', async (req, reply) => {
     const id = (req.params as { id: string }).id;
     const updateSchema = createPatientSchema.partial().extend({
       status: z.enum(['ACTIVE', 'ARCHIVED', 'LOST']).optional(),
@@ -217,8 +218,14 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       tags: z.array(z.string().min(1).max(24)).max(12).optional(),
     });
     const partial = updateSchema.safeParse(req.body);
-    if (!partial.success) return { error: 'ValidationError', details: partial.error.flatten() };
+    if (!partial.success) return reply.status(400).send({ error: 'ValidationError', details: partial.error.flatten() });
     const data = partial.data;
+    // SECURITE — preferredPractitionerId réservé à ADMIN/PRACTITIONER (pas SECRETARY).
+    if (data.preferredPractitionerId !== undefined
+        && req.currentUser!.role !== 'ADMIN'
+        && req.currentUser!.role !== 'PRACTITIONER') {
+      return reply.status(403).send({ error: 'AdminOrPractitionerRequired' });
+    }
     // Normalise les tags : trim + lowercase + dédoublonne
     const tags = data.tags
       ? Array.from(new Set(data.tags.map((t) => t.trim().toLowerCase()).filter(Boolean)))
@@ -452,15 +459,20 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       'Date de naissance', 'Age', 'Genre', 'Gouvernorat',
       'Addiction principale', 'Statut', 'Langue', 'Tags', 'Créé le',
     ];
-    const rows = patients.map((p) => [
+    const rows = patients.map((p) => csvRow([
       p.id, p.firstName, p.lastName, p.phone, p.whatsapp ?? '', p.email ?? '',
       p.dateOfBirth ? p.dateOfBirth.toISOString().slice(0, 10) : '',
       p.age ?? '', p.gender ?? '', p.governorate ?? '',
       p.primaryAddiction, p.status, p.preferredLanguage,
       (p.tags ?? []).join('; '),
       p.createdAt.toISOString(),
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
+    ]));
+    const csv = [csvRow(headers), ...rows].join('\n');
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: 'patients_csv_export',
+      details: { count: patients.length },
+    });
     reply
       .header('Content-Type', 'text/csv; charset=utf-8')
       .header('Content-Disposition', `attachment; filename="reset-egypt-patients-${new Date().toISOString().slice(0, 10)}.csv"`);

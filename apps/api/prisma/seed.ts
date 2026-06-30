@@ -216,10 +216,15 @@ async function main() {
   console.log(`✔ Appointments created: ${appointmentsCreated}`);
 
   console.log('🎉 Seed complete!');
-  console.log(`\nLogin credentials (dev only):`);
-  console.log(`  Admin       : direction@reset-egypt.com / ${PASSWORD_PLAIN}`);
-  console.log(`  Practitioner: dr.ahmadalashry@reset-egypt.com / ${PASSWORD_PLAIN}`);
-  console.log(`  Secretary   : sara@reset-egypt.com / ${PASSWORD_PLAIN}`);
+  // SECURITE — n'affiche les mots de passe qu'en dev. En prod = jamais.
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`\nLogin credentials (dev only):`);
+    console.log(`  Admin       : direction@reset-egypt.com / ${PASSWORD_PLAIN}`);
+    console.log(`  Practitioner: dr.ahmadalashry@reset-egypt.com / ${PASSWORD_PLAIN}`);
+    console.log(`  Secretary   : sara@reset-egypt.com / ${PASSWORD_PLAIN}`);
+  } else {
+    console.log('Passwords reset to default — staff must change them on first login.');
+  }
 }
 
 main()
