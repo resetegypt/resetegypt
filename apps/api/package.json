@@ -36,7 +36,7 @@
     "fastify-plugin": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.7",
-    "otplib": "^13.4.0",
+    "otplib": "^12",
     "pino": "^9.1.0",
     "pino-pretty": "^11.0.0",
     "qrcode": "^1.5.4",
@@ -47,6 +47,8 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/web-push": "^3.6.4",
     "@vercel/node": "^5.8.0",
     "esbuild": "^0.28.0",
     "prisma": "^5.13.0",

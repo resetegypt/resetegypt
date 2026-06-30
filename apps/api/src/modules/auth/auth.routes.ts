@@ -14,7 +14,23 @@ const loginSchema = z.object({
 });
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
-  app.post('/auth/login', async (req, reply) => {
+  // Rate-limit anti-brute-force : 10 tentatives / 15 min / IP sur /auth/login
+  const loginRateLimit = {
+    config: {
+      rateLimit: {
+        max: 10,
+        timeWindow: '15 minutes',
+        keyGenerator: (req: { ip: string }) => `auth-login|${req.ip}`,
+        errorResponseBuilder: () => ({
+          statusCode: 429,
+          error: 'TooManyAuthAttempts',
+          message: 'Trop de tentatives. Réessaie dans 15 minutes.',
+        }),
+      },
+    },
+  };
+
+  app.post('/auth/login', loginRateLimit, async (req, reply) => {
     const parsed = loginSchema.safeParse(req.body);
     if (!parsed.success) {
       await recordAudit(app.prisma, req, {
@@ -78,7 +94,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     // un vrai JWT via POST /auth/2fa/verify { challenge, code }.
     if (user.totpEnabled && user.totpSecret) {
       const challenge = await reply.jwtSign(
-        { sub: user.id, purpose: 'totp', rememberMe: !!rememberMe },
+        { sub: user.id, purpose: 'totp', rememberMe: !!rememberMe } as never,
         { expiresIn: '5m' },
       );
       await recordAudit(app.prisma, req, {

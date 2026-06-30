@@ -150,7 +150,9 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
           }
 
           case 'inactive_60_days': {
-            // Trigger 1×/jour ; idempotency contextKey inclut yyyymmdd
+            // Bug-fix : on ne RE-relance pas le même patient chaque jour.
+            // contextKey n'inclut PAS la date → un seul envoi à vie par workflow+step.
+            // (Si on veut re-relancer après 6 mois, il faudra ajouter un yyyy-Hx suffix manuellement.)
             const cutoff = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
             const rows = await app.prisma.$queryRaw<Array<{
               id: string; firstName: string; lastName: string; email: string | null;
@@ -165,7 +167,7 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
                 )
             `;
             candidates = rows.map((p) => ({
-              contextKey: `patient-${p.id}-${yyyymmdd(now)}-reactivation`,
+              contextKey: `patient-${p.id}-reactivation`,
               toAddress: pickAddress(step.channel, p),
               emailFallback: p.email,
               vars: { patientFirstName: p.firstName, patientLastName: p.lastName, language: p.preferredLanguage },
@@ -173,7 +175,66 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             break;
           }
 
-          // long_term_followup et no_show seront ajoutés dans une itération suivante
+          case 'long_term_followup': {
+            // Suivi long-terme : envoie à offsetDays après le DERNIER RDV complété.
+            // contextKey inclut appointmentId du RDV de référence + stepIndex.
+            const offsetDays = step.offsetDays ?? 0;
+            const targetMs = offsetDays * 24 * 60 * 60 * 1000;
+            const targetMin = new Date(now.getTime() - targetMs - TICK_WINDOW_MIN * 60 * 1000);
+            const targetMax = new Date(now.getTime() - targetMs);
+            const appts = await app.prisma.appointment.findMany({
+              where: {
+                scheduledAt: { gte: targetMin, lte: targetMax },
+                status: 'COMPLETED',
+              },
+              include: { patient: true, practitioner: true },
+            });
+            candidates = appts
+              .filter((a) => a.patient.email || a.patient.whatsapp || a.patient.phone)
+              .map((a) => ({
+                contextKey: `appt-${a.id}-followup-${offsetDays}d`,
+                toAddress: pickAddress(step.channel, a.patient),
+                emailFallback: a.patient.email,
+                vars: {
+                  patientFirstName: a.patient.firstName,
+                  patientLastName: a.patient.lastName,
+                  practitionerName: `${a.practitioner.firstName} ${a.practitioner.lastName}`,
+                  appointmentDate: a.scheduledAt.toLocaleDateString('fr-FR'),
+                  language: a.patient.preferredLanguage,
+                },
+              }));
+            break;
+          }
+
+          case 'no_show': {
+            // No-show recovery : envoie à offset après un RDV marqué NO_SHOW.
+            const offsetMs = stepOffsetMs(step);
+            const targetMin = new Date(now.getTime() - offsetMs - TICK_WINDOW_MIN * 60 * 1000);
+            const targetMax = new Date(now.getTime() - offsetMs);
+            const appts = await app.prisma.appointment.findMany({
+              where: {
+                scheduledAt: { gte: targetMin, lte: targetMax },
+                status: 'NO_SHOW',
+              },
+              include: { patient: true, practitioner: true },
+            });
+            candidates = appts
+              .filter((a) => a.patient.email || a.patient.whatsapp || a.patient.phone)
+              .map((a) => ({
+                contextKey: `appt-${a.id}-noshow-step${stepIndex}`,
+                toAddress: pickAddress(step.channel, a.patient),
+                emailFallback: a.patient.email,
+                vars: {
+                  patientFirstName: a.patient.firstName,
+                  patientLastName: a.patient.lastName,
+                  practitionerName: `${a.practitioner.firstName} ${a.practitioner.lastName}`,
+                  appointmentDate: a.scheduledAt.toLocaleDateString('fr-FR'),
+                  language: a.patient.preferredLanguage,
+                },
+              }));
+            break;
+          }
+
           default:
             continue;
         }

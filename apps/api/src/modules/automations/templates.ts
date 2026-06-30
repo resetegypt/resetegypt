@@ -19,6 +19,24 @@ interface TemplateDef {
   ar: (v: Record<string, string>) => RenderedEmail;
 }
 
+/** Échappe les variables avant interpolation HTML — patient nommé `<img onerror=...>` = XSS sinon. */
+function esc(s: string | undefined): string {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Échappe toutes les valeurs d'un dict de variables. Le texte plain reste brut. */
+function escVars(v: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of Object.keys(v)) out[k] = esc(v[k]);
+  return out;
+}
+
 const wrap = (innerHtml: string, lang: Lang): string => `
 <!doctype html>
 <html lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
@@ -169,9 +187,23 @@ export function renderTemplate(name: string, vars: Record<string, string>): Rend
     return {
       subject: `Reset Egypt`,
       text: `Bonjour ${vars.patientFirstName ?? ''}\n\n(template "${name}" introuvable)\n\nReset Egypt`,
-      html: wrap(`<p>Bonjour <strong>${vars.patientFirstName ?? ''}</strong></p><p>(template <code>${name}</code> introuvable)</p>`, lang),
+      html: wrap(
+        `<p>Bonjour <strong>${esc(vars.patientFirstName)}</strong></p><p>(template <code>${esc(name)}</code> introuvable)</p>`,
+        lang,
+      ),
     };
   }
   const renderer = tpl[lang] ?? tpl.fr;
-  return renderer(vars);
+  // Anti-XSS : on rend une 1re fois avec variables RAW (subject + text) puis
+  // une 2e fois avec variables ESCAPED pour la partie HTML.
+  // Coût : 2× le rendering, négligeable. Bénéfice : un patient nommé
+  // `<img src=x onerror=alert(1)>` ne crée plus d'injection dans les emails.
+  const raw = renderer(vars);
+  const escaped = renderer(escVars(vars));
+  return {
+    subject: raw.subject,
+    text: raw.text,
+    html: escaped.html,
+  };
 }
+

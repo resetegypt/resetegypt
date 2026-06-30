@@ -24,13 +24,20 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  // Debug-only Sentry trigger. Protected by a shared secret so it can stay in
-  // prod without being abusable. Usage:
+  // Debug-only Sentry trigger. Protected par shared secret comparé timing-safe.
   //   curl -H "X-Debug-Token: $SENTRY_DEBUG_TOKEN" https://api.reset-egypt.com/__debug/sentry
   app.get('/__debug/sentry', async (req, reply) => {
     const expected = process.env.SENTRY_DEBUG_TOKEN;
     const got = req.headers['x-debug-token'];
-    if (!expected || got !== expected) {
+    const gotStr = typeof got === 'string' ? got : '';
+    let ok = false;
+    if (expected && gotStr.length === expected.length) {
+      try {
+        const { timingSafeEqual } = await import('node:crypto');
+        ok = timingSafeEqual(Buffer.from(gotStr), Buffer.from(expected));
+      } catch { /* noop */ }
+    }
+    if (!ok) {
       reply.status(404).send({ error: 'NotFound' });
       return;
     }

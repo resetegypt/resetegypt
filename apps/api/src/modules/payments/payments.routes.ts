@@ -22,10 +22,25 @@ const createPaymentSchema = z.object({
   paymentRef: z.string().optional(),
 });
 
-function nextInvoiceNumber(): string {
+/**
+ * Génère le prochain numéro de facture séquentiel race-safe.
+ * Format : INV-YYYY-NNNNN (5 chiffres = 99k factures/an, ample).
+ *
+ * Stratégie : SELECT MAX(invoiceNumber) WHERE year prefix → +1.
+ * Doublé d'une @unique sur invoiceNumber côté DB (catch P2002 → retry).
+ * Évite la collision de Math.random() qui foirait à ~100 factures.
+ */
+async function nextInvoiceNumber(prisma: { payment: { findFirst: (a: object) => Promise<{ invoiceNumber: string } | null> } }): Promise<string> {
   const year = new Date().getFullYear();
-  const random = Math.floor(Math.random() * 9000) + 1000;
-  return `INV-${year}-${random}`;
+  const prefix = `INV-${year}-`;
+  const last = await prisma.payment.findFirst({
+    where: { invoiceNumber: { startsWith: prefix } },
+    orderBy: { invoiceNumber: 'desc' },
+    select: { invoiceNumber: true },
+  });
+  const lastSeq = last ? parseInt(last.invoiceNumber.slice(prefix.length), 10) : 0;
+  const next = (Number.isFinite(lastSeq) ? lastSeq : 0) + 1;
+  return `${prefix}${String(next).padStart(5, '0')}`;
 }
 
 function mockETASubmit(payload: object): { uuid: string; hash: string } {
@@ -50,7 +65,7 @@ export async function paymentsRoutes(app: FastifyInstance): Promise<void> {
     const vat = subtotal * 0.14;
     const total = subtotal + vat;
 
-    const invoiceNumber = nextInvoiceNumber();
+    const invoiceNumber = await nextInvoiceNumber(app.prisma);
     const etaResult = mockETASubmit({
       invoiceNumber,
       items: d.items,

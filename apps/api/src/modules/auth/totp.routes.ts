@@ -20,15 +20,17 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { authenticator } from 'otplib';
+
+// Tolérance ±30s (window=1 step de 30s)
+authenticator.options = { window: 1 };
 import QRCode from 'qrcode';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { recordAudit } from '../../lib/audit.js';
+import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_SEC } from '../../plugins/auth.js';
+import { env } from '../../env.js';
 
 const TOTP_ISSUER = 'Reset Egypt';
 const BACKUP_CODE_COUNT = 10;
-
-// Tolérance de drift (en steps de 30s). 1 = ±30s (recommandé)
-authenticator.options = { window: 1 };
 
 function generateBackupCodes(): string[] {
   // 10 codes de 8 chars hex (4 bytes) — environ 32 bits d'entropie chacun
@@ -171,7 +173,21 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
 
   // POST /auth/2fa/verify { challenge, code } — appelé après /auth/login si totpRequired
   // Retourne le vrai JWT session (cookie httpOnly comme /auth/login).
-  app.post('/auth/2fa/verify', async (req, reply) => {
+  // Rate-limité : 10 essais / 15 min / IP — protège du brute-force des codes 6 chiffres.
+  app.post('/auth/2fa/verify', {
+    config: {
+      rateLimit: {
+        max: 10,
+        timeWindow: '15 minutes',
+        keyGenerator: (req: { ip: string }) => `2fa-verify|${req.ip}`,
+        errorResponseBuilder: () => ({
+          statusCode: 429,
+          error: 'TooMany2faAttempts',
+          message: 'Trop de tentatives 2FA. Réessaie dans 15 minutes.',
+        }),
+      },
+    },
+  }, async (req, reply) => {
     const schema = z.object({
       challenge: z.string().min(1),
       code: z.string().min(6),
@@ -235,18 +251,31 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
       resource: `user:${user.id}`,
     });
 
-    // Émettre le vrai JWT session
+    // Émettre le vrai JWT session — DOIT être strictement identique à /auth/login
+    // (même nom de cookie, même domain, même secure, même payload, même TTL).
+    // Sinon `app.authenticate()` ne reconnaît pas le cookie → boucle de login.
     const ttl = decoded.rememberMe ? '7d' : '8h';
     const token = app.jwt.sign(
-      { sub: user.id, role: user.role, email: user.email },
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
       { expiresIn: ttl },
     );
-    reply.setCookie('session', token, {
+    const cookieDomain =
+      env.NODE_ENV === 'production' && env.APP_URL.includes('reset-egypt.com')
+        ? '.reset-egypt.com'
+        : undefined;
+    reply.setCookie(SESSION_COOKIE_NAME, token, {
       httpOnly: true,
-      secure: true,
+      secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: decoded.rememberMe ? 7 * 24 * 60 * 60 : 8 * 60 * 60,
+      domain: cookieDomain,
+      maxAge: decoded.rememberMe ? SESSION_MAX_AGE_SEC * 7 : SESSION_MAX_AGE_SEC,
     });
 
     return {

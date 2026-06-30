@@ -6,6 +6,7 @@ import { loggerOptions } from './lib/logger.js';
 import { initSentry, attachSentryToFastify } from './lib/sentry.js';
 import { registerHelmet } from './plugins/helmet.js';
 import { registerCors } from './plugins/cors.js';
+import { registerRateLimit } from './plugins/rate-limit.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import prismaPlugin from './plugins/prisma.js';
 import authPlugin from './plugins/auth.js';
@@ -19,6 +20,7 @@ export async function buildApp() {
   await app.register(sensible);
   await registerHelmet(app);
   await registerCors(app);
+  await registerRateLimit(app);
   await app.register(prismaPlugin);
   await app.register(authPlugin);
   registerErrorHandler(app);
