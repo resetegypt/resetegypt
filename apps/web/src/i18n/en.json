@@ -1,5 +1,21 @@
 {
+  "toasts": {
+    "confirmed": "Appointment confirmed",
+    "arrived": "Patient marked arrived",
+    "started": "Session started",
+    "completed": "Session completed",
+    "noShow": "No-show recorded",
+    "cancelled": "Appointment cancelled",
+    "updated": "Updated",
+    "updateFailed": "Update failed",
+    "actionFailed": "Action failed"
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you're looking for doesn't exist or has been moved."
+  },
   "common": {
+    "home": "Home",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",

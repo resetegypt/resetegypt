@@ -10,7 +10,12 @@
     "updateFailed": "Échec de la mise à jour",
     "actionFailed": "Action impossible"
   },
+  "errors": {
+    "notFoundTitle": "Page introuvable",
+    "notFoundBody": "La page demandée n'existe pas ou a été déplacée."
+  },
   "common": {
+    "home": "Page d'accueil",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",

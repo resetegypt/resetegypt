@@ -1,5 +1,21 @@
 {
+  "toasts": {
+    "confirmed": "تم تأكيد الموعد",
+    "arrived": "تم تسجيل وصول المريض",
+    "started": "بدأت الجلسة",
+    "completed": "انتهت الجلسة",
+    "noShow": "تم تسجيل الغياب",
+    "cancelled": "تم إلغاء الموعد",
+    "updated": "تم التحديث",
+    "updateFailed": "فشل التحديث",
+    "actionFailed": "تعذّر تنفيذ الإجراء"
+  },
+  "errors": {
+    "notFoundTitle": "الصفحة غير موجودة",
+    "notFoundBody": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+  },
   "common": {
+    "home": "الصفحة الرئيسية",
     "save": "حفظ",
     "cancel": "إلغاء",
     "delete": "حذف",

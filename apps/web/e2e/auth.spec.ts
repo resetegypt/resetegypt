@@ -9,12 +9,18 @@ import { test, expect, request } from '@playwright/test';
 
 const API = process.env.PLAYWRIGHT_API_URL ?? 'https://api.reset-egypt.com';
 
-const ACCOUNTS = [
-  { email: 'direction@reset-egypt.com', password: '123.resetdirection', role: 'ADMIN' },
-  { email: 'dr.ahmadalashry@reset-egypt.com', password: '123.resetahmad', role: 'PRACTITIONER' },
-  { email: 'sara@reset-egypt.com', password: '123.resetsara', role: 'SECRETARY' },
-  { email: 'nora@reset-egypt.com', password: '123.resetnora', role: 'SECRETARY' },
-];
+// SECURITE — passwords lus depuis env vars (E2E_PASSWORD ou tableau JSON
+// PLAYWRIGHT_ACCOUNTS_JSON). Fallback "123.reset" pour permettre le run local
+// après le password-reset commun. Jamais de password sensible commité.
+const DEFAULT_PWD = process.env.E2E_PASSWORD ?? '123.reset';
+const ACCOUNTS = process.env.PLAYWRIGHT_ACCOUNTS_JSON
+  ? JSON.parse(process.env.PLAYWRIGHT_ACCOUNTS_JSON) as Array<{ email: string; password: string; role: string }>
+  : [
+      { email: 'direction@reset-egypt.com', password: DEFAULT_PWD, role: 'ADMIN' },
+      { email: 'dr.ahmadalashry@reset-egypt.com', password: DEFAULT_PWD, role: 'PRACTITIONER' },
+      { email: 'sara@reset-egypt.com', password: DEFAULT_PWD, role: 'SECRETARY' },
+      { email: 'nora@reset-egypt.com', password: DEFAULT_PWD, role: 'SECRETARY' },
+    ];
 
 test.describe('API · Auth flow', () => {
   test('health endpoint répond 200', async () => {
@@ -64,7 +70,7 @@ test.describe('API · Auth flow', () => {
     const ctx = await request.newContext();
     // Login
     const loginRes = await ctx.post(`${API}/auth/login`, {
-      data: { email: 'direction@reset-egypt.com', password: '123.resetdirection' },
+      data: { email: 'direction@reset-egypt.com', password: DEFAULT_PWD },
     });
     expect(loginRes.status()).toBe(200);
 

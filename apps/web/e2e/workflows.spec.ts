@@ -8,11 +8,12 @@
 import { test, expect, request } from '@playwright/test';
 
 const API = process.env.PLAYWRIGHT_API_URL ?? 'https://api.reset-egypt.com';
+const DEFAULT_PWD = process.env.E2E_PASSWORD ?? '123.reset';
 
 async function loginAdmin() {
   const ctx = await request.newContext();
   const res = await ctx.post(`${API}/auth/login`, {
-    data: { email: 'direction@reset-egypt.com', password: '123.resetdirection' },
+    data: { email: 'direction@reset-egypt.com', password: DEFAULT_PWD },
   });
   expect(res.status()).toBe(200);
   return ctx;
@@ -21,7 +22,7 @@ async function loginAdmin() {
 async function loginPractitioner() {
   const ctx = await request.newContext();
   const res = await ctx.post(`${API}/auth/login`, {
-    data: { email: 'dr.ahmadalashry@reset-egypt.com', password: '123.resetahmad' },
+    data: { email: 'dr.ahmadalashry@reset-egypt.com', password: DEFAULT_PWD },
   });
   expect(res.status()).toBe(200);
   return ctx;
@@ -30,7 +31,7 @@ async function loginPractitioner() {
 async function loginSecretary() {
   const ctx = await request.newContext();
   const res = await ctx.post(`${API}/auth/login`, {
-    data: { email: 'sara@reset-egypt.com', password: '123.resetsara' },
+    data: { email: 'sara@reset-egypt.com', password: DEFAULT_PWD },
   });
   expect(res.status()).toBe(200);
   return ctx;

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { CookieConsent } from '../components/CookieConsent';
+import { LocaleHtmlSync } from '../components/LocaleHtmlSync';
 import './globals.css';
 
 const inter = Inter({
@@ -59,8 +60,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Note : lang/dir réels sont ajustés client-side par LocaleHtmlSync (composant
+  // au début du <body>) selon la première URL segment (/fr | /en | /ar).
+  // Défaut SSR = fr (langue principale du centre).
   return (
-    <html lang="ar" dir="rtl" className={inter.variable}>
+    <html lang="fr" dir="ltr" className={inter.variable}>
       <head>
         <script
           type="application/ld+json"
@@ -101,6 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-bg text-text antialiased">
+        <LocaleHtmlSync />
         <Header />
         <main>{children}</main>
         <Footer />

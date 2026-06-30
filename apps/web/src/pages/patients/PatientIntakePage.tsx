@@ -188,7 +188,7 @@ export function PatientIntakePage() {
             <CardTitle>🆔 {t('patients.intake.identity')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FieldLabel label={`${t('patients.intake.firstName')} *`}>
                 <Input
                   required
@@ -204,7 +204,7 @@ export function PatientIntakePage() {
                 />
               </FieldLabel>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <FieldLabel label={t('patients.intake.dateOfBirth')}>
                 <Input
                   type="date"
@@ -243,7 +243,7 @@ export function PatientIntakePage() {
             <CardTitle>📞 {t('patients.intake.contact')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FieldLabel label={`${t('patients.intake.phoneFormat')} *`}>
                 <Input
                   required
@@ -267,7 +267,7 @@ export function PatientIntakePage() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </FieldLabel>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FieldLabel label={t('patients.intake.address')}>
                 <Input
                   value={form.address}
@@ -314,7 +314,7 @@ export function PatientIntakePage() {
                 ))}
               </div>
             </FieldLabel>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FieldLabel label={t('patients.intake.previousAttempts')}>
                 <select
                   className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
@@ -361,7 +361,7 @@ export function PatientIntakePage() {
           <CardHeader>
             <CardTitle>🆘 {t('patients.intake.emergencyContact')}</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FieldLabel label={t('patients.intake.emergencyName')}>
               <Input
                 value={form.emergencyContactName}
@@ -425,7 +425,7 @@ export function PatientIntakePage() {
               </span>
             </label>
             {bookAppointment && (
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border-light">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border-light">
                 <FieldLabel label={t('patients.intake.practitioner', 'Praticien *')}>
                   <select
                     className="w-full h-9 rounded-lg border border-border bg-surface px-3 text-sm"
