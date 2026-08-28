@@ -67,7 +67,7 @@ model Patient {
   dateOfBirth             DateTime?
   age                     Int?
   gender                  Gender?
-  phone                   String        @unique
+  phone                   String        // pas @unique : familles peuvent partager un numéro
   whatsapp                String?
   email                   String?
   address                 String?
@@ -400,6 +400,20 @@ model AutomationWorkflow {
   updatedAt DateTime @updatedAt
 
   runs AutomationRun[]
+}
+
+/// Anti-replay TOTP : chaque code utilisé est enregistré (userId + code hash + expiresAt).
+/// Un même code ne peut plus être réutilisé dans sa fenêtre 30s.
+/// Nettoyage via cron : DELETE WHERE expiresAt < now.
+model UsedTotpCode {
+  id        String   @id @default(uuid())
+  userId    String
+  codeHash  String   // sha256 du code 6 chiffres (évite de logger le code en clair)
+  usedAt    DateTime @default(now())
+  expiresAt DateTime // usedAt + ~60s (fenêtre + drift)
+
+  @@unique([userId, codeHash])
+  @@index([expiresAt])
 }
 
 /// Idempotency + audit trail for fired automation steps.

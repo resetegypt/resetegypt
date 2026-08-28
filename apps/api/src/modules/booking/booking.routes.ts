@@ -36,10 +36,16 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
   // Rate-limit anti-spam : 30 req / minute / IP sur la création de RDV.
   app.get('/booking/slots', async (req) => {
     const q = req.query as { date?: string; practitionerId?: string };
-    const date = q.date ? new Date(q.date) : new Date();
-    date.setHours(0, 0, 0, 0);
+    // Timezone Cairo UTC+2 (pas de DST depuis 2023) : on interprète la date
+    // fournie comme la date LOCALE Cairo, on génère les slots à 10h Cairo etc.
+    // Toutes les valeurs stockées en UTC (ISO), affichage recomposé Cairo côté client.
+    const CAIRO_OFFSET_H = 2;
+    const dateStr = q.date ?? new Date().toISOString().slice(0, 10);
+    // dateStr = YYYY-MM-DD. On construit minuit LOCAL Cairo = YYYY-MM-DD 00:00 +02:00 UTC.
+    const date = new Date(`${dateStr}T00:00:00.000Z`);
+    date.setUTCHours(date.getUTCHours() - CAIRO_OFFSET_H); // minuit Cairo = 22h UTC la veille
     const next = new Date(date);
-    next.setDate(next.getDate() + 1);
+    next.setUTCDate(next.getUTCDate() + 1);
 
     // Praticiens éligibles : tous les actifs (ou un seul si filtré)
     const practitioners = await app.prisma.user.findMany({
@@ -72,9 +78,12 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
 
     const slots: Array<{ time: string; iso: string; taken: boolean }> = [];
     for (let i = 0; i < SLOTS_PER_DAY; i++) {
+      // Slot i = minuit Cairo + DAY_START_MIN + i*SLOT_DURATION_MIN (en minutes local Cairo)
       const slot = new Date(date);
-      slot.setMinutes(DAY_START_MIN + i * SLOT_DURATION_MIN);
+      slot.setUTCMinutes(slot.getUTCMinutes() + DAY_START_MIN + i * SLOT_DURATION_MIN);
       const iso = slot.toISOString();
+      // Affichage local Cairo (HH:MM) — indépendant du fuseau du serveur
+      const cairoTime = new Date(slot.getTime() + CAIRO_OFFSET_H * 60 * 60 * 1000);
 
       // Au moins 1 praticien disponible (respectant availability) ET non occupé
       const occupied = takenByIso.get(iso) ?? new Set<string>();
@@ -86,7 +95,7 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
         if (available) { anyAvailable = true; break; }
       }
       slots.push({
-        time: `${String(slot.getHours()).padStart(2, '0')}:${String(slot.getMinutes()).padStart(2, '0')}`,
+        time: `${String(cairoTime.getUTCHours()).padStart(2, '0')}:${String(cairoTime.getUTCMinutes()).padStart(2, '0')}`,
         iso,
         taken: !anyAvailable,
       });
@@ -178,7 +187,7 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
     // unique constraint existe, sinon on retombe via le retry global.
     try {
       const result = await app.prisma.$transaction(async (tx) => {
-        let patient = await tx.patient.findUnique({ where: { phone: d.phone } });
+        let patient = await tx.patient.findFirst({ where: { phone: d.phone } });
         if (!patient) {
           patient = await tx.patient.create({
             data: {

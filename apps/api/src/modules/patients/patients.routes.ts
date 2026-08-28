@@ -250,6 +250,82 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     return { patient: updated };
   });
 
+  // RGPD article 17 + Loi 151/2020 art. 6 — Droit à l'effacement.
+  // ADMIN peut effacer TOUTES les données d'un patient sur demande.
+  //
+  // Stratégie : effacer les données NON-comptables (identité, coordonnées,
+  // notes médicales, messages), MAIS garder les factures anonymisées 5+ ans
+  // (obligation légale fiscale égyptienne). Le patient est archivé + pseudo-
+  // nymisé plutôt que hard-deleted (préserve intégrité des factures liées).
+  app.post('/patients/:id/erase', async (req, reply) => {
+    if (req.currentUser?.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'AdminRequired' });
+    }
+    const id = (req.params as { id: string }).id;
+    const bodySchema = z.object({
+      confirm: z.literal('ERASE_PATIENT_DATA'),
+      reason: z.string().min(3).max(500),
+    });
+    const parsed = bodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.status(400).send({
+        error: 'ConfirmationRequired',
+        message: 'body must be { confirm: "ERASE_PATIENT_DATA", reason: "..." }',
+      });
+    }
+
+    const patient = await app.prisma.patient.findUnique({ where: { id } });
+    if (!patient) return reply.status(404).send({ error: 'NotFound' });
+
+    const anonId = `erased-${id.slice(0, 8)}`;
+    await app.prisma.$transaction(async (tx) => {
+      // Efface les données médicales (dossier + notes de suivi + scores)
+      await tx.followUpNote.deleteMany({ where: { patientId: id } });
+      await tx.scoreSnapshot.deleteMany({ where: { patientId: id } });
+      await tx.medicalRecord.deleteMany({ where: { patientId: id } });
+      // Efface les messages (WhatsApp / Email / Instagram)
+      await tx.message.deleteMany({ where: { patientId: id } });
+      // Threads emails pour ce patient : dissocier (le mailbox garde le contexte)
+      await tx.emailThread.updateMany({
+        where: { patientId: id },
+        data: { patientId: null },
+      });
+      // Pseudonymise le patient — garde l'ID pour ne pas casser les FK factures
+      await tx.patient.update({
+        where: { id },
+        data: {
+          firstName: 'Anonymisé',
+          lastName: anonId,
+          phone: `+00${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(0, 20),
+          whatsapp: null,
+          email: null,
+          address: null,
+          governorate: null,
+          profession: null,
+          maritalStatus: null,
+          dateOfBirth: null,
+          age: null,
+          gender: null,
+          emergencyContact: {} as never,
+          consents: { erasedAt: new Date().toISOString(), reason: parsed.data.reason } as never,
+          tags: [],
+          avatarUrl: null,
+          acquisitionSource: [],
+          status: 'ARCHIVED',
+          preferredPractitionerId: null,
+        },
+      });
+    });
+
+    await recordAudit(app.prisma, req, {
+      userId: req.currentUser!.sub,
+      action: 'patient_erased_gdpr',
+      resource: `patient:${id}`,
+      details: { reason: parsed.data.reason, anonymizedId: anonId },
+    });
+    return { ok: true, anonymizedId: anonId, message: 'Patient data erased. Invoices retained anonymized for legal compliance.' };
+  });
+
   // === Upload de l'avatar patient ===
   // Le client envoie une data URL base64 redimensionnée côté navigateur
   // (max 256x256, ~20KB). On stocke directement dans patient.avatarUrl.

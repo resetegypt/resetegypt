@@ -243,7 +243,7 @@ function renderWaitingListNotificationEmail(d: WaitingNotifData): string {
           Contactez-nous rapidement pour confirmer ce créneau — premier arrivé, premier servi.
         </p>
         <div style="text-align:center;margin:24px 0;">
-          <a href="https://wa.me/201234567890" style="display:inline-block;background:${BRAND.primary};color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:600;font-size:14px;box-shadow:0 2px 8px rgba(30,15,186,0.25);">Réserver par WhatsApp</a>
+          <a href="https://wa.me/${env.CENTER_WHATSAPP}" style="display:inline-block;background:${BRAND.primary};color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:600;font-size:14px;box-shadow:0 2px 8px rgba(30,15,186,0.25);">Réserver par WhatsApp</a>
         </div>
         <p style="color:${BRAND.textSecondary};font-size:13px;margin:0;">À très vite,<br><strong style="color:${BRAND.text};">L'équipe Reset Egypt</strong></p>
       </td></tr>

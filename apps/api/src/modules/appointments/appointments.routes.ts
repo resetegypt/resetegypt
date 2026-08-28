@@ -523,7 +523,7 @@ function renderWaitingNotifEmail(firstName: string, service: string, slotAt: Dat
   <div style="font-size:18px;font-weight:700;color:${NOTIF_BRAND.primaryDark};margin-top:8px;">${escapeHtml(slotStr)}</div>
 </div>
 <p style="color:${NOTIF_BRAND.textSecondary};font-size:14px;">Contactez-nous rapidement pour confirmer — premier arrivé, premier servi.</p>
-<div style="text-align:center;margin:24px 0;"><a href="https://wa.me/201234567890" style="display:inline-block;background:${NOTIF_BRAND.primary};color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:600;">Réserver par WhatsApp</a></div>
+<div style="text-align:center;margin:24px 0;"><a href="https://wa.me/${env.CENTER_WHATSAPP}" style="display:inline-block;background:${NOTIF_BRAND.primary};color:white;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:600;">Réserver par WhatsApp</a></div>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }

@@ -299,7 +299,7 @@ export function renderInvoiceEmailBody(payment: Payment, patient: Patient, appUr
           <!-- Closing -->
           <tr>
             <td style="padding: 28px 32px 0; color: ${BRAND.textSecondary}; font-size: 14px;">
-              <p style="margin: 0;">Pour toute question ou pour reprendre rendez-vous, contactez-nous par <a href="https://wa.me/201xxxxxxxxx" style="color: ${BRAND.primary}; text-decoration: none; font-weight: 600;">WhatsApp</a> ou par téléphone.</p>
+              <p style="margin: 0;">Pour toute question ou pour reprendre rendez-vous, contactez-nous par <a href="https://wa.me/${process.env.CENTER_WHATSAPP ?? '201234567890'}" style="color: ${BRAND.primary}; text-decoration: none; font-weight: 600;">WhatsApp</a> ou par téléphone.</p>
               <p style="margin: 20px 0 0;">À très vite,<br><strong style="color: ${BRAND.text};">L'équipe Reset Egypt</strong></p>
             </td>
           </tr>

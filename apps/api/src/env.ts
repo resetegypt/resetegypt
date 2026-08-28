@@ -22,6 +22,12 @@ const envSchema = z.object({
   // URLs publiques (pour les emails et CORS)
   APP_URL: z.string().url().default('http://localhost:3000'),
   API_URL: z.string().url().default('http://localhost:3001'),
+  BOOKING_URL: z.string().url().default('https://book.reset-egypt.com'),
+  SITE_URL: z.string().url().default('https://reset-egypt.com'),
+  // Coordonnées du centre pour les emails/notifications
+  CENTER_EMAIL: z.string().email().default('contact@reset-egypt.com'),
+  CENTER_PHONE: z.string().default('+201234567890'),
+  CENTER_WHATSAPP: z.string().default('201234567890'), // format E.164 sans + pour wa.me/xxxxx
   // Monitoring (Sentry — optionnel; si absent, init no-op)
   SENTRY_DSN: z.string().url().optional(),
   SENTRY_ENVIRONMENT: z.string().default('production'),

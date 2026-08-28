@@ -154,11 +154,12 @@ async function main() {
   const secretarySara = secretaries[0]!;
 
   const patients = await Promise.all(
-    PATIENTS_DATA.map((p) =>
-      prisma.patient.upsert({
-        where: { phone: p.phone },
-        update: {},
-        create: {
+    PATIENTS_DATA.map(async (p) => {
+      // phone n'est plus unique (familles) → check manuel puis create if missing
+      const existing = await prisma.patient.findFirst({ where: { phone: p.phone } });
+      if (existing) return existing;
+      return prisma.patient.create({
+        data: {
           firstName: p.firstName,
           lastName: p.lastName,
           phone: p.phone,
@@ -176,8 +177,8 @@ async function main() {
           },
           createdById: secretarySara.id,
         },
-      }),
-    ),
+      });
+    }),
   );
   patients.forEach((p) => console.log(`✔ Patient: ${p.firstName} ${p.lastName}`));
 

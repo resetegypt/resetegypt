@@ -61,10 +61,20 @@ export async function paymentsRoutes(app: FastifyInstance): Promise<void> {
     if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const d = parsed.data;
 
+    // Calcul de la facture — respect des taux TVA par ligne (item-level vatRate).
+    // Convention ETA Égypte : TVA calculée sur HT AVANT remise commerciale
+    // (la remise est une réduction en pied de facture, pas dans l'assiette TVA).
+    // Chaque ligne peut avoir un taux différent (14% par défaut, 0% pour actes
+    // strictement médicaux si le comptable confirme).
     const subtotalRaw = d.items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0);
-    const subtotal = subtotalRaw - d.discount;
-    const vat = subtotal * 0.14;
-    const total = subtotal + vat;
+    const vatRaw = d.items.reduce(
+      (sum, it) => sum + it.quantity * it.unitPrice * (it.vatRate / 100),
+      0,
+    );
+    // Arrondi centime pour cohérence display ↔ ETA ↔ paiement
+    const subtotal = Math.round(subtotalRaw * 100) / 100;
+    const vat = Math.round(vatRaw * 100) / 100;
+    const total = Math.round((subtotal + vat - d.discount) * 100) / 100;
 
     const invoiceNumber = await nextInvoiceNumber(app.prisma);
     const etaResult = mockETASubmit({
