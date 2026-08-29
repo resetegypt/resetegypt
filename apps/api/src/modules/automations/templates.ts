@@ -5,6 +5,8 @@
 // Pour ajouter un template : ajoute une entrée dans TEMPLATES + sa traduction.
 // ============================================================================
 
+import { env } from '../../env.js';
+
 interface RenderedEmail {
   subject: string;
   text: string;
@@ -47,7 +49,7 @@ const wrap = (innerHtml: string, lang: Lang): string => `
   </div>
   ${innerHtml}
   <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:12px;color:#888">
-    Reset Egypt · N Teseen, New Cairo · +20 1XXXXXXXXX · <a href="https://reset-egypt.com" style="color:#4f46e5">reset-egypt.com</a>
+    Reset Egypt · N Teseen, New Cairo · ${env.CENTER_PHONE} · <a href="${env.SITE_URL}" style="color:#4f46e5">${env.SITE_URL.replace(/^https?:\/\//, '')}</a>
   </div>
 </body>
 </html>`;

@@ -5,6 +5,7 @@ import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_SEC } from '../../plugins/auth.js'
 import { recordAudit } from '../../lib/audit.js';
 import { env } from '../../env.js';
 import { passwordSchema } from '../../lib/password-policy.js';
+import { maskEmail } from '../../lib/email.js';
 
 const MAX_FAILED_ATTEMPTS = 5;
 
@@ -46,7 +47,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     if (!user) {
       await recordAudit(app.prisma, req, {
         action: 'login_failed',
-        details: { email, reason: 'unknown_email' },
+        details: { email: maskEmail(email), reason: 'unknown_email' },
       });
       return reply.status(401).send({ error: 'InvalidCredentials' });
     }

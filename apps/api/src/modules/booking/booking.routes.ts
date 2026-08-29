@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { isPractitionerAvailable } from '../availability/availability.routes.js';
 import { env } from '../../env.js';
-import { sendEmail } from '../../lib/email.js';
+import { sendEmail, maskEmail } from '../../lib/email.js';
 import { renderTemplate } from '../automations/templates.js';
 
 const SERVICE_LABEL_BY_LANG: Record<string, Record<string, string>> = {
@@ -311,7 +311,7 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
             html: rendered.html,
           }).catch((err) =>
             app.log.error(
-              { err, patientEmail: result.patient.email },
+              { err, to: maskEmail(result.patient.email) },
               'booking confirmation email failed',
             ),
           );

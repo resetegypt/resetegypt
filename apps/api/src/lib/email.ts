@@ -5,6 +5,31 @@ import { env } from '../env.js';
 
 const logger = pino({ level: 'info' });
 
+/**
+ * Masque une adresse email pour les logs — RGPD/Loi 151/2020 : les emails
+ * patients sont des données perso, on ne les loggue jamais en clair.
+ *   `patient@example.com` → `p******@e******.com`
+ *   `x@y.z`               → `x@y*****`
+ * Résiste à malformed input : renvoie `[invalid-email]` si pas de @.
+ */
+function maskEmail(email: string | null | undefined): string {
+  if (!email) return '[empty]';
+  const at = email.indexOf('@');
+  if (at <= 0) return '[invalid-email]';
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  const dot = domain.lastIndexOf('.');
+  const maskedLocal = local[0] + '*'.repeat(Math.max(1, local.length - 1));
+  const maskedDomain =
+    dot > 0
+      ? domain[0] + '*'.repeat(Math.max(1, dot - 1)) + domain.slice(dot)
+      : domain[0] + '*****';
+  return `${maskedLocal}@${maskedDomain}`;
+}
+
+// Exporté pour usage dans les autres modules (booking.routes, auth.routes, etc.)
+export { maskEmail };
+
 let resendClient: Resend | null = null;
 let smtpTransporter: { transporter: Transporter | null; verified: boolean } | null = null;
 
@@ -88,7 +113,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
         logger.error({ err: result.error }, 'Resend send failed');
         return { sent: false, mocked: false, provider: 'resend', error: result.error.message };
       }
-      logger.info({ to: msg.to, id: result.data?.id }, 'email sent via Resend');
+      logger.info({ to: maskEmail(msg.to), id: result.data?.id }, 'email sent via Resend');
       return { sent: true, mocked: false, provider: 'resend', messageId: result.data?.id };
     } catch (err) {
       logger.error({ err }, 'Resend exception');
@@ -99,7 +124,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
   // Fallback : SMTP (MailHog en dev)
   const { transporter, verified } = await getSmtpTransporter();
   if (!transporter || !verified) {
-    logger.info({ to: msg.to, subject: msg.subject }, '[MOCK EMAIL] would send');
+    logger.info({ to: maskEmail(msg.to), subject: msg.subject }, '[MOCK EMAIL] would send');
     return { sent: true, mocked: true, provider: 'mock' };
   }
   try {
@@ -114,7 +139,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
       text: msg.text,
       attachments: msg.attachments,
     });
-    logger.info({ to: msg.to, messageId: info.messageId }, 'email sent via SMTP');
+    logger.info({ to: maskEmail(msg.to), messageId: info.messageId }, 'email sent via SMTP');
     return { sent: true, mocked: false, provider: 'smtp', messageId: info.messageId };
   } catch (err) {
     logger.error({ err }, 'SMTP send failed');
