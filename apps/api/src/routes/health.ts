@@ -8,20 +8,26 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
     uptime: process.uptime(),
   }));
 
-  app.get('/health/deep', async () => {
+  // /health/deep : renvoie 503 si la DB est down (utile pour un uptime monitor
+  // avec alerting — 200 même en degraded serait un anti-pattern).
+  app.get('/health/deep', async (_req, reply) => {
     let db: 'ok' | 'down';
+    let dbLatencyMs: number | null = null;
+    const started = Date.now();
     try {
       await app.prisma.$queryRaw`SELECT 1`;
       db = 'ok';
+      dbLatencyMs = Date.now() - started;
     } catch {
       db = 'down';
     }
-    return {
+    const body = {
       status: db === 'ok' ? 'ok' : 'degraded',
       service: 'reset-api',
-      checks: { database: db },
+      checks: { database: db, dbLatencyMs },
       timestamp: new Date().toISOString(),
     };
+    return reply.status(db === 'ok' ? 200 : 503).send(body);
   });
 
   // Debug-only Sentry trigger. Protected par shared secret comparé timing-safe.

@@ -33,8 +33,38 @@ export function initSentry(): void {
       'Unauthorized',
     ],
     beforeSend(event) {
-      // Strip toute donnée patient des extras au cas où
+      // Strip cookies et headers Authorization
       if (event.request?.cookies) delete event.request.cookies;
+      if (event.request?.headers) {
+        const h = event.request.headers as Record<string, string>;
+        delete h.authorization;
+        delete h.cookie;
+        delete h['x-webhook-secret'];
+        delete h['x-debug-token'];
+      }
+      // Strip les query params qui pourraient contenir un token
+      if (event.request?.query_string) {
+        const raw = String(event.request.query_string);
+        // Redact token=..., code=..., password=..., email=...
+        event.request.query_string = raw.replace(
+          /\b(token|code|password|email|secret|api[_-]?key)=[^&\s]+/gi,
+          '$1=[REDACTED]',
+        );
+      }
+      // Strip breadcrumbs qui pourraient contenir des URLs avec token
+      if (event.breadcrumbs) {
+        for (const bc of event.breadcrumbs) {
+          if (bc.data && typeof bc.data === 'object') {
+            const d = bc.data as Record<string, unknown>;
+            if (typeof d.url === 'string') {
+              d.url = d.url.replace(
+                /\b(token|code|password|email|secret)=[^&\s]+/gi,
+                '$1=[REDACTED]',
+              );
+            }
+          }
+        }
+      }
       return event;
     },
   });
