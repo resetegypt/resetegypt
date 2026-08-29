@@ -102,16 +102,37 @@ NODE_ENV=production pnpm --filter @reset/api tsx scripts/cleanup-seed-patients.t
 
 https://github.com/resetegypt/resetegypt/settings/secrets/actions
 
-Add ces 6 secrets :
+**✅ Déjà set automatiquement par Claude** :
 
-| Nom                          | Valeur                                                                                                                                              |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL_PROD`          | `postgresql://postgres.pubrtdtigucvhjydtifo:<password>@aws-0-eu-west-1.pooler.supabase.com:5432/postgres` (⚠️ port 5432 direct, pas 6543 pgbouncer) |
-| `R2_ACCOUNT_ID`              | Account ID Cloudflare (32 chars hex)                                                                                                                |
-| `R2_ACCESS_KEY_ID`           | Access Key R2                                                                                                                                       |
-| `R2_SECRET_ACCESS_KEY`       | Secret R2                                                                                                                                           |
-| `R2_BUCKET`                  | `reset-egypt-backups`                                                                                                                               |
-| `BACKUP_ENCRYPTION_PASSWORD` | `openssl rand -base64 32` (⚠️ **garde-la précieusement** — perdue = backups illisibles)                                                             |
+| Nom                          | État                                                           |
+| ---------------------------- | -------------------------------------------------------------- |
+| `DATABASE_URL_PROD`          | ✅ Set (Supabase URL directe port 5432)                        |
+| `BACKUP_ENCRYPTION_PASSWORD` | ✅ Set (⚠️ **note-la ci-dessous, tu ne pourras plus la voir**) |
+
+**⚠️ IMPORTANT — clé GPG backup** (garde-la précieusement, perdue = backups illisibles) :
+
+```
+BACKUP_ENCRYPTION_PASSWORD = tISyPsRxbQmh3m5JZrOIrVATQ4+9eJ62P75FQ+HEhfk=
+```
+
+**🟡 À ajouter par toi** (après création bucket R2) :
+
+| Nom                    | Valeur                               |
+| ---------------------- | ------------------------------------ |
+| `R2_ACCOUNT_ID`        | Account ID Cloudflare (32 chars hex) |
+| `R2_ACCESS_KEY_ID`     | Access Key R2                        |
+| `R2_SECRET_ACCESS_KEY` | Secret R2                            |
+| `R2_BUCKET`            | `reset-egypt-backups`                |
+
+Via CLI (préféré) :
+
+```bash
+export GH_TOKEN=ghp_xxx
+echo "<ton_r2_account_id>" | gh secret set R2_ACCOUNT_ID --repo=resetegypt/resetegypt
+echo "<ta_r2_access_key>"  | gh secret set R2_ACCESS_KEY_ID --repo=resetegypt/resetegypt
+echo "<ton_r2_secret>"     | gh secret set R2_SECRET_ACCESS_KEY --repo=resetegypt/resetegypt
+echo "reset-egypt-backups" | gh secret set R2_BUCKET --repo=resetegypt/resetegypt
+```
 
 ### 4d. Vérifier
 
