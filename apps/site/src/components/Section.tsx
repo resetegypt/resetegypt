@@ -23,7 +23,9 @@ export function Section({
     <section id={id} className={`py-16 lg:py-24 ${className}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {(eyebrow || title || subtitle) && (
-          <header className={`mb-10 lg:mb-14 ${align === 'center' ? 'text-center' : ''} max-w-3xl ${align === 'center' ? 'mx-auto' : ''}`}>
+          <header
+            className={`mb-10 lg:mb-14 ${align === 'center' ? 'text-center' : ''} max-w-3xl ${align === 'center' ? 'mx-auto' : ''}`}
+          >
             {eyebrow && (
               <div className="inline-flex items-center gap-2 text-[10px] tracking-[0.32em] font-bold text-primary uppercase mb-3">
                 <span className="w-6 h-px bg-primary" />

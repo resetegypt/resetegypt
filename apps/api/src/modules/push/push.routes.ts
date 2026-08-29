@@ -39,10 +39,10 @@ function ensureVapid() {
 export interface PushPayload {
   title: string;
   body: string;
-  url?: string;  // URL ouverte au clic
+  url?: string; // URL ouverte au clic
   icon?: string;
   badge?: string;
-  tag?: string;  // groupe notifications (remplace celle existante)
+  tag?: string; // groupe notifications (remplace celle existante)
 }
 
 /** Envoie une notif à toutes les subscriptions d'un user. Purge celles cassées. */
@@ -64,7 +64,8 @@ export async function sendPushToUser(
     badge: payload.badge ?? '/pwa-192.png',
     tag: payload.tag,
   });
-  let sent = 0, failed = 0;
+  let sent = 0,
+    failed = 0;
   for (const s of subs) {
     try {
       await webpush.sendNotification(
@@ -138,8 +139,9 @@ export async function pushRoutes(app: FastifyInstance): Promise<void> {
     const schema = z.object({ endpoint: z.string().url() });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return reply.status(400).send({ error: 'ValidationError' });
-    await app.prisma.pushSubscription
-      .deleteMany({ where: { endpoint: parsed.data.endpoint, userId: req.currentUser!.sub } });
+    await app.prisma.pushSubscription.deleteMany({
+      where: { endpoint: parsed.data.endpoint, userId: req.currentUser!.sub },
+    });
     return { ok: true };
   });
 

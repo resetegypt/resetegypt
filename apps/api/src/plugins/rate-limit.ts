@@ -36,7 +36,7 @@ export async function registerRateLimit(app: FastifyInstance): Promise<void> {
  */
 export function strictAuthRateLimit(app: FastifyInstance) {
   return app.rateLimit({
-    max: 10,             // 10 essais
+    max: 10, // 10 essais
     timeWindow: '15 minutes',
     keyGenerator: (req) => `auth|${req.ip}`,
     errorResponseBuilder: () => ({

@@ -14,19 +14,23 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { recordAudit } from '../../lib/audit.js';
 
-const availabilitySchema = z.object({
-  dayOfWeek: z.number().int().min(0).max(6),
-  startMinutes: z.number().int().min(0).max(1439),
-  endMinutes: z.number().int().min(1).max(1440),
-  isActive: z.boolean().optional(),
-}).refine((d) => d.endMinutes > d.startMinutes, { message: 'endMinutes must be > startMinutes' });
+const availabilitySchema = z
+  .object({
+    dayOfWeek: z.number().int().min(0).max(6),
+    startMinutes: z.number().int().min(0).max(1439),
+    endMinutes: z.number().int().min(1).max(1440),
+    isActive: z.boolean().optional(),
+  })
+  .refine((d) => d.endMinutes > d.startMinutes, { message: 'endMinutes must be > startMinutes' });
 
-const timeOffSchema = z.object({
-  startAt: z.string().datetime(),
-  endAt: z.string().datetime(),
-  type: z.enum(['TIME_OFF', 'EXTRA']).default('TIME_OFF'),
-  reason: z.string().max(200).optional(),
-}).refine((d) => new Date(d.endAt) > new Date(d.startAt), { message: 'endAt must be > startAt' });
+const timeOffSchema = z
+  .object({
+    startAt: z.string().datetime(),
+    endAt: z.string().datetime(),
+    type: z.enum(['TIME_OFF', 'EXTRA']).default('TIME_OFF'),
+    reason: z.string().max(200).optional(),
+  })
+  .refine((d) => new Date(d.endAt) > new Date(d.startAt), { message: 'endAt must be > startAt' });
 
 /** Vérifie si un praticien est disponible à un instant donné (utilisé par booking). */
 export async function isPractitionerAvailable(
@@ -49,16 +53,22 @@ export async function isPractitionerAvailable(
   // Si aucune disponibilité définie pour ce praticien → on suppose qu'il est dispo
   // (rétro-compat : pas casser la prod tant que l'admin n'a rien configuré)
   if (slots.length === 0) {
-    const totalSlots = await app.prisma.practitionerAvailability.count({ where: { practitionerId } });
+    const totalSlots = await app.prisma.practitionerAvailability.count({
+      where: { practitionerId },
+    });
     if (totalSlots === 0) return true;
     return false;
   }
   return slots.some((s) => minutesOfDay >= s.startMinutes && minutesOfDay < s.endMinutes);
 }
 
-function canAccess(req: { currentUser?: { role?: string; sub?: string } }, practitionerId: string): boolean {
+function canAccess(
+  req: { currentUser?: { role?: string; sub?: string } },
+  practitionerId: string,
+): boolean {
   if (req.currentUser?.role === 'ADMIN') return true;
-  if (req.currentUser?.role === 'PRACTITIONER' && req.currentUser.sub === practitionerId) return true;
+  if (req.currentUser?.role === 'PRACTITIONER' && req.currentUser.sub === practitionerId)
+    return true;
   return false;
 }
 
@@ -87,7 +97,8 @@ export async function availabilityRoutes(app: FastifyInstance): Promise<void> {
     if (!canAccess(req, id)) return reply.status(403).send({ error: 'Forbidden' });
     const schema = z.object({ slots: z.array(availabilitySchema) });
     const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     await app.prisma.$transaction([
       app.prisma.practitionerAvailability.deleteMany({ where: { practitionerId: id } }),
       ...parsed.data.slots.map((s) =>
@@ -115,7 +126,8 @@ export async function availabilityRoutes(app: FastifyInstance): Promise<void> {
     const id = (req.params as { id: string }).id;
     if (!canAccess(req, id)) return reply.status(403).send({ error: 'Forbidden' });
     const parsed = timeOffSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const created = await app.prisma.practitionerTimeOff.create({
       data: {
         practitionerId: id,

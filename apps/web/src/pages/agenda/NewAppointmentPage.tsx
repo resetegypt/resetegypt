@@ -37,7 +37,9 @@ export function NewAppointmentPage() {
   const [service, setService] = useState<Addiction>('TOBACCO');
   const [visitType, setVisitType] = useState<'FIRST' | 'FOLLOWUP'>('FIRST');
   const [date, setDate] = useState(initialDate.toISOString().slice(0, 10));
-  const [time, setTime] = useState(slotIso ? new Date(slotIso).toTimeString().slice(0, 5) : '10:00');
+  const [time, setTime] = useState(
+    slotIso ? new Date(slotIso).toTimeString().slice(0, 5) : '10:00',
+  );
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -123,7 +125,8 @@ export function NewAppointmentPage() {
           <CardContent className="space-y-3">
             {initialPatientId ? (
               <p className="text-sm">
-                <strong>{t('newAppointment.patientSelectedFromFile')}</strong> · ID {initialPatientId}
+                <strong>{t('newAppointment.patientSelectedFromFile')}</strong> · ID{' '}
+                {initialPatientId}
               </p>
             ) : (
               <>
@@ -138,8 +141,7 @@ export function NewAppointmentPage() {
                     to={`/patients/intake${slotIso ? `?slot=${encodeURIComponent(slotIso)}` : ''}`}
                     className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-primary/40 bg-primary-lightest text-primary-dark text-sm font-medium hover:bg-primary hover:text-white transition-all whitespace-nowrap"
                   >
-                    +{' '}
-                    {t('newAppointment.newPatient', 'Nouveau patient')}
+                    + {t('newAppointment.newPatient', 'Nouveau patient')}
                   </Link>
                 </div>
                 {patientSearch.length >= 2 && (
@@ -186,7 +188,10 @@ export function NewAppointmentPage() {
                 )}
                 {selectedPatient && (
                   <p className="text-sm">
-                    ✓ <strong>{selectedPatient.firstName} {selectedPatient.lastName}</strong>{' '}
+                    ✓{' '}
+                    <strong>
+                      {selectedPatient.firstName} {selectedPatient.lastName}
+                    </strong>{' '}
                     {t('newAppointment.patientSelected')}
                   </p>
                 )}
@@ -201,7 +206,9 @@ export function NewAppointmentPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="block text-xs font-medium mb-1">{t('newAppointment.service')}</label>
+              <label className="block text-xs font-medium mb-1">
+                {t('newAppointment.service')}
+              </label>
               <div className="flex gap-2 flex-wrap">
                 {ADDICTIONS.map((a) => (
                   <Chip key={a} active={service === a} onClick={() => setService(a)}>
@@ -212,21 +219,22 @@ export function NewAppointmentPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium mb-1">{t('newAppointment.visitType')}</label>
+                <label className="block text-xs font-medium mb-1">
+                  {t('newAppointment.visitType')}
+                </label>
                 <div className="flex gap-2">
                   <Chip active={visitType === 'FIRST'} onClick={() => setVisitType('FIRST')}>
                     {t('newAppointment.firstSession')}
                   </Chip>
-                  <Chip
-                    active={visitType === 'FOLLOWUP'}
-                    onClick={() => setVisitType('FOLLOWUP')}
-                  >
+                  <Chip active={visitType === 'FOLLOWUP'} onClick={() => setVisitType('FOLLOWUP')}>
                     {t('newAppointment.followup')}
                   </Chip>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">{t('newAppointment.price')}</label>
+                <label className="block text-xs font-medium mb-1">
+                  {t('newAppointment.price')}
+                </label>
                 <Input
                   readOnly
                   value={`${price.toLocaleString(i18n.language)} EGP`}
@@ -235,7 +243,9 @@ export function NewAppointmentPage() {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">{t('newAppointment.practitioner')}</label>
+              <label className="block text-xs font-medium mb-1">
+                {t('newAppointment.practitioner')}
+              </label>
               <select
                 className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                 value={practitionerId}
@@ -261,7 +271,9 @@ export function NewAppointmentPage() {
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">{t('newAppointment.timeSlot')}</label>
+              <label className="block text-xs font-medium mb-1">
+                {t('newAppointment.timeSlot')}
+              </label>
               <Input
                 type="time"
                 step={2400}
@@ -288,7 +300,9 @@ export function NewAppointmentPage() {
           </CardContent>
         </Card>
 
-        {error && <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>}
+        {error && (
+          <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>
+        )}
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>

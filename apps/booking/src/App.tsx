@@ -1,15 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, CardContent, Input, ResetLogo } from '@reset/ui';
-import {
-  Cigarette,
-  Pill,
-  Wine,
-  Candy,
-  Brain,
-  Check,
-  type LucideIcon,
-} from 'lucide-react';
+import { Cigarette, Pill, Wine, Candy, Brain, Check, type LucideIcon } from 'lucide-react';
 import { LANGUAGES, type Lang } from './i18n';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -117,10 +109,7 @@ export function App() {
             aria-label="Accueil"
           >
             <div className="rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(30,15,186,0.25)] shrink-0 transition-transform group-hover:scale-105">
-              <ResetLogo
-                variant="full"
-                className="block w-12 h-12 sm:w-14 sm:h-14"
-              />
+              <ResetLogo variant="full" className="block w-12 h-12 sm:w-14 sm:h-14" />
             </div>
             <div className="leading-tight text-start min-w-0">
               <div className="text-sm sm:text-base font-bold text-primary tracking-tight truncate">
@@ -146,11 +135,7 @@ export function App() {
       {/* === BODY ======================================================= */}
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-5 sm:py-7">
         {step === 1 && (
-          <ServiceSelection
-            booking={booking}
-            onChange={setBooking}
-            onNext={() => setStep(2)}
-          />
+          <ServiceSelection booking={booking} onChange={setBooking} onNext={() => setStep(2)} />
         )}
 
         {step === 2 && (
@@ -847,15 +832,7 @@ function Field({
   );
 }
 
-function SummaryRow({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function SummaryRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-sm">
       <span className="text-text-secondary font-medium">{label}</span>

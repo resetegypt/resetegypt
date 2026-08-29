@@ -47,8 +47,14 @@ export function Composer({ state, onClose }: Props) {
     mutationFn: () =>
       apiPost('/practitioner-mail/send', {
         threadId: state.mode === 'reply' ? state.threadId : undefined,
-        to: to.split(',').map((s) => s.trim()).filter(Boolean),
-        cc: cc.split(',').map((s) => s.trim()).filter(Boolean),
+        to: to
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        cc: cc
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
         subject,
         bodyText: body,
         attachments,
@@ -85,7 +91,11 @@ export function Composer({ state, onClose }: Props) {
           <strong className="text-sm">
             {state.mode === 'reply' ? t('mail.reply') : t('mail.compose')}
           </strong>
-          <button onClick={onClose} className="p-1 rounded hover:bg-bg-secondary" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-bg-secondary"
+            aria-label="Close"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -93,14 +103,24 @@ export function Composer({ state, onClose }: Props) {
         <div className="p-4 space-y-2 overflow-y-auto">
           <label className="block">
             <span className="text-[11px] font-semibold text-text-secondary">{t('mail.to')}</span>
-            <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="email@exemple.com" />
+            <Input
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              placeholder="email@exemple.com"
+            />
           </label>
           <label className="block">
             <span className="text-[11px] font-semibold text-text-secondary">{t('mail.cc')}</span>
-            <Input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="email@exemple.com" />
+            <Input
+              value={cc}
+              onChange={(e) => setCc(e.target.value)}
+              placeholder="email@exemple.com"
+            />
           </label>
           <label className="block">
-            <span className="text-[11px] font-semibold text-text-secondary">{t('mail.subject')}</span>
+            <span className="text-[11px] font-semibold text-text-secondary">
+              {t('mail.subject')}
+            </span>
             <Input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}

@@ -114,7 +114,8 @@ export async function statsRoutes(app: FastifyInstance): Promise<void> {
 
     const currentRevenue = Number(revenue._sum.total ?? 0);
     const prevRevenue = Number(previousRevenue._sum.total ?? 0);
-    const revenueChange = prevRevenue > 0 ? ((currentRevenue - prevRevenue) / prevRevenue) * 100 : 0;
+    const revenueChange =
+      prevRevenue > 0 ? ((currentRevenue - prevRevenue) / prevRevenue) * 100 : 0;
 
     const dailyRevenue = await app.prisma.$queryRawUnsafe<Array<{ day: Date; total: number }>>(
       `SELECT DATE_TRUNC('day', "createdAt") AS day, SUM("total")::float AS total

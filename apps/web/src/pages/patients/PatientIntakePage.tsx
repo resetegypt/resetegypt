@@ -380,10 +380,7 @@ export function PatientIntakePage() {
         {/* Section RDV — pour que le patient apparaisse direct sur le dashboard du docteur */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              📅{' '}
-              {t('patients.intake.appointmentSection', 'Rendez-vous')}
-            </CardTitle>
+            <CardTitle>📅 {t('patients.intake.appointmentSection', 'Rendez-vous')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {slotDate && (
@@ -391,7 +388,7 @@ export function PatientIntakePage() {
                 <span className="text-primary-dark font-semibold">📍</span>
                 <div className="flex-1">
                   <div className="text-primary-dark font-medium">
-                    {t('patients.intake.slotFromAgenda', 'Créneau pré-rempli depuis l\'agenda')}
+                    {t('patients.intake.slotFromAgenda', "Créneau pré-rempli depuis l'agenda")}
                   </div>
                   <div className="text-xs text-text-secondary mt-0.5" data-numeric>
                     {slotDate.toLocaleDateString(undefined, {
@@ -416,11 +413,11 @@ export function PatientIntakePage() {
                 {slotDate
                   ? t(
                       'patients.intake.bookForSlot',
-                      "Créer le rendez-vous au créneau choisi (apparaîtra sur le dashboard du praticien)",
+                      'Créer le rendez-vous au créneau choisi (apparaîtra sur le dashboard du praticien)',
                     )
                   : t(
                       'patients.intake.bookSameDay',
-                      "Créer un rendez-vous immédiat pour ce patient (apparaîtra sur le dashboard du praticien)",
+                      'Créer un rendez-vous immédiat pour ce patient (apparaîtra sur le dashboard du praticien)',
                     )}
               </span>
             </label>
@@ -497,7 +494,9 @@ export function PatientIntakePage() {
           </CardContent>
         </Card>
 
-        {error && <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>}
+        {error && (
+          <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>
+        )}
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>

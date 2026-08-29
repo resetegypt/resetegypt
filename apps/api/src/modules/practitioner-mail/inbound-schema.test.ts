@@ -48,7 +48,12 @@ describe('inboundEmailSchema', () => {
     const r = inboundEmailSchema.safeParse({
       ...valid,
       attachments: [
-        { filename: 'doc.pdf', contentType: 'application/pdf', sizeBytes: 1024, contentBase64: 'AAAA' },
+        {
+          filename: 'doc.pdf',
+          contentType: 'application/pdf',
+          sizeBytes: 1024,
+          contentBase64: 'AAAA',
+        },
       ],
     });
     expect(r.success).toBe(true);

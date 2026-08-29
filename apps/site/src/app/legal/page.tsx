@@ -23,7 +23,8 @@ export default function LegalPage() {
         <br />
         Registre du commerce : <em>en cours d&apos;attribution</em>
         <br />
-        TIN (Tax Identification Number) : <em>en cours d&apos;attribution auprès du Ministère des Finances</em>
+        TIN (Tax Identification Number) :{' '}
+        <em>en cours d&apos;attribution auprès du Ministère des Finances</em>
       </p>
 
       <h2>Directeur de la publication</h2>
@@ -45,16 +46,16 @@ export default function LegalPage() {
         souhaitant se libérer d&apos;une addiction ou gérer leur stress.
       </p>
       <p>
-        <strong>⚠️ Important : ces séances ne constituent pas un acte médical.</strong> Elles
-        ne remplacent pas un diagnostic ou un traitement médical. Pour toute pathologie, consultez
+        <strong>⚠️ Important : ces séances ne constituent pas un acte médical.</strong> Elles ne
+        remplacent pas un diagnostic ou un traitement médical. Pour toute pathologie, consultez
         votre médecin.
       </p>
 
       <h2>Propriété intellectuelle</h2>
       <p>
-        L&apos;ensemble des contenus (textes, images, logos, code source) présents sur ce site
-        sont la propriété exclusive de Reset Egypt. Toute reproduction, distribution ou
-        modification sans autorisation écrite est interdite.
+        L&apos;ensemble des contenus (textes, images, logos, code source) présents sur ce site sont
+        la propriété exclusive de Reset Egypt. Toute reproduction, distribution ou modification sans
+        autorisation écrite est interdite.
       </p>
 
       <h2>Voir aussi</h2>

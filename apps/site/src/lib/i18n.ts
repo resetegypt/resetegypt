@@ -183,7 +183,7 @@ const fr: Dict = {
     eyebrow: 'Centre agréé',
     title: 'Un centre enregistré et régulé',
     subtitle:
-      "Le laser est un dispositif certifié conforme aux normes européennes (CE) pour la biostimulation, utilisé en kinésithérapie, physiothérapie, médecine du sport, acupuncture et auriculothérapie. Les séances sont conduites dans un environnement contrôlé par un praticien certifié, diplômé par une formation certifiante française.",
+      'Le laser est un dispositif certifié conforme aux normes européennes (CE) pour la biostimulation, utilisé en kinésithérapie, physiothérapie, médecine du sport, acupuncture et auriculothérapie. Les séances sont conduites dans un environnement contrôlé par un praticien certifié, diplômé par une formation certifiante française.',
     moh: 'Ministry of Health',
     eda: 'EDA · Egyptian Drug Authority',
     inProcess: 'Enregistrement en cours',
@@ -222,11 +222,9 @@ const fr: Dict = {
     },
     pillar3: {
       title: 'Accompagnement personnel',
-      description:
-        'Un praticien dédié vous guide pendant et après la transition comportementale.',
+      description: 'Un praticien dédié vous guide pendant et après la transition comportementale.',
     },
-    noteTitle:
-      'Notre approche est entièrement non-invasive, sans médicament et non-médicale.',
+    noteTitle: 'Notre approche est entièrement non-invasive, sans médicament et non-médicale.',
     noteBody:
       'Aucune douleur, aucune piqûre, aucune chaleur destructrice. Le laser froid de photobiomodulation est une technologie certifiée, sûre et sans effet secondaire connu.',
   },
@@ -317,14 +315,14 @@ const fr: Dict = {
     title1: 'Votre liberté commence',
     title2: "aujourd'hui.",
     description:
-      "Réservez votre première consultation en moins de 2 minutes. Sans engagement, sans médicament, sans douleur.",
+      'Réservez votre première consultation en moins de 2 minutes. Sans engagement, sans médicament, sans douleur.',
     ctaBook: 'Réserver ma séance',
     ctaPhone: 'Nous joindre',
     address: '📍 CMC, Teseen, New Cairo · Le Caire · Ouvert 11h-22h tous les jours',
   },
   footer: {
     description:
-      "Méthode française non-invasive combinant auriculothérapie et laser de photobiomodulation pour neutraliser naturellement les addictions et le stress.",
+      'Méthode française non-invasive combinant auriculothérapie et laser de photobiomodulation pour neutraliser naturellement les addictions et le stress.',
     services: 'Services',
     centre: 'Centre',
     legal: 'Conforme décret 188/2020 (ETA) · Loi 151/2020',
@@ -406,15 +404,14 @@ const en: Dict = {
     subtitle:
       'In the 1950s, Dr. Paul Nogier identified a precise mapping of neural correspondences between the outer ear and the body. This discovery founded modern auriculotherapy — the scientific basis of our approach.',
     p1: 'RESET combines the precision of French auriculotherapy with advanced laser photobiomodulation. Our approach is entirely non-invasive, drug-free, and non-medical.',
-    p2: "In the 1950s, French physician Dr. Paul Nogier established the scientific basis of modern auriculotherapy by mapping the neural correspondences of the outer ear with the human body. A method recognized worldwide for its effectiveness in behavioral regulation.",
+    p2: 'In the 1950s, French physician Dr. Paul Nogier established the scientific basis of modern auriculotherapy by mapping the neural correspondences of the outer ear with the human body. A method recognized worldwide for its effectiveness in behavioral regulation.',
     linkMore: 'Learn more about the method',
     badge: 'Dr. Paul Nogier · 1950',
     pillarsEyebrow: 'The 3 pillars',
     pillarsTitle: 'How it actually works',
     pillar1: {
       title: 'Stress regulation',
-      description:
-        'Low-intensity photobiomodulation laser to naturally calm the nervous system.',
+      description: 'Low-intensity photobiomodulation laser to naturally calm the nervous system.',
     },
     pillar2: {
       title: 'Auricular stimulation',
@@ -472,7 +469,7 @@ const en: Dict = {
         name: 'Khaled S.',
         role: 'Client — smoking cessation',
         quote:
-          "I had tried everything — patches, gums, willpower — nothing worked until RESET. The team is professional and the center is top-notch. I left my session feeling like a non-smoker.",
+          'I had tried everything — patches, gums, willpower — nothing worked until RESET. The team is professional and the center is top-notch. I left my session feeling like a non-smoker.',
       },
     ],
   },

@@ -28,7 +28,7 @@ export default defineConfig({
         name: 'Reset Egypt — Staff',
         short_name: 'Reset',
         description:
-          "Plateforme métier Reset Egypt — auriculothérapie laser, gestion patients, agenda et facturation conforme ETA.",
+          'Plateforme métier Reset Egypt — auriculothérapie laser, gestion patients, agenda et facturation conforme ETA.',
         theme_color: '#1E0FBA',
         background_color: '#1E0FBA',
         display: 'standalone',
@@ -40,7 +40,12 @@ export default defineConfig({
         icons: [
           { src: '/pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: '/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: '/pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          {
+            src: '/pwa-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
           { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
         ],
       },

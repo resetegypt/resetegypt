@@ -114,8 +114,9 @@ export async function medicalRecordsRoutes(app: FastifyInstance): Promise<void> 
     // SECURITE — un PRACTITIONER ne peut éditer que les fiches de ses propres patients
     // (preferredPractitionerId OR a un RDV passé avec lui). ADMIN passe partout.
     if (req.currentUser!.role === 'PRACTITIONER') {
-      const isOwn = patient.preferredPractitionerId === req.currentUser!.sub
-        || (await app.prisma.appointment.findFirst({
+      const isOwn =
+        patient.preferredPractitionerId === req.currentUser!.sub ||
+        (await app.prisma.appointment.findFirst({
           where: { patientId, practitionerId: req.currentUser!.sub },
           select: { id: true },
         })) !== null;
@@ -142,7 +143,10 @@ export async function medicalRecordsRoutes(app: FastifyInstance): Promise<void> 
         action: 'medical_record_write_blocked_finalized',
         resource: `medicalRecord:${existingCheck.id}`,
       });
-      return reply.status(409).send({ error: 'AlreadyFinalized', message: 'Fiche déjà signée — création d\'avenant requise.' });
+      return reply.status(409).send({
+        error: 'AlreadyFinalized',
+        message: "Fiche déjà signée — création d'avenant requise.",
+      });
     }
 
     // BMI auto-calculé

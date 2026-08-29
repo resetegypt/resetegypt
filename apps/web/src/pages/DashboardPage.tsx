@@ -295,9 +295,17 @@ export function DashboardPage() {
               {t('dashboard.quickActions', 'Actions rapides')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <QuickAction to="/patients/intake" Icon={ClipboardPlus} label={t('dashboard.action.newPatient')} />
+              <QuickAction
+                to="/patients/intake"
+                Icon={ClipboardPlus}
+                label={t('dashboard.action.newPatient')}
+              />
               <QuickAction to="/patients" Icon={Users} label={t('dashboard.action.patients')} />
-              <QuickAction to="/accounting" Icon={Wallet} label={t('dashboard.action.accounting')} />
+              <QuickAction
+                to="/accounting"
+                Icon={Wallet}
+                label={t('dashboard.action.accounting')}
+              />
             </div>
           </div>
         )}
@@ -353,9 +361,7 @@ function KPICard({
         <span className={`text-3xl font-bold tracking-tight ${c.valueColor}`} data-numeric>
           {value}
         </span>
-        {suffix && (
-          <span className="text-sm font-medium text-text-tertiary">{suffix}</span>
-        )}
+        {suffix && <span className="text-sm font-medium text-text-tertiary">{suffix}</span>}
       </div>
     </div>
   );
@@ -381,9 +387,7 @@ function Section({
           <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
           <Badge variant={accent}>{count}</Badge>
         </div>
-        {description && (
-          <span className="text-xs text-text-secondary truncate">{description}</span>
-        )}
+        {description && <span className="text-xs text-text-secondary truncate">{description}</span>}
       </div>
       <CardContent className="p-0">
         <ul className="divide-y divide-border-light">{children}</ul>
@@ -450,7 +454,10 @@ function AppointmentRowItem({
             <Link
               to={`/patients/${a.patientId}`}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-info-dark hover:text-white hover:bg-info bg-info-light/60 hover:bg-info px-2 py-1 rounded-md transition-all"
-              title={t('dashboard.actions.viewIntake', "Voir la fiche d'accueil (admission, infos perso, consentements)")}
+              title={t(
+                'dashboard.actions.viewIntake',
+                "Voir la fiche d'accueil (admission, infos perso, consentements)",
+              )}
             >
               <ClipboardList className="w-3.5 h-3.5" />
               {t('dashboard.actions.intake', "Fiche d'accueil")}
@@ -458,7 +465,10 @@ function AppointmentRowItem({
             <Link
               to={`/patients/${a.patientId}/clinical`}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-white hover:bg-primary bg-primary-lightest px-2 py-1 rounded-md transition-all"
-              title={t('dashboard.actions.viewClinical', 'Ouvrir la fiche clinique (anamnèse, scores, examen)')}
+              title={t(
+                'dashboard.actions.viewClinical',
+                'Ouvrir la fiche clinique (anamnèse, scores, examen)',
+              )}
             >
               <Stethoscope className="w-3.5 h-3.5" />
               {t('dashboard.actions.clinical', 'Fiche clinique')}
@@ -501,11 +511,7 @@ function AppointmentRowItem({
         )}
         {a.status === 'IN_PROGRESS' && (
           <>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onUpdateStatus('COMPLETED')}
-            >
+            <Button size="sm" variant="outline" onClick={() => onUpdateStatus('COMPLETED')}>
               <Check className="w-3.5 h-3.5 me-1" />
               {t('dashboard.actions.complete')}
             </Button>
@@ -526,11 +532,7 @@ function AppointmentRowItem({
                 {t('dashboard.actions.done', 'Terminé')}
               </span>
             ) : a.payment ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onViewInvoice(a.payment!.id)}
-              >
+              <Button size="sm" variant="outline" onClick={() => onViewInvoice(a.payment!.id)}>
                 <FileText className="w-3.5 h-3.5 me-1" />
                 {a.payment.invoiceNumber}
               </Button>

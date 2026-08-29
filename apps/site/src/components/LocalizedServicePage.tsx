@@ -28,7 +28,13 @@ const PHOTOS: Record<ServiceKey, string> = {
   stress: '/photos/service-stress.jpeg',
 };
 
-export function LocalizedServicePage({ serviceKey, locale }: { serviceKey: ServiceKey; locale: Locale }) {
+export function LocalizedServicePage({
+  serviceKey,
+  locale,
+}: {
+  serviceKey: ServiceKey;
+  locale: Locale;
+}) {
   const content = getServiceContent(locale, serviceKey);
   return (
     <ServicePage

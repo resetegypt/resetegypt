@@ -1,7 +1,19 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogTitle, DialogTrigger, Input } from '@reset/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+  Input,
+} from '@reset/ui';
 import { apiGet, apiPost, apiPatch } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
@@ -80,7 +92,9 @@ export function UsersPage() {
           <Card>
             <CardContent>
               <p className="text-xs text-text-secondary">{t('users.kpi.total')}</p>
-              <p className="text-3xl font-bold" data-numeric>{kpis?.total ?? '–'}</p>
+              <p className="text-3xl font-bold" data-numeric>
+                {kpis?.total ?? '–'}
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -121,89 +135,109 @@ export function UsersPage() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
-                <tr>
-                  <th className="text-start px-4 py-2">{t('users.columns.name')}</th>
-                  <th className="text-start px-4 py-2">{t('users.columns.email')}</th>
-                  <th className="text-start px-4 py-2">{t('users.columns.role')}</th>
-                  <th className="text-start px-4 py-2">{t('users.columns.status')}</th>
-                  <th className="text-start px-4 py-2">{t('users.columns.lastLogin')}</th>
-                  <th className="text-end px-4 py-2">{t('users.columns.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data?.users.map((u) => (
-                  <tr key={u.id}>
-                    <td className="px-4 py-3 font-medium">
-                      {u.firstName} {u.lastName}
-                    </td>
-                    <td className="px-4 py-3 text-text-secondary">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant={
-                          u.role === 'ADMIN'
-                            ? 'danger'
-                            : u.role === 'PRACTITIONER'
-                              ? 'success'
-                              : 'info'
-                        }
-                      >
-                        {t(`roles.${u.role}`)}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      {u.isLocked ? (
-                        <Badge variant="danger">{t('users.locked')}</Badge>
-                      ) : u.isActive ? (
-                        <Badge variant="success">{t('users.active')}</Badge>
-                      ) : (
-                        <Badge variant="neutral">{t('users.disabled')}</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-text-tertiary" data-numeric>
-                      {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString(i18n.language) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-end space-x-1">
-                      {u.isLocked && (
+              <table className="w-full text-sm min-w-[600px]">
+                <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
+                  <tr>
+                    <th className="text-start px-4 py-2">{t('users.columns.name')}</th>
+                    <th className="text-start px-4 py-2">{t('users.columns.email')}</th>
+                    <th className="text-start px-4 py-2">{t('users.columns.role')}</th>
+                    <th className="text-start px-4 py-2">{t('users.columns.status')}</th>
+                    <th className="text-start px-4 py-2">{t('users.columns.lastLogin')}</th>
+                    <th className="text-end px-4 py-2">{t('users.columns.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {data?.users.map((u) => (
+                    <tr key={u.id}>
+                      <td className="px-4 py-3 font-medium">
+                        {u.firstName} {u.lastName}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">{u.email}</td>
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant={
+                            u.role === 'ADMIN'
+                              ? 'danger'
+                              : u.role === 'PRACTITIONER'
+                                ? 'success'
+                                : 'info'
+                          }
+                        >
+                          {t(`roles.${u.role}`)}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.isLocked ? (
+                          <Badge variant="danger">{t('users.locked')}</Badge>
+                        ) : u.isActive ? (
+                          <Badge variant="success">{t('users.active')}</Badge>
+                        ) : (
+                          <Badge variant="neutral">{t('users.disabled')}</Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-text-tertiary" data-numeric>
+                        {u.lastLoginAt
+                          ? new Date(u.lastLoginAt).toLocaleString(i18n.language)
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-end space-x-1">
+                        {u.isLocked && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => unlockMut.mutate(u.id)}
+                            disabled={unlockMut.isPending}
+                          >
+                            🔓 {t('users.unlock')}
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => unlockMut.mutate(u.id)}
-                          disabled={unlockMut.isPending}
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                t(
+                                  'users.confirmResetPw',
+                                  'Réinitialiser le mot de passe de {{n}} ?',
+                                  { n: u.firstName + ' ' + u.lastName },
+                                ),
+                              )
+                            ) {
+                              resetPwMut.mutate(u.id);
+                            }
+                          }}
+                          disabled={resetPwMut.isPending}
                         >
-                          🔓 {t('users.unlock')}
+                          🔑 {t('users.resetPw', 'Reset mdp')}
                         </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          if (window.confirm(t('users.confirmResetPw', 'Réinitialiser le mot de passe de {{n}} ?', { n: u.firstName + ' ' + u.lastName }))) {
-                            resetPwMut.mutate(u.id);
-                          }
-                        }}
-                        disabled={resetPwMut.isPending}
-                      >
-                        🔑 {t('users.resetPw', 'Reset mdp')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={u.isActive ? 'outline' : 'primary'}
-                        onClick={() => {
-                          if (window.confirm(t(u.isActive ? 'users.confirmDisable' : 'users.confirmEnable', u.isActive ? 'Désactiver {{n}} ?' : 'Réactiver {{n}} ?', { n: u.firstName + ' ' + u.lastName }))) {
-                            toggleActiveMut.mutate({ id: u.id, isActive: !u.isActive });
-                          }
-                        }}
-                        disabled={toggleActiveMut.isPending}
-                      >
-                        {u.isActive ? '🚫 ' + t('users.disable', 'Désactiver') : '✅ ' + t('users.enable', 'Activer')}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <Button
+                          size="sm"
+                          variant={u.isActive ? 'outline' : 'primary'}
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                t(
+                                  u.isActive ? 'users.confirmDisable' : 'users.confirmEnable',
+                                  u.isActive ? 'Désactiver {{n}} ?' : 'Réactiver {{n}} ?',
+                                  { n: u.firstName + ' ' + u.lastName },
+                                ),
+                              )
+                            ) {
+                              toggleActiveMut.mutate({ id: u.id, isActive: !u.isActive });
+                            }
+                          }}
+                          disabled={toggleActiveMut.isPending}
+                        >
+                          {u.isActive
+                            ? '🚫 ' + t('users.disable', 'Désactiver')
+                            : '✅ ' + t('users.enable', 'Activer')}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>
@@ -263,9 +297,7 @@ function CreateUserDialog({ onCreated }: { onCreated: () => void }) {
           <select
             className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
             value={form.role}
-            onChange={(e) =>
-              setForm({ ...form, role: e.target.value as typeof form.role })
-            }
+            onChange={(e) => setForm({ ...form, role: e.target.value as typeof form.role })}
           >
             <option value="SECRETARY">{t('roles.SECRETARY')}</option>
             <option value="PRACTITIONER">{t('roles.PRACTITIONER')}</option>

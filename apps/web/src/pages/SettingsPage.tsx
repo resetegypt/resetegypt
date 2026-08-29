@@ -10,7 +10,11 @@ import { Shield, Smartphone, Check, X, Copy, Bell, BellOff, AlertCircle } from '
 import { Button, Card, CardContent, Input } from '@reset/ui';
 import { apiGet, apiPost } from '../lib/api';
 import {
-  isPushSupported, getPermissionState, subscribePush, unsubscribePush, sendTestPush,
+  isPushSupported,
+  getPermissionState,
+  subscribePush,
+  unsubscribePush,
+  sendTestPush,
 } from '../lib/push';
 
 export function SettingsPage() {
@@ -36,22 +40,27 @@ function TwoFactorSection() {
     queryKey: ['2fa-status'],
     queryFn: () => apiGet<{ enabled: boolean; backupCodesRemaining: number }>('/auth/2fa/status'),
   });
-  const [setup, setSetup] = useState<{ secret: string; qrDataUrl: string; otpauth: string } | null>(null);
+  const [setup, setSetup] = useState<{ secret: string; qrDataUrl: string; otpauth: string } | null>(
+    null,
+  );
   const [code, setCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
   const [disableCode, setDisableCode] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const beginSetup = useMutation({
-    mutationFn: () => apiPost<{ secret: string; qrDataUrl: string; otpauth: string }>('/auth/2fa/setup'),
+    mutationFn: () =>
+      apiPost<{ secret: string; qrDataUrl: string; otpauth: string }>('/auth/2fa/setup'),
     onSuccess: setSetup,
     onError: () => setError('Erreur lors du setup'),
   });
   const enable = useMutation({
-    mutationFn: (c: string) => apiPost<{ ok: true; backupCodes: string[] }>('/auth/2fa/enable', { code: c }),
+    mutationFn: (c: string) =>
+      apiPost<{ ok: true; backupCodes: string[] }>('/auth/2fa/enable', { code: c }),
     onSuccess: (r) => {
       setBackupCodes(r.backupCodes);
-      setSetup(null); setCode('');
+      setSetup(null);
+      setCode('');
       qc.invalidateQueries({ queryKey: ['2fa-status'] });
     },
     onError: () => setError('Code incorrect. Réessaie.'),
@@ -87,10 +96,18 @@ function TwoFactorSection() {
           )}
         </div>
 
-        {error && <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>}
+        {error && (
+          <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>
+        )}
 
         {!status?.enabled && !setup && !backupCodes && (
-          <Button onClick={() => { setError(null); beginSetup.mutate(); }} disabled={beginSetup.isPending}>
+          <Button
+            onClick={() => {
+              setError(null);
+              beginSetup.mutate();
+            }}
+            disabled={beginSetup.isPending}
+          >
             {beginSetup.isPending ? 'Génération…' : 'Activer le 2FA'}
           </Button>
         )}
@@ -100,10 +117,16 @@ function TwoFactorSection() {
             <p className="text-sm text-text">
               1. Scanne ce QR code avec <strong>Google Authenticator</strong> / Authy / 1Password :
             </p>
-            <img src={setup.qrDataUrl} alt="QR code 2FA" className="border border-border rounded p-2 bg-white" />
+            <img
+              src={setup.qrDataUrl}
+              alt="QR code 2FA"
+              className="border border-border rounded p-2 bg-white"
+            />
             <details className="text-xs text-text-secondary">
               <summary className="cursor-pointer">Saisir manuellement le code</summary>
-              <code className="block mt-1 p-2 bg-bg-secondary rounded font-mono text-xs break-all">{setup.secret}</code>
+              <code className="block mt-1 p-2 bg-bg-secondary rounded font-mono text-xs break-all">
+                {setup.secret}
+              </code>
             </details>
             <p className="text-sm text-text">2. Entre le code à 6 chiffres affiché par l'app :</p>
             <div className="flex gap-2">
@@ -118,7 +141,10 @@ function TwoFactorSection() {
                 className="font-mono text-center text-xl tracking-widest"
               />
               <Button
-                onClick={() => { setError(null); enable.mutate(code); }}
+                onClick={() => {
+                  setError(null);
+                  enable.mutate(code);
+                }}
                 disabled={code.length !== 6 || enable.isPending}
               >
                 Valider
@@ -137,7 +163,9 @@ function TwoFactorSection() {
             </p>
             <div className="grid grid-cols-2 gap-2 p-3 bg-bg-secondary rounded">
               {backupCodes.map((c) => (
-                <code key={c} className="font-mono text-sm">{c}</code>
+                <code key={c} className="font-mono text-sm">
+                  {c}
+                </code>
               ))}
             </div>
             <Button
@@ -148,7 +176,9 @@ function TwoFactorSection() {
             >
               <Copy className="w-3.5 h-3.5" /> Copier
             </Button>
-            <Button size="sm" onClick={() => setBackupCodes(null)} className="ms-2">J'ai sauvegardé</Button>
+            <Button size="sm" onClick={() => setBackupCodes(null)} className="ms-2">
+              J'ai sauvegardé
+            </Button>
           </div>
         )}
 
@@ -170,7 +200,10 @@ function TwoFactorSection() {
                 />
                 <Button
                   variant="danger"
-                  onClick={() => { setError(null); disable.mutate(disableCode); }}
+                  onClick={() => {
+                    setError(null);
+                    disable.mutate(disableCode);
+                  }}
                   disabled={disableCode.length < 6}
                 >
                   Désactiver
@@ -207,7 +240,8 @@ function NotificationsSection() {
   }, []);
 
   async function handleSubscribe() {
-    setLoading(true); setMessage(null);
+    setLoading(true);
+    setMessage(null);
     const r = await subscribePush();
     setLoading(false);
     if (r.ok) {
@@ -232,17 +266,24 @@ function NotificationsSection() {
     setMessage('Notifications désactivées.');
   }
   async function handleTest() {
-    setLoading(true); setMessage(null);
+    setLoading(true);
+    setMessage(null);
     const r = await sendTestPush();
     setLoading(false);
-    setMessage(r.sent > 0 ? 'Notif de test envoyée — regarde ton browser !' : 'Aucun device abonné.');
+    setMessage(
+      r.sent > 0 ? 'Notif de test envoyée — regarde ton browser !' : 'Aucun device abonné.',
+    );
   }
 
   return (
     <Card>
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center gap-3">
-          {subscribed ? <Bell className="w-6 h-6 text-primary" /> : <BellOff className="w-6 h-6 text-text-tertiary" />}
+          {subscribed ? (
+            <Bell className="w-6 h-6 text-primary" />
+          ) : (
+            <BellOff className="w-6 h-6 text-text-tertiary" />
+          )}
           <div className="flex-1">
             <h2 className="font-semibold text-text">Notifications push</h2>
             <p className="text-xs text-text-secondary mt-0.5">
@@ -253,12 +294,16 @@ function NotificationsSection() {
         {!supported && (
           <div className="bg-warning-light text-warning-dark text-sm p-3 rounded inline-flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>Non supporté par ton navigateur (iOS Safari requiert l'app installée sur l'écran d'accueil).</span>
+            <span>
+              Non supporté par ton navigateur (iOS Safari requiert l'app installée sur l'écran
+              d'accueil).
+            </span>
           </div>
         )}
         {permission === 'denied' && (
           <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">
-            Permission refusée. Va dans les paramètres du navigateur pour autoriser les notifications.
+            Permission refusée. Va dans les paramètres du navigateur pour autoriser les
+            notifications.
           </div>
         )}
         {message && (

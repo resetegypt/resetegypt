@@ -218,12 +218,15 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       tags: z.array(z.string().min(1).max(24)).max(12).optional(),
     });
     const partial = updateSchema.safeParse(req.body);
-    if (!partial.success) return reply.status(400).send({ error: 'ValidationError', details: partial.error.flatten() });
+    if (!partial.success)
+      return reply.status(400).send({ error: 'ValidationError', details: partial.error.flatten() });
     const data = partial.data;
     // SECURITE — preferredPractitionerId réservé à ADMIN/PRACTITIONER (pas SECRETARY).
-    if (data.preferredPractitionerId !== undefined
-        && req.currentUser!.role !== 'ADMIN'
-        && req.currentUser!.role !== 'PRACTITIONER') {
+    if (
+      data.preferredPractitionerId !== undefined &&
+      req.currentUser!.role !== 'ADMIN' &&
+      req.currentUser!.role !== 'PRACTITIONER'
+    ) {
       return reply.status(403).send({ error: 'AdminOrPractitionerRequired' });
     }
     // Normalise les tags : trim + lowercase + dédoublonne
@@ -323,7 +326,11 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       resource: `patient:${id}`,
       details: { reason: parsed.data.reason, anonymizedId: anonId },
     });
-    return { ok: true, anonymizedId: anonId, message: 'Patient data erased. Invoices retained anonymized for legal compliance.' };
+    return {
+      ok: true,
+      anonymizedId: anonId,
+      message: 'Patient data erased. Invoices retained anonymized for legal compliance.',
+    };
   });
 
   // === Upload de l'avatar patient ===
@@ -341,7 +348,8 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
         .nullable(),
     });
     const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const updated = await app.prisma.patient.update({
       where: { id },
       data: { avatarUrl: parsed.data.dataUrl },
@@ -380,7 +388,8 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       appointmentId: z.string().uuid().optional(),
     });
     const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const note = await app.prisma.followUpNote.create({
       data: {
         patientId: id,
@@ -447,7 +456,8 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       useCurrent: z.boolean().optional(),
     });
     const parsed = schema.safeParse(req.body ?? {});
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const d = parsed.data;
 
     let scores = {
@@ -531,18 +541,41 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
       },
     });
     const headers = [
-      'ID', 'Prénom', 'Nom', 'Téléphone', 'WhatsApp', 'Email',
-      'Date de naissance', 'Age', 'Genre', 'Gouvernorat',
-      'Addiction principale', 'Statut', 'Langue', 'Tags', 'Créé le',
+      'ID',
+      'Prénom',
+      'Nom',
+      'Téléphone',
+      'WhatsApp',
+      'Email',
+      'Date de naissance',
+      'Age',
+      'Genre',
+      'Gouvernorat',
+      'Addiction principale',
+      'Statut',
+      'Langue',
+      'Tags',
+      'Créé le',
     ];
-    const rows = patients.map((p) => csvRow([
-      p.id, p.firstName, p.lastName, p.phone, p.whatsapp ?? '', p.email ?? '',
-      p.dateOfBirth ? p.dateOfBirth.toISOString().slice(0, 10) : '',
-      p.age ?? '', p.gender ?? '', p.governorate ?? '',
-      p.primaryAddiction, p.status, p.preferredLanguage,
-      (p.tags ?? []).join('; '),
-      p.createdAt.toISOString(),
-    ]));
+    const rows = patients.map((p) =>
+      csvRow([
+        p.id,
+        p.firstName,
+        p.lastName,
+        p.phone,
+        p.whatsapp ?? '',
+        p.email ?? '',
+        p.dateOfBirth ? p.dateOfBirth.toISOString().slice(0, 10) : '',
+        p.age ?? '',
+        p.gender ?? '',
+        p.governorate ?? '',
+        p.primaryAddiction,
+        p.status,
+        p.preferredLanguage,
+        (p.tags ?? []).join('; '),
+        p.createdAt.toISOString(),
+      ]),
+    );
     const csv = [csvRow(headers), ...rows].join('\n');
     await recordAudit(app.prisma, req, {
       userId: req.currentUser!.sub,
@@ -551,7 +584,10 @@ export async function patientsRoutes(app: FastifyInstance): Promise<void> {
     });
     reply
       .header('Content-Type', 'text/csv; charset=utf-8')
-      .header('Content-Disposition', `attachment; filename="reset-egypt-patients-${new Date().toISOString().slice(0, 10)}.csv"`);
+      .header(
+        'Content-Disposition',
+        `attachment; filename="reset-egypt-patients-${new Date().toISOString().slice(0, 10)}.csv"`,
+      );
     return csv;
   });
 }

@@ -110,24 +110,21 @@ const aboutFr: AboutContent = {
     eyebrow: 'Notre histoire',
     title: 'La méthode RESET — un héritage scientifique',
     paragraph1: {
-      lead: 'RESET est un programme spécialisé qui combine la précision de l\'',
+      lead: "RESET est un programme spécialisé qui combine la précision de l'",
       emphasis1: 'auriculothérapie française',
       emphasis2: 'photobiomodulation laser',
-      tail:
-        " avancée. Notre approche est entièrement non-invasive, sans médicament, et non-médicale — focalisée sur la régulation neuronale naturelle.",
+      tail: ' avancée. Notre approche est entièrement non-invasive, sans médicament, et non-médicale — focalisée sur la régulation neuronale naturelle.',
     },
     paragraph2: {
       lead: 'Dans les ',
       emphasis1: 'années 1950',
       emphasis2: 'Dr Paul Nogier',
-      tail:
-        " identifia une cartographie précise de correspondances neuronales entre l'oreille externe et le corps humain. Cette recherche pionnière a établi la base de l'auriculothérapie moderne, méthode aujourd'hui reconnue mondialement pour son efficacité dans la régulation comportementale.",
+      tail: " identifia une cartographie précise de correspondances neuronales entre l'oreille externe et le corps humain. Cette recherche pionnière a établi la base de l'auriculothérapie moderne, méthode aujourd'hui reconnue mondialement pour son efficacité dans la régulation comportementale.",
     },
     paragraph3: {
       lead: "Aujourd'hui, le centre ",
       emphasis: 'RESET Branch Cairo East CMC',
-      tail:
-        ' applique cette méthode au Caire avec un laser de photobiomodulation certifié et un accompagnement humain personnalisé.',
+      tail: ' applique cette méthode au Caire avec un laser de photobiomodulation certifié et un accompagnement humain personnalisé.',
     },
     badgeCertified: 'Méthode certifiée',
     badgeNonInvasive: '100 % non-invasif',
@@ -184,7 +181,7 @@ const contactFr: ContactContent = {
     addressLine1: 'CMC, Teseen, New Cairo',
     addressLine2: 'Le Caire, Égypte',
     description:
-      "Technologie certifiée, accompagnement expert. Nous sommes dédiés à vous offrir la percée dont vous avez besoin pour reprendre le contrôle de votre vie.",
+      'Technologie certifiée, accompagnement expert. Nous sommes dédiés à vous offrir la percée dont vous avez besoin pour reprendre le contrôle de votre vie.',
     mapsLink: 'Itinéraire Google Maps',
   },
   hours: {
@@ -234,21 +231,18 @@ const aboutEn: AboutContent = {
       lead: 'RESET is a specialized program that combines the precision of ',
       emphasis1: 'French auriculotherapy',
       emphasis2: 'advanced photobiomodulation laser',
-      tail:
-        '. Our approach is entirely non-invasive, medication-free and non-medical — focused on natural neural regulation.',
+      tail: '. Our approach is entirely non-invasive, medication-free and non-medical — focused on natural neural regulation.',
     },
     paragraph2: {
       lead: 'In the ',
       emphasis1: '1950s',
       emphasis2: 'Dr Paul Nogier',
-      tail:
-        ' identified a precise mapping of neural correspondences between the outer ear and the human body. This pioneering research established the foundation of modern auriculotherapy, a method now recognized worldwide for its effectiveness in behavioural regulation.',
+      tail: ' identified a precise mapping of neural correspondences between the outer ear and the human body. This pioneering research established the foundation of modern auriculotherapy, a method now recognized worldwide for its effectiveness in behavioural regulation.',
     },
     paragraph3: {
       lead: 'Today, the ',
       emphasis: 'RESET Branch Cairo East CMC',
-      tail:
-        ' centre applies this method in Cairo with a certified photobiomodulation laser and personalized human support.',
+      tail: ' centre applies this method in Cairo with a certified photobiomodulation laser and personalized human support.',
     },
     badgeCertified: 'Certified method',
     badgeNonInvasive: '100% non-invasive',
@@ -360,8 +354,7 @@ const aboutAr: AboutContent = {
       lead: 'في ',
       emphasis1: 'خمسينيات القرن العشرين',
       emphasis2: 'الدكتور بول نوجييه',
-      tail:
-        ' خريطة دقيقة من التقابلات العصبية بين الأذن الخارجية وجسم الإنسان. أرسى هذا البحث الرائد أساس العلاج الأذني الحديث، وهو منهج معترف به اليوم عالميًا لفاعليته في تنظيم السلوك.',
+      tail: ' خريطة دقيقة من التقابلات العصبية بين الأذن الخارجية وجسم الإنسان. أرسى هذا البحث الرائد أساس العلاج الأذني الحديث، وهو منهج معترف به اليوم عالميًا لفاعليته في تنظيم السلوك.',
     },
     paragraph3: {
       lead: 'يطبّق مركز ',

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Cigarette, Pill, Wine, Candy, Brain, ArrowRight, type LucideIcon } from 'lucide-react';
 import type { Dict, Locale } from '../lib/i18n';
 import { localizedPath } from '../lib/i18n';
+import { BOOKING_URL } from '../lib/urls';
 
 interface Service {
   id: 'smoking' | 'drugs' | 'alcohol' | 'sugar' | 'stress';
@@ -15,7 +16,12 @@ interface Service {
 }
 
 const SERVICES: Service[] = [
-  { id: 'smoking', href: '/services/smoking', Icon: Cigarette, photo: '/photos/service-smoking.jpeg' },
+  {
+    id: 'smoking',
+    href: '/services/smoking',
+    Icon: Cigarette,
+    photo: '/photos/service-smoking.jpeg',
+  },
   { id: 'drugs', href: '/services/drugs', Icon: Pill, photo: '/photos/service-drugs.jpeg' },
   { id: 'alcohol', href: '/services/alcohol', Icon: Wine, photo: '/photos/service-alcohol.jpeg' },
   { id: 'sugar', href: '/services/sugar', Icon: Candy, photo: '/photos/service-sugar.jpeg' },
@@ -93,7 +99,7 @@ export function ServicesTabs({ dict, locale }: { dict: Dict; locale: Locale }) {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="https://book.reset-egypt.com"
+                href={BOOKING_URL}
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-text hover:text-primary border border-border rounded-lg hover:border-primary/40 transition-all"
               >
                 {d.ctaBook}

@@ -52,8 +52,9 @@ export function attachSentryToFastify(app: FastifyInstance): void {
     Sentry.withScope((scope) => {
       scope.setTag('route', request.routeOptions?.url ?? request.url);
       scope.setTag('method', request.method);
-      const userId = (request as unknown as { user?: { sub?: string; id?: string } }).user?.sub
-        ?? (request as unknown as { user?: { sub?: string; id?: string } }).user?.id;
+      const userId =
+        (request as unknown as { user?: { sub?: string; id?: string } }).user?.sub ??
+        (request as unknown as { user?: { sub?: string; id?: string } }).user?.id;
       if (userId) scope.setUser({ id: userId });
       scope.setContext('request', {
         url: request.url,

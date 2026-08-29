@@ -95,11 +95,11 @@ Vercel donne les enregistrements DNS à créer (CNAME vers `cname.vercel-dns.com
 
 Espace IONOS → Domaines & SSL → `reset-egypt.com` → DNS → Ajouter un enregistrement :
 
-| Type | Nom d'hôte | Valeur |
-|------|-----------|--------|
-| CNAME | `api` | `cname.vercel-dns.com` |
-| CNAME | `app` | `cname.vercel-dns.com` |
-| CNAME | `book` | `cname.vercel-dns.com` (optionnel) |
+| Type  | Nom d'hôte | Valeur                             |
+| ----- | ---------- | ---------------------------------- |
+| CNAME | `api`      | `cname.vercel-dns.com`             |
+| CNAME | `app`      | `cname.vercel-dns.com`             |
+| CNAME | `book`     | `cname.vercel-dns.com` (optionnel) |
 
 Plus les records Resend (Domain verification) si email custom.
 
@@ -109,11 +109,11 @@ Plus les records Resend (Domain verification) si email custom.
 
 Installer le plugin **Redirection** (gratuit, John Godley) → Outils → Redirection → Ajouter :
 
-| Source | Cible | Type |
-|--------|-------|------|
-| `/admin` | `https://app.reset-egypt.com/login?role=admin` | 302 |
-| `/admindr` | `https://app.reset-egypt.com/login?role=practitioner` | 302 |
-| `/resetsecretary` | `https://app.reset-egypt.com/login?role=secretary` | 302 |
+| Source            | Cible                                                 | Type |
+| ----------------- | ----------------------------------------------------- | ---- |
+| `/admin`          | `https://app.reset-egypt.com/login?role=admin`        | 302  |
+| `/admindr`        | `https://app.reset-egypt.com/login?role=practitioner` | 302  |
+| `/resetsecretary` | `https://app.reset-egypt.com/login?role=secretary`    | 302  |
 
 ### 9. Tester
 
@@ -145,11 +145,11 @@ pnpm --filter @reset/api exec prisma migrate deploy
 
 ## 💸 Limites des free tiers
 
-| Service | Free tier limit | Quand passer payant |
-|---------|----------------|---------------------|
-| **Vercel** | 100 GB bande passante / mois, 100 000 invocations function | Si trafic > 10k visites/jour |
-| **Supabase** | 500 MB DB, 50 000 utilisateurs actifs, 1 GB stockage | Si > 5 000 patients ou DB > 500 MB |
-| **Resend** | 100 emails/jour, 3 000/mois | Si > 100 factures/jour |
+| Service      | Free tier limit                                            | Quand passer payant                |
+| ------------ | ---------------------------------------------------------- | ---------------------------------- |
+| **Vercel**   | 100 GB bande passante / mois, 100 000 invocations function | Si trafic > 10k visites/jour       |
+| **Supabase** | 500 MB DB, 50 000 utilisateurs actifs, 1 GB stockage       | Si > 5 000 patients ou DB > 500 MB |
+| **Resend**   | 100 emails/jour, 3 000/mois                                | Si > 100 factures/jour             |
 
 Pour Reset Egypt (un centre, ~5 personnes, ~50 RDV/jour), **on est très loin des limites pendant au moins 1 an**.
 
@@ -158,16 +158,20 @@ Pour Reset Egypt (un centre, ~5 personnes, ~50 RDV/jour), **on est très loin de
 ## 🐛 Troubleshooting
 
 ### "Cookie not set" en prod
+
 - Vérifier `NODE_ENV=production` sur Vercel api
 - Vérifier que `APP_URL` contient `reset-egypt.com` (pour activer `domain=.reset-egypt.com`)
 
 ### "CORS error" en prod
+
 - Vérifier `CORS_ORIGIN` sur Vercel api inclut bien `https://app.reset-egypt.com`
 
 ### "Prisma client init error"
+
 - Re-run `pnpm --filter @reset/api exec prisma generate`
 - Sur Vercel : la `buildCommand` du vercel.json le fait automatiquement
 
 ### Connection refused Supabase
+
 - Vérifier que `DATABASE_URL` utilise le **pooler** (port 6543, pas 5432) et a `?pgbouncer=true&connection_limit=1`
 - Le 5432 (`DIRECT_URL`) n'est utilisé QUE pour les migrations, pas en runtime

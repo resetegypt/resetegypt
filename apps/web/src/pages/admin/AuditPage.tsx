@@ -31,40 +31,40 @@ export function AuditPage() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[700px]">
-              <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
-                <tr>
-                  <th className="text-start px-4 py-2">{t('audit.columns.date')}</th>
-                  <th className="text-start px-4 py-2">{t('audit.columns.user')}</th>
-                  <th className="text-start px-4 py-2">{t('audit.columns.action')}</th>
-                  <th className="text-start px-4 py-2">{t('audit.columns.ip')}</th>
-                  <th className="text-start px-4 py-2">{t('audit.columns.details')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data?.logs.map((log) => (
-                  <tr key={log.id}>
-                    <td className="px-4 py-2 text-xs text-text-tertiary font-mono" data-numeric>
-                      {new Date(log.createdAt).toLocaleString(i18n.language)}
-                    </td>
-                    <td className="px-4 py-2 text-text-secondary">
-                      {log.user?.email ?? <span className="italic">{t('common.anonymous')}</span>}
-                    </td>
-                    <td className="px-4 py-2">
-                      <Badge variant={badgeVariant(log.action)}>{log.action}</Badge>
-                    </td>
-                    <td className="px-4 py-2 font-mono text-xs text-text-tertiary" data-numeric>
-                      {log.ipAddress ?? '—'}
-                    </td>
-                    <td className="px-4 py-2 text-xs text-text-secondary max-w-md truncate">
-                      {Object.keys(log.details ?? {}).length > 0
-                        ? JSON.stringify(log.details)
-                        : (log.resource ?? '—')}
-                    </td>
+              <table className="w-full text-sm min-w-[700px]">
+                <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
+                  <tr>
+                    <th className="text-start px-4 py-2">{t('audit.columns.date')}</th>
+                    <th className="text-start px-4 py-2">{t('audit.columns.user')}</th>
+                    <th className="text-start px-4 py-2">{t('audit.columns.action')}</th>
+                    <th className="text-start px-4 py-2">{t('audit.columns.ip')}</th>
+                    <th className="text-start px-4 py-2">{t('audit.columns.details')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {data?.logs.map((log) => (
+                    <tr key={log.id}>
+                      <td className="px-4 py-2 text-xs text-text-tertiary font-mono" data-numeric>
+                        {new Date(log.createdAt).toLocaleString(i18n.language)}
+                      </td>
+                      <td className="px-4 py-2 text-text-secondary">
+                        {log.user?.email ?? <span className="italic">{t('common.anonymous')}</span>}
+                      </td>
+                      <td className="px-4 py-2">
+                        <Badge variant={badgeVariant(log.action)}>{log.action}</Badge>
+                      </td>
+                      <td className="px-4 py-2 font-mono text-xs text-text-tertiary" data-numeric>
+                        {log.ipAddress ?? '—'}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-text-secondary max-w-md truncate">
+                        {Object.keys(log.details ?? {}).length > 0
+                          ? JSON.stringify(log.details)
+                          : (log.resource ?? '—')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>

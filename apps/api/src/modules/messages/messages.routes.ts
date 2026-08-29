@@ -56,7 +56,9 @@ export async function messagesRoutes(app: FastifyInstance): Promise<void> {
     >();
 
     for (const m of rows) {
-      const key = m.patient ? `patient:${m.patient.id}` : `addr:${m.channel}:${m.fromAddress || m.toAddress}`;
+      const key = m.patient
+        ? `patient:${m.patient.id}`
+        : `addr:${m.channel}:${m.fromAddress || m.toAddress}`;
       if (!conversations.has(key)) {
         conversations.set(key, {
           key,

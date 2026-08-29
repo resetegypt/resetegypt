@@ -29,7 +29,13 @@ interface PaymentDetail {
     emailSentAt: string | null;
     emailSentTo: string | null;
     createdAt: string;
-    patient: { id: string; firstName: string; lastName: string; phone: string; email: string | null };
+    patient: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      phone: string;
+      email: string | null;
+    };
     createdBy: { firstName: string; lastName: string };
   };
 }
@@ -250,7 +256,9 @@ export function InvoicePage() {
                 {p.etaHash}
               </p>
               <p>
-                <strong className="text-text-secondary font-sans">{t('invoice.submittedOn')}</strong>{' '}
+                <strong className="text-text-secondary font-sans">
+                  {t('invoice.submittedOn')}
+                </strong>{' '}
                 {p.etaSubmittedAt ? new Date(p.etaSubmittedAt).toLocaleString(i18n.language) : '—'}
               </p>
               <p className="font-sans italic text-text-tertiary text-xs pt-2">
@@ -263,7 +271,8 @@ export function InvoicePage() {
         <Card>
           <CardContent className="text-sm text-text-secondary">
             <p>
-              <strong>{t('invoice.createdBy')}</strong> {p.createdBy.firstName} {p.createdBy.lastName}
+              <strong>{t('invoice.createdBy')}</strong> {p.createdBy.firstName}{' '}
+              {p.createdBy.lastName}
             </p>
             <p>
               <strong>{t('invoice.patientLabel')}</strong>{' '}

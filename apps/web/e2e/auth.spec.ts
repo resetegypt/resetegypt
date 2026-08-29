@@ -14,7 +14,11 @@ const API = process.env.PLAYWRIGHT_API_URL ?? 'https://api.reset-egypt.com';
 // après le password-reset commun. Jamais de password sensible commité.
 const DEFAULT_PWD = process.env.E2E_PASSWORD ?? '123.reset';
 const ACCOUNTS = process.env.PLAYWRIGHT_ACCOUNTS_JSON
-  ? JSON.parse(process.env.PLAYWRIGHT_ACCOUNTS_JSON) as Array<{ email: string; password: string; role: string }>
+  ? (JSON.parse(process.env.PLAYWRIGHT_ACCOUNTS_JSON) as Array<{
+      email: string;
+      password: string;
+      role: string;
+    }>)
   : [
       { email: 'direction@reset-egypt.com', password: DEFAULT_PWD, role: 'ADMIN' },
       { email: 'dr.ahmadalashry@reset-egypt.com', password: DEFAULT_PWD, role: 'PRACTITIONER' },

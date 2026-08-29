@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Sparkles, type LucideIcon } from 'lucide-react';
 import { Section } from './Section';
+import { BOOKING_URL } from '../lib/urls';
 
 export interface ServicePageProps {
   Icon: LucideIcon;
@@ -51,7 +52,7 @@ export function ServicePage(props: ServicePageProps) {
               </p>
               <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:items-center justify-center lg:justify-start">
                 <Link
-                  href="https://book.reset-egypt.com"
+                  href={BOOKING_URL}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5"
                 >
                   Réserver ma séance
@@ -144,7 +145,7 @@ export function ServicePage(props: ServicePageProps) {
             Réservez votre première séance — sans engagement, sans médicament.
           </p>
           <Link
-            href="https://book.reset-egypt.com"
+            href={BOOKING_URL}
             className="inline-flex items-center gap-2 mt-8 px-8 py-4 text-base font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/25"
           >
             Réserver ma séance

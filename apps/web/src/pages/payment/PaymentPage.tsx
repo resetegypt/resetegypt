@@ -180,9 +180,7 @@ export function PaymentPage() {
                   {t('payment.success.patientEmailLabel')} <strong>{patientEmail}</strong>
                 </p>
               ) : (
-                <p className="text-sm text-warning-dark">
-                  {t('payment.success.noEmailWarning')}
-                </p>
+                <p className="text-sm text-warning-dark">{t('payment.success.noEmailWarning')}</p>
               )}
               <div className="flex gap-2">
                 <Input
@@ -195,7 +193,9 @@ export function PaymentPage() {
                   onClick={handleEmail}
                   disabled={emailSending || (!emailTo && !patientEmail)}
                 >
-                  {emailSending ? t('payment.success.sending') : `✉️ ${t('payment.success.sendEmail')}`}
+                  {emailSending
+                    ? t('payment.success.sending')
+                    : `✉️ ${t('payment.success.sendEmail')}`}
                 </Button>
               </div>
               {emailMessage && (
@@ -425,14 +425,18 @@ export function PaymentPage() {
                 <strong>
                   {a.patient.firstName} {a.patient.lastName}
                 </strong>
-                <p className="text-text-secondary" data-numeric>{a.patient.phone}</p>
+                <p className="text-text-secondary" data-numeric>
+                  {a.patient.phone}
+                </p>
               </div>
             </div>
             <p className="text-xs text-text-tertiary mt-3 italic">{t('payment.etaMockNote')}</p>
           </CardContent>
         </Card>
 
-        {error && <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>}
+        {error && (
+          <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>
+        )}
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>

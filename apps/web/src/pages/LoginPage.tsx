@@ -19,7 +19,9 @@ export function LoginPage() {
 
   if (user) {
     const from = (location.state as { from?: string } | null)?.from;
-    return <Navigate to={from && from !== '/login' ? from : defaultRouteForRole(user.role)} replace />;
+    return (
+      <Navigate to={from && from !== '/login' ? from : defaultRouteForRole(user.role)} replace />
+    );
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -59,7 +61,10 @@ export function LoginPage() {
             BRANCH CAIRO EAST CMC
           </div>
           <p className="mt-8 text-primary-light/80 text-sm max-w-xs mx-auto leading-relaxed">
-            {t('auth.heroTagline', "Plateforme métier — auriculothérapie laser, gestion patients et facturation conforme ETA.")}
+            {t(
+              'auth.heroTagline',
+              'Plateforme métier — auriculothérapie laser, gestion patients et facturation conforme ETA.',
+            )}
           </p>
         </div>
       </div>
@@ -97,7 +102,10 @@ export function LoginPage() {
                     {t('auth.totpTitle', 'Code de vérification 2FA')}
                   </h2>
                   <p className="text-xs text-text-secondary">
-                    {t('auth.totpPrompt', 'Ouvre ton app d\'authentification (Google Authenticator, Authy…) et entre le code à 6 chiffres.')}
+                    {t(
+                      'auth.totpPrompt',
+                      "Ouvre ton app d'authentification (Google Authenticator, Authy…) et entre le code à 6 chiffres.",
+                    )}
                   </p>
                   <Input
                     type="text"
@@ -113,14 +121,23 @@ export function LoginPage() {
                     className="text-center text-2xl font-mono tracking-widest"
                   />
                   {error && (
-                    <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">{error}</div>
+                    <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">
+                      {error}
+                    </div>
                   )}
-                  <Button type="submit" disabled={loading || totpCode.length < 6} className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={loading || totpCode.length < 6}
+                    className="w-full"
+                  >
                     {loading ? t('common.loading') : t('auth.totpVerify', 'Vérifier')}
                   </Button>
                   <button
                     type="button"
-                    onClick={() => { cancelTotp(); setTotpCode(''); }}
+                    onClick={() => {
+                      cancelTotp();
+                      setTotpCode('');
+                    }}
                     className="block w-full text-xs text-text-secondary hover:text-text underline mt-2"
                   >
                     {t('auth.totpCancel', '← Recommencer la connexion')}
@@ -130,62 +147,70 @@ export function LoginPage() {
                   </p>
                 </form>
               ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <h2 className="text-lg font-semibold text-primary">{t('auth.login')}</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <h2 className="text-lg font-semibold text-primary">{t('auth.login')}</h2>
 
-              <div>
-                <label className="block text-xs font-medium mb-1">{t('auth.email')}</label>
-                <Input
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1">{t('auth.email')}</label>
+                    <Input
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-xs font-medium mb-1">{t('auth.password')}</label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((s) => !s)}
-                    aria-label={showPassword ? t('auth.hidePassword', 'Masquer le mot de passe') : t('auth.showPassword', 'Afficher le mot de passe')}
-                    className="absolute inset-y-0 end-0 px-3 flex items-center text-text-secondary hover:text-text transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1">{t('auth.password')}</label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((s) => !s)}
+                        aria-label={
+                          showPassword
+                            ? t('auth.hidePassword', 'Masquer le mot de passe')
+                            : t('auth.showPassword', 'Afficher le mot de passe')
+                        }
+                        className="absolute inset-y-0 end-0 px-3 flex items-center text-text-secondary hover:text-text transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
 
-              <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded"
-                />
-                {t('auth.rememberMe')}
-              </label>
+                  <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="rounded"
+                    />
+                    {t('auth.rememberMe')}
+                  </label>
 
-              {error && (
-                <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">
-                  {error}
-                </div>
-              )}
+                  {error && (
+                    <div className="bg-danger-light text-danger-dark text-sm p-3 rounded">
+                      {error}
+                    </div>
+                  )}
 
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? t('common.loading') : t('auth.signIn')}
-              </Button>
-              </form>
+                  <Button type="submit" disabled={loading} className="w-full">
+                    {loading ? t('common.loading') : t('auth.signIn')}
+                  </Button>
+                </form>
               )}
             </CardContent>
           </Card>

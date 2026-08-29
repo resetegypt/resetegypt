@@ -51,9 +51,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email, password, rememberMe = false) => {
     set({ loading: true, error: null, totpChallenge: null });
     try {
-      const res = await apiPost<
-        { user: CurrentUser } | { totpRequired: true; challenge: string }
-      >('/auth/login', { email, password, rememberMe });
+      const res = await apiPost<{ user: CurrentUser } | { totpRequired: true; challenge: string }>(
+        '/auth/login',
+        { email, password, rememberMe },
+      );
       if ('totpRequired' in res && res.totpRequired) {
         set({ loading: false, totpChallenge: res.challenge });
         return { user: null, totpRequired: true };

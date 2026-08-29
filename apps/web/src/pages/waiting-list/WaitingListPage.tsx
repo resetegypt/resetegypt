@@ -2,15 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-} from '@reset/ui';
+import { Avatar, AvatarFallback, AvatarImage, Badge, Button, Card, CardContent } from '@reset/ui';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 import { useToast } from '../../lib/toast';
@@ -220,7 +212,9 @@ export function WaitingListPage() {
               <div className="px-5 py-4 border-b border-border-light bg-bg-secondary/40 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{SERVICE_ICON[service]}</span>
-                  <h3 className="text-base font-semibold tracking-tight">{SERVICE_LABEL[service]}</h3>
+                  <h3 className="text-base font-semibold tracking-tight">
+                    {SERVICE_LABEL[service]}
+                  </h3>
                 </div>
                 <span className="text-xs text-text-secondary">
                   {list.length} {t('waitingList.entries', 'entrée(s)')}
@@ -234,7 +228,7 @@ export function WaitingListPage() {
                     lang={i18n.language}
                     onNotify={(slotAt) => notify.mutate({ id: e.id, slotAt })}
                     onRemove={() => {
-                      if (confirm('Retirer ce patient de la liste d\'attente ?')) {
+                      if (confirm("Retirer ce patient de la liste d'attente ?")) {
                         remove.mutate(e.id);
                       }
                     }}
@@ -288,7 +282,9 @@ function WaitingRow({
   return (
     <div className="px-5 py-4 flex items-center gap-4 hover:bg-bg-secondary/30 transition-colors">
       <Avatar className="h-11 w-11 shrink-0">
-        {p.avatarUrl ? <AvatarImage src={p.avatarUrl} alt={`${p.firstName} ${p.lastName}`} /> : null}
+        {p.avatarUrl ? (
+          <AvatarImage src={p.avatarUrl} alt={`${p.firstName} ${p.lastName}`} />
+        ) : null}
         <AvatarFallback className="bg-gradient-to-br from-primary-light to-secondary text-primary-dark font-bold">
           {initials}
         </AvatarFallback>
@@ -328,9 +324,7 @@ function WaitingRow({
             </>
           )}
           <span className="text-text-tertiary">·</span>
-          <span>
-            Ajouté il y a {waitingDays === 0 ? "aujourd'hui" : `${waitingDays} jour(s)`}
-          </span>
+          <span>Ajouté il y a {waitingDays === 0 ? "aujourd'hui" : `${waitingDays} jour(s)`}</span>
           {entry.notifiedAt && (
             <>
               <span className="text-text-tertiary">·</span>
@@ -396,9 +390,9 @@ function AddToWaitingListModal({
   useQuery({
     queryKey: ['prefill-patient', prefillPatientId],
     queryFn: async () => {
-      const r = await apiGet<{ patient: PatientLite & { primaryAddiction: WaitingEntry['service'] } }>(
-        `/patients/${prefillPatientId}`,
-      );
+      const r = await apiGet<{
+        patient: PatientLite & { primaryAddiction: WaitingEntry['service'] };
+      }>(`/patients/${prefillPatientId}`);
       setSelectedPatient(r.patient);
       setService(r.patient.primaryAddiction);
       return r;
@@ -495,7 +489,9 @@ function AddToWaitingListModal({
                       className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-bg-secondary transition-colors text-start"
                     >
                       <Avatar className="w-8 h-8">
-                        {p.avatarUrl ? <AvatarImage src={p.avatarUrl} alt={`${p.firstName} ${p.lastName}`} /> : null}
+                        {p.avatarUrl ? (
+                          <AvatarImage src={p.avatarUrl} alt={`${p.firstName} ${p.lastName}`} />
+                        ) : null}
                         <AvatarFallback className="text-[10px] font-bold">
                           {(p.firstName.charAt(0) + p.lastName.charAt(0)).toUpperCase()}
                         </AvatarFallback>
@@ -521,7 +517,10 @@ function AddToWaitingListModal({
               <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-bg-secondary/30">
                 <Avatar className="w-10 h-10">
                   {selectedPatient.avatarUrl ? (
-                    <AvatarImage src={selectedPatient.avatarUrl} alt={`${selectedPatient.firstName} ${selectedPatient.lastName}`} />
+                    <AvatarImage
+                      src={selectedPatient.avatarUrl}
+                      alt={`${selectedPatient.firstName} ${selectedPatient.lastName}`}
+                    />
                   ) : null}
                   <AvatarFallback className="text-xs font-bold">
                     {(
@@ -533,7 +532,9 @@ function AddToWaitingListModal({
                   <div className="text-sm font-semibold">
                     {selectedPatient.firstName} {selectedPatient.lastName}
                   </div>
-                  <div className="text-[11px] text-text-secondary font-mono">{selectedPatient.phone}</div>
+                  <div className="text-[11px] text-text-secondary font-mono">
+                    {selectedPatient.phone}
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -615,10 +616,7 @@ function AddToWaitingListModal({
           <Button variant="ghost" onClick={onClose} disabled={submit.isPending}>
             Annuler
           </Button>
-          <Button
-            disabled={!selectedPatient || submit.isPending}
-            onClick={() => submit.mutate()}
-          >
+          <Button disabled={!selectedPatient || submit.isPending} onClick={() => submit.mutate()}>
             <Plus className="w-4 h-4 me-1.5" />
             {submit.isPending ? 'Ajout…' : 'Ajouter à la file'}
           </Button>

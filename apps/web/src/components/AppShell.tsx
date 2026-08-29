@@ -33,10 +33,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '../lib/api';
-import {
-  notifyImportantEvent,
-  requestNotificationPermission,
-} from '../lib/notifications';
+import { notifyImportantEvent, requestNotificationPermission } from '../lib/notifications';
 
 interface NavItem {
   to: string;
@@ -193,7 +190,9 @@ export function AppShell() {
           />
         </div>
         <Avatar className="h-9 w-9 ring-2 ring-primary/20">
-          <AvatarFallback className="bg-primary text-white text-xs font-semibold">{initials}</AvatarFallback>
+          <AvatarFallback className="bg-primary text-white text-xs font-semibold">
+            {initials}
+          </AvatarFallback>
         </Avatar>
       </header>
 
@@ -237,13 +236,17 @@ export function AppShell() {
             </div>
             <div className="relative flex items-center gap-3">
               <Avatar className="ring-2 ring-white/20 h-10 w-10">
-                <AvatarFallback className="bg-white/15 text-white font-semibold">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-white/15 text-white font-semibold">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-white truncate leading-tight">
                   {user.firstName} {user.lastName}
                 </div>
-                <div className="text-[11px] text-primary-light/80 truncate leading-tight">{user.email}</div>
+                <div className="text-[11px] text-primary-light/80 truncate leading-tight">
+                  {user.email}
+                </div>
                 <div className="mt-1.5">
                   <RoleBadge role={user.role} />
                 </div>
@@ -269,9 +272,19 @@ export function AppShell() {
 
         {/* Nav sections */}
         <nav className="flex-1 py-3 px-2 space-y-5">
-          <NavSection label={t('nav.sectionWork', 'WORKSPACE')} items={workNav} t={t} badges={badges} />
+          <NavSection
+            label={t('nav.sectionWork', 'WORKSPACE')}
+            items={workNav}
+            t={t}
+            badges={badges}
+          />
           {adminNav.length > 0 && (
-            <NavSection label={t('nav.sectionAdmin', 'ADMINISTRATION')} items={adminNav} t={t} badges={badges} />
+            <NavSection
+              label={t('nav.sectionAdmin', 'ADMINISTRATION')}
+              items={adminNav}
+              t={t}
+              badges={badges}
+            />
           )}
         </nav>
 
@@ -309,11 +322,7 @@ export function AppShell() {
       </main>
 
       {cmdkOpen && (
-        <CommandPalette
-          onClose={() => setCmdkOpen(false)}
-          items={visibleNav}
-          role={user.role}
-        />
+        <CommandPalette onClose={() => setCmdkOpen(false)} items={visibleNav} role={user.role} />
       )}
     </div>
   );
@@ -358,16 +367,16 @@ function NavSection({
                   )}
                   <item.Icon
                     className={`w-4 h-4 shrink-0 ${
-                      isActive ? 'text-primary' : 'text-text-tertiary group-hover:text-text-secondary'
+                      isActive
+                        ? 'text-primary'
+                        : 'text-text-tertiary group-hover:text-text-secondary'
                     }`}
                   />
                   <span className="truncate flex-1">{t(item.label)}</span>
                   {badgeValue > 0 && (
                     <span
                       className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold tabular-nums ${
-                        isActive
-                          ? 'bg-primary text-white'
-                          : 'bg-danger text-white animate-pulse'
+                        isActive ? 'bg-primary text-white' : 'bg-danger text-white animate-pulse'
                       }`}
                     >
                       {badgeValue > 99 ? '99+' : badgeValue}
@@ -572,7 +581,7 @@ function CommandPalette({
     }> = [
       {
         id: 'action:new-patient',
-        label: t('cmdk.actions.newPatient', 'Nouveau patient (fiche d\'accueil)'),
+        label: t('cmdk.actions.newPatient', "Nouveau patient (fiche d'accueil)"),
         Icon: UserCircle,
         keywords: 'patient nouveau accueil intake',
         run: () => navigate('/patients/intake'),
@@ -598,9 +607,7 @@ function CommandPalette({
     const matchingGlobals = globalActions.filter(
       (a) =>
         a.allowed &&
-        (q.length === 0 ||
-          a.label.toLowerCase().includes(q) ||
-          a.keywords.includes(q)),
+        (q.length === 0 || a.label.toLowerCase().includes(q) || a.keywords.includes(q)),
     );
     matchingGlobals.forEach((a) =>
       out.push({
@@ -615,9 +622,9 @@ function CommandPalette({
 
     // 3) Patients (uniquement si on a tapé qqch)
     if (q.length >= 2) {
-      patients.slice(0, 8).forEach((p) =>
-        out.push({ kind: 'patient', id: `patient:${p.id}`, patient: p }),
-      );
+      patients
+        .slice(0, 8)
+        .forEach((p) => out.push({ kind: 'patient', id: `patient:${p.id}`, patient: p }));
     }
 
     return out;
@@ -709,8 +716,7 @@ function CommandPalette({
                 if (action === 'open') navigate(`/patients/${p.id}`);
                 if (action === 'appointment') navigate(`/appointments/new?patientId=${p.id}`);
                 if (action === 'clinical') navigate(`/patients/${p.id}/clinical`);
-                if (action === 'addToWaiting')
-                  navigate(`/waiting-list?prefillPatientId=${p.id}`);
+                if (action === 'addToWaiting') navigate(`/waiting-list?prefillPatientId=${p.id}`);
                 onClose();
               }}
             />
@@ -761,8 +767,7 @@ function CmdkList({
     const isSelected = idx === selectedIdx;
     if (r.kind === 'patient') {
       const p = r.patient;
-      const initials =
-        (p.firstName.charAt(0) ?? '') + (p.lastName.charAt(0) ?? '');
+      const initials = (p.firstName.charAt(0) ?? '') + (p.lastName.charAt(0) ?? '');
       return (
         <div
           key={r.id}
@@ -773,7 +778,9 @@ function CmdkList({
           onClick={() => onActivate(r)}
         >
           <Avatar className="w-8 h-8">
-            {p.avatarUrl ? <AvatarImage src={p.avatarUrl} alt={`${p.firstName} ${p.lastName}`} /> : null}
+            {p.avatarUrl ? (
+              <AvatarImage src={p.avatarUrl} alt={`${p.firstName} ${p.lastName}`} />
+            ) : null}
             <AvatarFallback className="text-[10px] bg-gradient-to-br from-primary-light to-secondary text-primary-dark font-bold">
               {initials.toUpperCase()}
             </AvatarFallback>
@@ -782,7 +789,9 @@ function CmdkList({
             <div className="text-sm font-semibold text-text truncate flex items-center gap-1.5">
               {p.firstName} {p.lastName}
               {p.tags.includes('vip') && (
-                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1 py-px rounded">VIP</span>
+                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1 py-px rounded">
+                  VIP
+                </span>
               )}
             </div>
             <div className="text-[11px] text-text-secondary font-mono">{p.phone}</div>
@@ -842,23 +851,13 @@ function CmdkList({
       {actions.length > 0 && (
         <CmdkSection label="Actions rapides">{actions.map(renderRow)}</CmdkSection>
       )}
-      {patients.length > 0 && (
-        <CmdkSection label="Patients">{patients.map(renderRow)}</CmdkSection>
-      )}
-      {pages.length > 0 && (
-        <CmdkSection label="Navigation">{pages.map(renderRow)}</CmdkSection>
-      )}
+      {patients.length > 0 && <CmdkSection label="Patients">{patients.map(renderRow)}</CmdkSection>}
+      {pages.length > 0 && <CmdkSection label="Navigation">{pages.map(renderRow)}</CmdkSection>}
     </>
   );
 }
 
-function CmdkSection({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function CmdkSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <div className="px-4 pt-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-text-tertiary">

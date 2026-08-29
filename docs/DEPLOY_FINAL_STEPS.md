@@ -2,17 +2,17 @@
 
 ## ✅ Déjà fait (LIVE)
 
-| Service                | URL Vercel                                      | Statut          |
-|------------------------|-------------------------------------------------|-----------------|
-| API Fastify            | https://reset-api-vert.vercel.app               | ✅ LIVE         |
-| Admin (web)            | https://reset-web-virid.vercel.app              | ✅ LIVE         |
-| Booking public         | https://reset-booking.vercel.app                | ✅ LIVE         |
-| DB Supabase            | aws-0-eu-west-1 / project pubrtdtigucvhjydtifo  | ✅ migré + seed |
-| Comptes prod           | direction@reset-egypt.com  (admin)              | ✅ live         |
-|                        | dr.ahmadalashry@reset-egypt.com (praticien)     | ✅ live         |
-|                        | sara@reset-egypt.com  (secrétaire)              | ✅ live         |
-|                        | nora@reset-egypt.com  (secrétaire)              | ✅ live         |
-|                        | (mots de passe confiés en privé)                |                 |
+| Service        | URL Vercel                                     | Statut          |
+| -------------- | ---------------------------------------------- | --------------- |
+| API Fastify    | https://reset-api-vert.vercel.app              | ✅ LIVE         |
+| Admin (web)    | https://reset-web-virid.vercel.app             | ✅ LIVE         |
+| Booking public | https://reset-booking.vercel.app               | ✅ LIVE         |
+| DB Supabase    | aws-0-eu-west-1 / project pubrtdtigucvhjydtifo | ✅ migré + seed |
+| Comptes prod   | direction@reset-egypt.com (admin)              | ✅ live         |
+|                | dr.ahmadalashry@reset-egypt.com (praticien)    | ✅ live         |
+|                | sara@reset-egypt.com (secrétaire)              | ✅ live         |
+|                | nora@reset-egypt.com (secrétaire)              | ✅ live         |
+|                | (mots de passe confiés en privé)               |                 |
 
 Custom domains ajoutés côté Vercel (`verified: true`) — il manque juste le DNS IONOS.
 
@@ -26,20 +26,22 @@ Connectez-vous sur **https://login.ionos.fr/** puis :
 2. **DNS** → **Ajouter un enregistrement**
 3. Créez 3 enregistrements CNAME :
 
-| Type  | Nom du sous-domaine | Pointe vers              | TTL     |
-|-------|---------------------|--------------------------|---------|
-| CNAME | `api`               | `cname.vercel-dns.com`   | 3600    |
-| CNAME | `app`               | `cname.vercel-dns.com`   | 3600    |
-| CNAME | `book`              | `cname.vercel-dns.com`   | 3600    |
+| Type  | Nom du sous-domaine | Pointe vers            | TTL  |
+| ----- | ------------------- | ---------------------- | ---- |
+| CNAME | `api`               | `cname.vercel-dns.com` | 3600 |
+| CNAME | `app`               | `cname.vercel-dns.com` | 3600 |
+| CNAME | `book`              | `cname.vercel-dns.com` | 3600 |
 
 ⚠️ Ne **PAS** toucher l'enregistrement A de `reset-egypt.com` (apex) — il reste sur le WordPress IONOS (217.160.0.57).
 
 Propagation : 5–30 minutes. Vérifiez avec :
+
 ```bash
 nslookup api.reset-egypt.com
 nslookup app.reset-egypt.com
 nslookup book.reset-egypt.com
 ```
+
 Chaque résultat doit pointer vers `cname.vercel-dns.com` (ou une IP Vercel comme 76.76.21.21).
 
 Une fois fait, Vercel émettra automatiquement les certificats SSL Let's Encrypt (< 1 min).
@@ -66,13 +68,13 @@ Sur **app.reset-egypt.com** (WordPress, vitrine), installez **Redirection** (plu
 2. Activez le plugin
 3. **Outils** → **Redirection** → **Ajouter une redirection** :
 
-| URL source         | URL cible                                     | Type |
-|--------------------|-----------------------------------------------|------|
-| `/admin`           | `https://app.reset-egypt.com/login`           | 301  |
-| `/admindr`         | `https://app.reset-egypt.com/login?role=practitioner` | 301 |
-| `/resetsecretary`  | `https://app.reset-egypt.com/login?role=secretary` | 301 |
-| `/reserver`        | `https://book.reset-egypt.com/`               | 301  |
-| `/booking`         | `https://book.reset-egypt.com/`               | 301  |
+| URL source        | URL cible                                             | Type |
+| ----------------- | ----------------------------------------------------- | ---- |
+| `/admin`          | `https://app.reset-egypt.com/login`                   | 301  |
+| `/admindr`        | `https://app.reset-egypt.com/login?role=practitioner` | 301  |
+| `/resetsecretary` | `https://app.reset-egypt.com/login?role=secretary`    | 301  |
+| `/reserver`       | `https://book.reset-egypt.com/`                       | 301  |
+| `/booking`        | `https://book.reset-egypt.com/`                       | 301  |
 
 ### Alternative — `.htaccess`
 
@@ -123,15 +125,16 @@ open https://reset-egypt.com/admin  # → redirige vers app.reset-egypt.com/logi
 
 ## 💰 Coût mensuel
 
-| Service        | Plan          | Coût           |
-|----------------|---------------|----------------|
-| Vercel         | Hobby         | **0 €**        |
-| Supabase       | Free          | **0 €**        |
-| Resend         | Free          | **0 €**        |
-| IONOS          | existant      | **inclus**     |
-| **TOTAL**      |               | **0 €/mois**   |
+| Service   | Plan     | Coût         |
+| --------- | -------- | ------------ |
+| Vercel    | Hobby    | **0 €**      |
+| Supabase  | Free     | **0 €**      |
+| Resend    | Free     | **0 €**      |
+| IONOS     | existant | **inclus**   |
+| **TOTAL** |          | **0 €/mois** |
 
 Limites du plan gratuit :
+
 - Vercel : 100 GB bandwidth/mois, 6 000 minutes serverless
 - Supabase : 500 MB DB, 1 GB transfer, projet endormi après 7 jours d'inactivité (réveille automatiquement à la 1re requête)
 - Resend : 100 mails/jour, 3 000/mois

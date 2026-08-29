@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: '%s — RESET',
   },
   description:
-    "Centre RESET au Caire (New Cairo) : méthode française non-invasive combinant auriculothérapie et laser de photobiomodulation. Sevrage tabagique, drogues, alcool, sucre et gestion du stress en une séance.",
+    'Centre RESET au Caire (New Cairo) : méthode française non-invasive combinant auriculothérapie et laser de photobiomodulation. Sevrage tabagique, drogues, alcool, sucre et gestion du stress en une séance.',
   keywords: [
     'auriculothérapie',
     'laser photobiomodulation',

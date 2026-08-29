@@ -13,6 +13,7 @@ import {
   localizedPath,
   isRtl,
 } from '../lib/i18n';
+import { BOOKING_URL } from '../lib/urls';
 
 function detectLocale(pathname: string): Locale {
   // Pathname formats: '/', '/fr', '/fr/about', '/en/services/smoking', '/ar/about'
@@ -71,7 +72,10 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
           {/* Brand */}
-          <Link href={localizedPath('/', locale)} className="flex items-center gap-3 group shrink-0">
+          <Link
+            href={localizedPath('/', locale)}
+            className="flex items-center gap-3 group shrink-0"
+          >
             <Image
               src="/logo-yourself.png"
               alt="Reset Yourself"
@@ -104,7 +108,7 @@ export function Header() {
           <div className="flex items-center gap-2 shrink-0">
             <LangSwitcher current={locale} neutralPath={neutralPath} />
             <Link
-              href="https://book.reset-egypt.com"
+              href={BOOKING_URL}
               className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors shadow-sm shadow-primary/20"
             >
               {dict.nav.book}
@@ -137,7 +141,7 @@ export function Header() {
               </Link>
             ))}
             <Link
-              href="https://book.reset-egypt.com"
+              href={BOOKING_URL}
               className="block px-3 py-3 text-sm font-semibold bg-primary text-white rounded-lg text-center mt-3"
               onClick={() => setMobileOpen(false)}
             >
@@ -161,9 +165,7 @@ function LangSwitcher({ current, neutralPath }: { current: Locale; neutralPath: 
             href={localizedPath(neutralPath, lng)}
             style={isActive ? { backgroundColor: '#100090', color: '#fff' } : undefined}
             className={`px-2 sm:px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
-              isActive
-                ? 'shadow-sm'
-                : 'text-text-secondary hover:text-text'
+              isActive ? 'shadow-sm' : 'text-text-secondary hover:text-text'
             }`}
           >
             {LOCALE_LABEL[lng]}

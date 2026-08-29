@@ -76,7 +76,7 @@ test.describe('API · Workflows métier (read-only)', () => {
     const res = await ctx.get(`${API}/appointments/today`);
     expect(res.status()).toBe(200);
     const body = await res.json();
-    const appts = Array.isArray(body) ? body : body.appointments ?? [];
+    const appts = Array.isArray(body) ? body : (body.appointments ?? []);
     expect(Array.isArray(appts)).toBe(true);
   });
 

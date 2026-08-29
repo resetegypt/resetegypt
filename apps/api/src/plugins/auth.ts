@@ -52,23 +52,20 @@ async function authPlugin(app: FastifyInstance) {
     }
   });
 
-  app.decorate(
-    'requireRole',
-    function (...roles: Role[]) {
-      return async function (req: FastifyRequest, reply: FastifyReply) {
-        if (!req.currentUser) {
-          reply.status(401).send({ error: 'Unauthorized' });
-          return;
-        }
-        if (!roles.includes(req.currentUser.role)) {
-          reply.status(403).send({
-            error: 'Forbidden',
-            message: `Required role: ${roles.join(' or ')}`,
-          });
-        }
-      };
-    },
-  );
+  app.decorate('requireRole', function (...roles: Role[]) {
+    return async function (req: FastifyRequest, reply: FastifyReply) {
+      if (!req.currentUser) {
+        reply.status(401).send({ error: 'Unauthorized' });
+        return;
+      }
+      if (!roles.includes(req.currentUser.role)) {
+        reply.status(403).send({
+          error: 'Forbidden',
+          message: `Required role: ${roles.join(' or ')}`,
+        });
+      }
+    };
+  });
 }
 
 export const SESSION_COOKIE_NAME = COOKIE_NAME;

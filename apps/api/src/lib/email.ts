@@ -18,7 +18,10 @@ function getResend(): Resend | null {
   return null;
 }
 
-async function getSmtpTransporter(): Promise<{ transporter: Transporter | null; verified: boolean }> {
+async function getSmtpTransporter(): Promise<{
+  transporter: Transporter | null;
+  verified: boolean;
+}> {
   if (smtpTransporter) return smtpTransporter;
   const transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,

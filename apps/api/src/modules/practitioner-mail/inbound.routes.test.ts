@@ -99,7 +99,13 @@ describe('POST /inbound/email', () => {
 
   it('est idempotent sur un messageId déjà reçu', async () => {
     const messageId = `<dup-${Date.now()}@gmail.com>`;
-    const payload = { to: address, from: 'patient@gmail.com', subject: 'Dup', messageId, bodyText: 'x' };
+    const payload = {
+      to: address,
+      from: 'patient@gmail.com',
+      subject: 'Dup',
+      messageId,
+      bodyText: 'x',
+    };
     const first = await app.inject({
       method: 'POST',
       url: '/inbound/email',

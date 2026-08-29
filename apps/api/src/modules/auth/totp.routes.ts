@@ -174,148 +174,168 @@ export async function totpRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(400).send({ error: 'invalid_code' });
     }
     const { plain: backupCodes, hashes } = await generateBackupCodes();
-    await app.prisma.user.update({ where: { id: req.currentUser!.sub }, data: { backupCodes: hashes } });
+    await app.prisma.user.update({
+      where: { id: req.currentUser!.sub },
+      data: { backupCodes: hashes },
+    });
     return { ok: true, backupCodes };
   });
 
   // POST /auth/2fa/verify { challenge, code } — appelé après /auth/login si totpRequired
   // Retourne le vrai JWT session (cookie httpOnly comme /auth/login).
   // Rate-limité : 10 essais / 15 min / IP — protège du brute-force des codes 6 chiffres.
-  app.post('/auth/2fa/verify', {
-    config: {
-      rateLimit: {
-        max: 10,
-        timeWindow: '15 minutes',
-        keyGenerator: (req: { ip: string }) => `2fa-verify|${req.ip}`,
-        errorResponseBuilder: () => ({
-          statusCode: 429,
-          error: 'TooMany2faAttempts',
-          message: 'Trop de tentatives 2FA. Réessaie dans 15 minutes.',
-        }),
+  app.post(
+    '/auth/2fa/verify',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '15 minutes',
+          keyGenerator: (req: { ip: string }) => `2fa-verify|${req.ip}`,
+          errorResponseBuilder: () => ({
+            statusCode: 429,
+            error: 'TooMany2faAttempts',
+            message: 'Trop de tentatives 2FA. Réessaie dans 15 minutes.',
+          }),
+        },
       },
     },
-  }, async (req, reply) => {
-    const schema = z.object({
-      challenge: z.string().min(1),
-      code: z.string().min(6),
-    });
-    const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'invalid_payload' });
+    async (req, reply) => {
+      const schema = z.object({
+        challenge: z.string().min(1),
+        code: z.string().min(6),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return reply.status(400).send({ error: 'invalid_payload' });
 
-    // Vérifie le challenge JWT (purpose=totp, expire 5 min)
-    let decoded: { sub: string; purpose: string; rememberMe?: boolean };
-    try {
-      decoded = app.jwt.verify(parsed.data.challenge) as typeof decoded;
-    } catch {
-      return reply.status(400).send({ error: 'invalid_or_expired_challenge' });
-    }
-    if (decoded.purpose !== 'totp') {
-      return reply.status(400).send({ error: 'wrong_token_purpose' });
-    }
-
-    const user = await app.prisma.user.findUnique({
-      where: { id: decoded.sub },
-      select: {
-        id: true, email: true, role: true, firstName: true, lastName: true,
-        preferredLanguage: true, totpSecret: true, totpEnabled: true, backupCodes: true,
-        isActive: true, isLocked: true,
-      },
-    });
-    if (!user || !user.isActive || user.isLocked) {
-      return reply.status(401).send({ error: 'account_unavailable' });
-    }
-    if (!user.totpEnabled || !user.totpSecret) {
-      return reply.status(400).send({ error: '2fa_not_configured' });
-    }
-
-    const decryptedSecret = decryptSecret(user.totpSecret);
-    const codeOk = !!decryptedSecret && authenticator.check(parsed.data.code, decryptedSecret);
-    let backupCodeConsumed = false;
-    let remainingBackupCodes = user.backupCodes;
-    if (!codeOk) {
-      const consumed = await consumeBackupCode(user.backupCodes, parsed.data.code);
-      if (consumed === null) {
-        return reply.status(401).send({ error: 'invalid_code' });
-      }
-      remainingBackupCodes = consumed;
-      backupCodeConsumed = true;
-    } else {
-      // SECURITE anti-replay : un même TOTP ne peut plus être réutilisé
-      // dans sa fenêtre 30s (attaquant qui sniff le code = ne peut pas le rejouer).
-      // On stocke un sha256 du code (pas le code en clair) + expiresAt +60s.
-      const { createHash } = await import('node:crypto');
-      const codeHash = createHash('sha256').update(`${user.id}|${parsed.data.code}`).digest('hex');
-      const expiresAt = new Date(Date.now() + 60_000);
+      // Vérifie le challenge JWT (purpose=totp, expire 5 min)
+      let decoded: { sub: string; purpose: string; rememberMe?: boolean };
       try {
-        await app.prisma.usedTotpCode.create({
-          data: { userId: user.id, codeHash, expiresAt },
-        });
-      } catch (err) {
-        // P2002 = unique violation → code déjà utilisé récemment
-        if ((err as { code?: string }).code === 'P2002') {
-          await recordAudit(app.prisma, req, {
-            userId: user.id,
-            action: 'login_2fa_replay_blocked',
-            resource: `user:${user.id}`,
-          });
-          return reply.status(401).send({ error: 'code_already_used' });
-        }
-        throw err;
+        decoded = app.jwt.verify(parsed.data.challenge) as typeof decoded;
+      } catch {
+        return reply.status(400).send({ error: 'invalid_or_expired_challenge' });
       }
-    }
+      if (decoded.purpose !== 'totp') {
+        return reply.status(400).send({ error: 'wrong_token_purpose' });
+      }
 
-    if (backupCodeConsumed) {
-      await app.prisma.user.update({
-        where: { id: user.id },
-        data: { backupCodes: remainingBackupCodes, lastLoginAt: new Date() },
+      const user = await app.prisma.user.findUnique({
+        where: { id: decoded.sub },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          firstName: true,
+          lastName: true,
+          preferredLanguage: true,
+          totpSecret: true,
+          totpEnabled: true,
+          backupCodes: true,
+          isActive: true,
+          isLocked: true,
+        },
       });
-    } else {
-      await app.prisma.user.update({
-        where: { id: user.id },
-        data: { lastLoginAt: new Date() },
+      if (!user || !user.isActive || user.isLocked) {
+        return reply.status(401).send({ error: 'account_unavailable' });
+      }
+      if (!user.totpEnabled || !user.totpSecret) {
+        return reply.status(400).send({ error: '2fa_not_configured' });
+      }
+
+      const decryptedSecret = decryptSecret(user.totpSecret);
+      const codeOk = !!decryptedSecret && authenticator.check(parsed.data.code, decryptedSecret);
+      let backupCodeConsumed = false;
+      let remainingBackupCodes = user.backupCodes;
+      if (!codeOk) {
+        const consumed = await consumeBackupCode(user.backupCodes, parsed.data.code);
+        if (consumed === null) {
+          return reply.status(401).send({ error: 'invalid_code' });
+        }
+        remainingBackupCodes = consumed;
+        backupCodeConsumed = true;
+      } else {
+        // SECURITE anti-replay : un même TOTP ne peut plus être réutilisé
+        // dans sa fenêtre 30s (attaquant qui sniff le code = ne peut pas le rejouer).
+        // On stocke un sha256 du code (pas le code en clair) + expiresAt +60s.
+        const { createHash } = await import('node:crypto');
+        const codeHash = createHash('sha256')
+          .update(`${user.id}|${parsed.data.code}`)
+          .digest('hex');
+        const expiresAt = new Date(Date.now() + 60_000);
+        try {
+          await app.prisma.usedTotpCode.create({
+            data: { userId: user.id, codeHash, expiresAt },
+          });
+        } catch (err) {
+          // P2002 = unique violation → code déjà utilisé récemment
+          if ((err as { code?: string }).code === 'P2002') {
+            await recordAudit(app.prisma, req, {
+              userId: user.id,
+              action: 'login_2fa_replay_blocked',
+              resource: `user:${user.id}`,
+            });
+            return reply.status(401).send({ error: 'code_already_used' });
+          }
+          throw err;
+        }
+      }
+
+      if (backupCodeConsumed) {
+        await app.prisma.user.update({
+          where: { id: user.id },
+          data: { backupCodes: remainingBackupCodes, lastLoginAt: new Date() },
+        });
+      } else {
+        await app.prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        });
+      }
+
+      await recordAudit(app.prisma, req, {
+        userId: user.id,
+        action: backupCodeConsumed ? 'login_2fa_backup' : 'login_2fa',
+        resource: `user:${user.id}`,
       });
-    }
 
-    await recordAudit(app.prisma, req, {
-      userId: user.id,
-      action: backupCodeConsumed ? 'login_2fa_backup' : 'login_2fa',
-      resource: `user:${user.id}`,
-    });
+      // Émettre le vrai JWT session — DOIT être strictement identique à /auth/login
+      // (même nom de cookie, même domain, même secure, même payload, même TTL).
+      // Sinon `app.authenticate()` ne reconnaît pas le cookie → boucle de login.
+      const ttl = decoded.rememberMe ? '7d' : '8h';
+      const token = app.jwt.sign(
+        {
+          sub: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+        { expiresIn: ttl },
+      );
+      const cookieDomain =
+        env.NODE_ENV === 'production' && env.APP_URL.includes('reset-egypt.com')
+          ? '.reset-egypt.com'
+          : undefined;
+      reply.setCookie(SESSION_COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        domain: cookieDomain,
+        maxAge: decoded.rememberMe ? SESSION_MAX_AGE_SEC * 7 : SESSION_MAX_AGE_SEC,
+      });
 
-    // Émettre le vrai JWT session — DOIT être strictement identique à /auth/login
-    // (même nom de cookie, même domain, même secure, même payload, même TTL).
-    // Sinon `app.authenticate()` ne reconnaît pas le cookie → boucle de login.
-    const ttl = decoded.rememberMe ? '7d' : '8h';
-    const token = app.jwt.sign(
-      {
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-      { expiresIn: ttl },
-    );
-    const cookieDomain =
-      env.NODE_ENV === 'production' && env.APP_URL.includes('reset-egypt.com')
-        ? '.reset-egypt.com'
-        : undefined;
-    reply.setCookie(SESSION_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      domain: cookieDomain,
-      maxAge: decoded.rememberMe ? SESSION_MAX_AGE_SEC * 7 : SESSION_MAX_AGE_SEC,
-    });
-
-    return {
-      user: {
-        id: user.id, email: user.email, role: user.role,
-        firstName: user.firstName, lastName: user.lastName,
-        preferredLanguage: user.preferredLanguage,
-      },
-      backupCodesRemaining: remainingBackupCodes.length,
-    };
-  });
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          preferredLanguage: user.preferredLanguage,
+        },
+        backupCodesRemaining: remainingBackupCodes.length,
+      };
+    },
+  );
 }

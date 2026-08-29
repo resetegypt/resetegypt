@@ -9,7 +9,7 @@ const fr = {
   hero: {
     title: 'Reprenez le contrôle.',
     subtitle:
-      "Auriculothérapie & laser non-invasif — accompagnement sur-mesure pour le sevrage tabagique, alimentaire et la gestion du stress.",
+      'Auriculothérapie & laser non-invasif — accompagnement sur-mesure pour le sevrage tabagique, alimentaire et la gestion du stress.',
     scrollHint: 'Choisissez votre service ci-dessous',
     trust: {
       nonMedical: 'Centre non-médical agréé',
@@ -64,7 +64,8 @@ const fr = {
   dateSummary: 'Date :',
   patientSummary: 'Patient :',
   phoneSummary: 'Téléphone :',
-  consent1: 'J\'accepte que mes données soient traitées conformément à la loi 151/2020 sur la protection des données.',
+  consent1:
+    "J'accepte que mes données soient traitées conformément à la loi 151/2020 sur la protection des données.",
   consent2: 'Je reconnais que Reset Egypt est un centre de bien-être non médical.',
   back: 'Retour',
   next: 'Continuer',

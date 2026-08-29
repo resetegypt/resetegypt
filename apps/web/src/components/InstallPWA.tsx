@@ -136,7 +136,10 @@ export function InstallPWA() {
                   {t('pwa.iosTitle', 'Installer sur iPhone')}
                 </h3>
                 <p className="text-sm text-text-secondary mt-1">
-                  {t('pwa.iosSteps', "Dans Safari, touche le bouton Partager (carré avec flèche), puis « Sur l'écran d'accueil »")}
+                  {t(
+                    'pwa.iosSteps',
+                    "Dans Safari, touche le bouton Partager (carré avec flèche), puis « Sur l'écran d'accueil »",
+                  )}
                 </p>
               </div>
             </div>

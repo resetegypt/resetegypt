@@ -84,7 +84,14 @@ export async function usersRoutes(app: FastifyInstance): Promise<void> {
     const user = await app.prisma.user.update({
       where: { id },
       data: parsed.data,
-      select: { id: true, email: true, role: true, firstName: true, lastName: true, isActive: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+      },
     });
     await recordAudit(app.prisma, req, {
       userId: req.currentUser!.sub,

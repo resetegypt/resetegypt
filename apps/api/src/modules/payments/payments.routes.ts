@@ -31,7 +31,9 @@ const createPaymentSchema = z.object({
  * Doublé d'une @unique sur invoiceNumber côté DB (catch P2002 → retry).
  * Évite la collision de Math.random() qui foirait à ~100 factures.
  */
-async function nextInvoiceNumber(prisma: { payment: { findFirst: (a: object) => Promise<{ invoiceNumber: string } | null> } }): Promise<string> {
+async function nextInvoiceNumber(prisma: {
+  payment: { findFirst: (a: object) => Promise<{ invoiceNumber: string } | null> };
+}): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `INV-${year}-`;
   const last = await prisma.payment.findFirst({
@@ -58,7 +60,8 @@ export async function paymentsRoutes(app: FastifyInstance): Promise<void> {
 
   app.post('/payments', async (req, reply) => {
     const parsed = createPaymentSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const d = parsed.data;
 
     // Calcul de la facture — respect des taux TVA par ligne (item-level vatRate).
@@ -312,20 +315,22 @@ export async function paymentsRoutes(app: FastifyInstance): Promise<void> {
       'Email envoyé',
     ];
     const { csvRow } = await import('../../lib/crypto-helpers.js');
-    const rows = payments.map((p) => csvRow([
-      p.createdAt.toISOString(),
-      p.invoiceNumber,
-      `${p.patient.firstName} ${p.patient.lastName}`,
-      p.patient.phone,
-      Number(p.subtotal).toFixed(2),
-      Number(p.discount).toFixed(2),
-      Number(p.vat).toFixed(2),
-      Number(p.total).toFixed(2),
-      p.paymentMethod,
-      p.paymentRef ?? '',
-      p.etaUuid ?? '',
-      p.emailSentAt ? p.emailSentAt.toISOString() : '',
-    ]));
+    const rows = payments.map((p) =>
+      csvRow([
+        p.createdAt.toISOString(),
+        p.invoiceNumber,
+        `${p.patient.firstName} ${p.patient.lastName}`,
+        p.patient.phone,
+        Number(p.subtotal).toFixed(2),
+        Number(p.discount).toFixed(2),
+        Number(p.vat).toFixed(2),
+        Number(p.total).toFixed(2),
+        p.paymentMethod,
+        p.paymentRef ?? '',
+        p.etaUuid ?? '',
+        p.emailSentAt ? p.emailSentAt.toISOString() : '',
+      ]),
+    );
     const csv = [csvRow(headers), ...rows].join('\n');
 
     reply

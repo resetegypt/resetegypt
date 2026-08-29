@@ -247,8 +247,7 @@ export function AgendaPage() {
 
   const todayKey = localDateKey(new Date());
   const totalCount = appointments.length;
-  const daysInRange =
-    view === 'day' ? 1 : view === 'week' ? 7 : endOfMonth(anchorDate).getDate();
+  const daysInRange = view === 'day' ? 1 : view === 'week' ? 7 : endOfMonth(anchorDate).getDate();
   const slotsInRange = daysInRange * SLOTS_PER_DAY;
   const occupation = slotsInRange > 0 ? Math.round((totalCount / slotsInRange) * 100) : 0;
   const expectedRevenue = appointments
@@ -292,13 +291,18 @@ export function AgendaPage() {
 
   const subtitle =
     view === 'day'
-      ? anchorDate.toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      ? anchorDate.toLocaleDateString(i18n.language, {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
       : view === 'week'
         ? `${range.from.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })} → ${new Date(range.to.getTime() - 1).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })}`
         : anchorDate.toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' });
 
   const selectedAppointment = selectedAppointmentId
-    ? appointments.find((a) => a.id === selectedAppointmentId) ?? null
+    ? (appointments.find((a) => a.id === selectedAppointmentId) ?? null)
     : null;
 
   // Skeleton initial — avant le premier fetch.
@@ -404,7 +408,9 @@ export function AgendaPage() {
                       : 'bg-bg-secondary text-text-secondary hover:bg-bg-secondary/70 border border-border'
                   }`}
                 >
-                  <span>Dr. {p.firstName} {p.lastName.charAt(0)}.</span>
+                  <span>
+                    Dr. {p.firstName} {p.lastName.charAt(0)}.
+                  </span>
                   <span
                     className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-bold ${
                       active ? 'bg-white/20 text-white' : 'bg-surface text-text-secondary'
@@ -455,9 +461,7 @@ export function AgendaPage() {
               suffix="EGP"
               tone="success"
               ratio={
-                expectedRevenue > 0
-                  ? Math.round((realizedRevenue / expectedRevenue) * 100)
-                  : null
+                expectedRevenue > 0 ? Math.round((realizedRevenue / expectedRevenue) * 100) : null
               }
             />
           )}
@@ -590,7 +594,8 @@ function DayView({
           const time = slotTime(i);
           const key = `${dayKey}_${time}`;
           const a = byKey.get(key);
-          const isCurrentSlot = isToday && currentTimeIndex !== null && Math.floor(currentTimeIndex) === i;
+          const isCurrentSlot =
+            isToday && currentTimeIndex !== null && Math.floor(currentTimeIndex) === i;
           const showLine = isCurrentSlot;
           const lineOffsetPct = showLine ? (currentTimeIndex! - i) * 100 : 0;
           const slotIso = slotIsoFromCell(day, i);
@@ -624,10 +629,7 @@ function DayView({
               </div>
               <div className="flex-1 p-2">
                 {a ? (
-                  <DayAppointmentCard
-                    appointment={a}
-                    onClick={() => onSelectAppointment(a.id)}
-                  />
+                  <DayAppointmentCard appointment={a} onClick={() => onSelectAppointment(a.id)} />
                 ) : (
                   <Link
                     to={`/appointments/new?slot=${encodeURIComponent(slotIso)}`}
@@ -655,7 +657,8 @@ function DayAppointmentCard({
   const { t } = useTranslation();
   const a = appointment;
   const sc = SERVICE_COLOR[a.service] ?? SERVICE_COLOR.STRESS!;
-  const isConfirmed = a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED';
+  const isConfirmed =
+    a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED';
   const isArrived = a.status === 'ARRIVED';
   const isCancelled = a.status === 'NO_SHOW' || a.status === 'CANCELLED';
   const initials = a.patientName
@@ -696,7 +699,9 @@ function DayAppointmentCard({
             )}
           </div>
           <div className="text-xs text-text-secondary mt-0.5 flex items-center gap-1.5">
-            <span>{SERVICE_ICON[a.service]} {t(`addiction.${a.service}`)}</span>
+            <span>
+              {SERVICE_ICON[a.service]} {t(`addiction.${a.service}`)}
+            </span>
             <span className="text-text-tertiary">·</span>
             <span>{t(`dashboard.visitType.${a.visitType}`)}</span>
             <span className="text-text-tertiary">·</span>
@@ -756,13 +761,23 @@ function WeekView({
                   isToday ? 'bg-primary/10' : 'bg-bg-secondary/40'
                 }`}
               >
-                <div className={`text-[10px] uppercase tracking-wider font-semibold ${isToday ? 'text-primary' : 'text-text-tertiary'}`}>
+                <div
+                  className={`text-[10px] uppercase tracking-wider font-semibold ${isToday ? 'text-primary' : 'text-text-tertiary'}`}
+                >
                   {d.toLocaleDateString(lang, { weekday: 'short' })}
                 </div>
-                <div className={`mt-0.5 flex items-baseline gap-1 ${isToday ? 'text-primary' : 'text-text'}`}>
-                  <span className="text-2xl font-bold leading-none tabular-nums">{d.getDate()}</span>
-                  <span className="text-xs text-text-tertiary">{d.toLocaleDateString(lang, { month: 'short' })}</span>
-                  {isToday && <span className="ms-auto self-center inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                <div
+                  className={`mt-0.5 flex items-baseline gap-1 ${isToday ? 'text-primary' : 'text-text'}`}
+                >
+                  <span className="text-2xl font-bold leading-none tabular-nums">
+                    {d.getDate()}
+                  </span>
+                  <span className="text-xs text-text-tertiary">
+                    {d.toLocaleDateString(lang, { month: 'short' })}
+                  </span>
+                  {isToday && (
+                    <span className="ms-auto self-center inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  )}
                 </div>
               </div>
             );
@@ -822,7 +837,9 @@ function WeekRow({
   return (
     <>
       <div className="border-b border-border-light bg-surface px-2 py-2 flex items-start justify-end">
-        <span className={`text-[11px] font-mono tabular-nums ${isCurrentRow ? 'text-primary font-bold' : 'text-text-tertiary'}`}>
+        <span
+          className={`text-[11px] font-mono tabular-nums ${isCurrentRow ? 'text-primary font-bold' : 'text-text-tertiary'}`}
+        >
           {time}
         </span>
       </div>
@@ -831,7 +848,8 @@ function WeekRow({
         const a = byKey.get(key);
         const isToday = localDateKey(d) === todayKey;
         const slotIso = slotIsoFromCell(d, rowIdx);
-        const showNowLine = isToday && isCurrentRow && dayIdx === todayColIdx && currentTimeIndex !== null;
+        const showNowLine =
+          isToday && isCurrentRow && dayIdx === todayColIdx && currentTimeIndex !== null;
         const lineOffsetPct = showNowLine ? (currentTimeIndex - rowIdx) * 100 : 0;
         return (
           <SlotCell
@@ -844,15 +862,15 @@ function WeekRow({
             isDragging={isDragging}
           >
             {showNowLine && (
-              <div className="absolute left-0 right-0 h-[2px] bg-danger z-10 pointer-events-none" style={{ top: `${lineOffsetPct}%` }}>
+              <div
+                className="absolute left-0 right-0 h-[2px] bg-danger z-10 pointer-events-none"
+                style={{ top: `${lineOffsetPct}%` }}
+              >
                 <div className="absolute -left-1 -top-[3px] w-2 h-2 rounded-full bg-danger" />
               </div>
             )}
             {a ? (
-              <WeekAppointmentCard
-                appointment={a}
-                onClick={() => onSelectAppointment(a.id)}
-              />
+              <WeekAppointmentCard appointment={a} onClick={() => onSelectAppointment(a.id)} />
             ) : (
               <Link
                 to={`/appointments/new?slot=${encodeURIComponent(slotIso)}`}
@@ -877,7 +895,8 @@ function WeekAppointmentCard({
 }) {
   const a = appointment;
   const sc = SERVICE_COLOR[a.service] ?? SERVICE_COLOR.STRESS!;
-  const isConfirmed = a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED';
+  const isConfirmed =
+    a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED';
   const isArrived = a.status === 'ARRIVED';
   const isCancelled = a.status === 'NO_SHOW' || a.status === 'CANCELLED';
   return (
@@ -1229,8 +1248,8 @@ function AppointmentDetailModal({
                 })}
               </div>
               <div className="text-text-secondary font-mono text-xs mt-0.5">
-                {date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
-                {' '}· {a.duration} min
+                {date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })} ·{' '}
+                {a.duration} min
               </div>
             </div>
             <div>
@@ -1285,11 +1304,7 @@ function AppointmentDetailModal({
               </a>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <a
-                href={`https://wa.me/${phoneClean}`}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={`https://wa.me/${phoneClean}`} target="_blank" rel="noreferrer">
                 <MessageCircle className="w-3.5 h-3.5 me-1.5" />
                 WhatsApp
               </a>
@@ -1319,7 +1334,7 @@ function AppointmentDetailModal({
             {(a.status === 'SCHEDULED' || a.status === 'CONFIRMED') && (
               <StatusButton
                 Icon={CheckCircle2}
-                label={t('appointmentStatus.ARRIVED', "Patient arrivé")}
+                label={t('appointmentStatus.ARRIVED', 'Patient arrivé')}
                 onClick={() => setStatus.mutate('ARRIVED')}
                 color="primary"
                 disabled={setStatus.isPending}
@@ -1356,7 +1371,14 @@ function AppointmentDetailModal({
                   Icon={X}
                   label={t('appointmentStatus.CANCELLED', 'Annuler')}
                   onClick={() => {
-                    if (confirm(t('agenda.modal.confirmCancel', 'Annuler ce RDV ? Si un patient est en liste d\'attente, il recevra un email automatiquement.'))) {
+                    if (
+                      confirm(
+                        t(
+                          'agenda.modal.confirmCancel',
+                          "Annuler ce RDV ? Si un patient est en liste d'attente, il recevra un email automatiquement.",
+                        ),
+                      )
+                    ) {
                       setStatus.mutate('CANCELLED');
                     }
                   }}
@@ -1377,7 +1399,7 @@ function AppointmentDetailModal({
               <Users className="w-3.5 h-3.5 me-1.5" />
               {addToWaitingList.isPending
                 ? t('common.loading')
-                : t('agenda.modal.addToWaitingList', 'Ajouter à la liste d\'attente')}
+                : t('agenda.modal.addToWaitingList', "Ajouter à la liste d'attente")}
             </Button>
           )}
         </div>

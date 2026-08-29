@@ -60,32 +60,176 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/login" element={<PageMotion><LoginPage /></PageMotion>} />
+        <Route
+          path="/login"
+          element={
+            <PageMotion>
+              <LoginPage />
+            </PageMotion>
+          }
+        />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
-            <Route index element={user?.role === 'ADMIN' ? <Navigate to="/admin/dashboard" replace /> : <PageMotion><DashboardPage /></PageMotion>} />
-            <Route path="agenda" element={<PageMotion><AgendaPage /></PageMotion>} />
-            <Route path="appointments/new" element={<PageMotion><NewAppointmentPage /></PageMotion>} />
-            <Route path="patients" element={<PageMotion><PatientsListPage /></PageMotion>} />
-            <Route path="patients/intake" element={<PageMotion><PatientIntakePage /></PageMotion>} />
-            <Route path="patients/:id" element={<PageMotion><PatientDetailPage /></PageMotion>} />
-            <Route path="patients/:id/clinical" element={<PageMotion><ClinicalFormPage /></PageMotion>} />
-            <Route path="payment/:appointmentId" element={<PageMotion><PaymentPage /></PageMotion>} />
-            <Route path="payments/:id" element={<PageMotion><InvoicePage /></PageMotion>} />
-            <Route path="accounting" element={<PageMotion><AccountingPage /></PageMotion>} />
-            <Route path="inbox" element={<PageMotion><InboxPage /></PageMotion>} />
-            <Route path="waiting-list" element={<PageMotion><WaitingListPage /></PageMotion>} />
-            <Route path="courrier" element={<PageMotion><MailPage /></PageMotion>} />
-            <Route path="stats" element={<PageMotion><StatsPage /></PageMotion>} />
-            <Route path="settings" element={<PageMotion><SettingsPage /></PageMotion>} />
+            <Route
+              index
+              element={
+                user?.role === 'ADMIN' ? (
+                  <Navigate to="/admin/dashboard" replace />
+                ) : (
+                  <PageMotion>
+                    <DashboardPage />
+                  </PageMotion>
+                )
+              }
+            />
+            <Route
+              path="agenda"
+              element={
+                <PageMotion>
+                  <AgendaPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="appointments/new"
+              element={
+                <PageMotion>
+                  <NewAppointmentPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="patients"
+              element={
+                <PageMotion>
+                  <PatientsListPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="patients/intake"
+              element={
+                <PageMotion>
+                  <PatientIntakePage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="patients/:id"
+              element={
+                <PageMotion>
+                  <PatientDetailPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="patients/:id/clinical"
+              element={
+                <PageMotion>
+                  <ClinicalFormPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="payment/:appointmentId"
+              element={
+                <PageMotion>
+                  <PaymentPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="payments/:id"
+              element={
+                <PageMotion>
+                  <InvoicePage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="accounting"
+              element={
+                <PageMotion>
+                  <AccountingPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="inbox"
+              element={
+                <PageMotion>
+                  <InboxPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="waiting-list"
+              element={
+                <PageMotion>
+                  <WaitingListPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="courrier"
+              element={
+                <PageMotion>
+                  <MailPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="stats"
+              element={
+                <PageMotion>
+                  <StatsPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <PageMotion>
+                  <SettingsPage />
+                </PageMotion>
+              }
+            />
           </Route>
         </Route>
         <Route element={<ProtectedRoute roles={['ADMIN']} />}>
           <Route element={<AppShell />}>
-            <Route path="admin/dashboard" element={<PageMotion><StatsPage /></PageMotion>} />
-            <Route path="admin/users" element={<PageMotion><UsersPage /></PageMotion>} />
-            <Route path="admin/audit" element={<PageMotion><AuditPage /></PageMotion>} />
-            <Route path="admin/availability" element={<PageMotion><AvailabilityPage /></PageMotion>} />
+            <Route
+              path="admin/dashboard"
+              element={
+                <PageMotion>
+                  <StatsPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="admin/users"
+              element={
+                <PageMotion>
+                  <UsersPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="admin/audit"
+              element={
+                <PageMotion>
+                  <AuditPage />
+                </PageMotion>
+              }
+            />
+            <Route
+              path="admin/availability"
+              element={
+                <PageMotion>
+                  <AvailabilityPage />
+                </PageMotion>
+              }
+            />
           </Route>
         </Route>
         {/* 404 explicite — pas de redirect silencieux qui cache les vraies typos */}

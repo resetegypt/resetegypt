@@ -49,7 +49,9 @@ test.describe('Marketing site · public', () => {
     await expect(page.locator('body')).toContainText('Teseen');
   });
 
-  test('mobile responsive — débordement contenu < 50px (tolérance images/ornements)', async ({ page }) => {
+  test('mobile responsive — débordement contenu < 50px (tolérance images/ornements)', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
     await page.goto(`${SITE}/fr`);
     // Wait images load (les blur orbs peuvent déborder légèrement de façon visible)

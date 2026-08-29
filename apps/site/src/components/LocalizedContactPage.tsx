@@ -7,6 +7,7 @@ import { MapPin, Phone, Mail, Clock, MessageCircle, ArrowRight, Instagram } from
 import { Section } from './Section';
 import type { Locale } from '../lib/i18n';
 import { getContactContent } from '../lib/page-content';
+import { BOOKING_URL } from '../lib/urls';
 
 export function LocalizedContactPage({ locale }: { locale: Locale }) {
   const c = getContactContent(locale);
@@ -142,7 +143,7 @@ export function LocalizedContactPage({ locale }: { locale: Locale }) {
           </h2>
           <p className="mt-4 text-base text-primary-light leading-relaxed">{c.cta.description}</p>
           <Link
-            href="https://book.reset-egypt.com"
+            href={BOOKING_URL}
             className="inline-flex items-center gap-2 mt-8 px-8 py-4 text-base font-semibold bg-white text-primary rounded-xl hover:bg-primary-lightest transition-all shadow-xl"
           >
             {c.cta.button}

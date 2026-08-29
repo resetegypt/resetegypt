@@ -228,7 +228,8 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
 
   app.post('/appointments', async (req, reply) => {
     const parsed = createSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const d = parsed.data;
     const scheduledAt = new Date(d.scheduledAt);
 
@@ -243,7 +244,8 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(409).send({ error: 'TimeSlotConflict', conflictId: conflict.id });
     }
 
-    const price = d.price ?? PRICE_BY_SERVICE[d.service]![d.visitType === 'FIRST' ? 'first' : 'followup'];
+    const price =
+      d.price ?? PRICE_BY_SERVICE[d.service]![d.visitType === 'FIRST' ? 'first' : 'followup'];
     const created = await app.prisma.appointment.create({
       data: {
         patientId: d.patientId,
@@ -270,14 +272,23 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     const id = (req.params as { id: string }).id;
     const patchSchema = z.object({
       status: z
-        .enum(['SCHEDULED', 'CONFIRMED', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED'])
+        .enum([
+          'SCHEDULED',
+          'CONFIRMED',
+          'ARRIVED',
+          'IN_PROGRESS',
+          'COMPLETED',
+          'NO_SHOW',
+          'CANCELLED',
+        ])
         .optional(),
       notes: z.string().nullable().optional(),
       scheduledAt: z.string().optional(),
       practitionerId: z.string().uuid().optional(),
     });
     const parsed = patchSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const body = parsed.data;
     // SECURITE — réassignation de praticien limitée à ADMIN.
     // Un PRACTITIONER ou SECRETARY ne peut pas voler ou refiler un RDV.
@@ -293,7 +304,10 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     // Si on tente de déplacer le RDV : conflit ?
     if (body.scheduledAt) {
       const newDate = new Date(body.scheduledAt);
-      const target = await app.prisma.appointment.findUnique({ where: { id }, select: { practitionerId: true } });
+      const target = await app.prisma.appointment.findUnique({
+        where: { id },
+        select: { practitionerId: true },
+      });
       const practitionerId = body.practitionerId ?? target?.practitionerId;
       if (practitionerId) {
         const conflict = await app.prisma.appointment.findFirst({
@@ -304,7 +318,8 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
             id: { not: id },
           },
         });
-        if (conflict) return reply.status(409).send({ error: 'TimeSlotConflict', conflictId: conflict.id });
+        if (conflict)
+          return reply.status(409).send({ error: 'TimeSlotConflict', conflictId: conflict.id });
       }
     }
 
@@ -387,21 +402,38 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
       },
     });
     const headers = [
-      'ID', 'Date', 'Heure', 'Patient', 'Téléphone', 'Praticien',
-      'Service', 'Type', 'Statut', 'Source', 'Prix', 'Durée (min)', 'Notes',
+      'ID',
+      'Date',
+      'Heure',
+      'Patient',
+      'Téléphone',
+      'Praticien',
+      'Service',
+      'Type',
+      'Statut',
+      'Source',
+      'Prix',
+      'Durée (min)',
+      'Notes',
     ];
     const { csvRow } = await import('../../lib/crypto-helpers.js');
-    const rows = appts.map((a) => csvRow([
-      a.id,
-      a.scheduledAt.toISOString().slice(0, 10),
-      a.scheduledAt.toISOString().slice(11, 16),
-      `${a.patient.firstName} ${a.patient.lastName}`,
-      a.patient.phone,
-      `${a.practitioner.firstName} ${a.practitioner.lastName}`,
-      a.service, a.visitType, a.status, a.source,
-      Number(a.price).toFixed(2), a.duration,
-      a.notes ?? '',
-    ]));
+    const rows = appts.map((a) =>
+      csvRow([
+        a.id,
+        a.scheduledAt.toISOString().slice(0, 10),
+        a.scheduledAt.toISOString().slice(11, 16),
+        `${a.patient.firstName} ${a.patient.lastName}`,
+        a.patient.phone,
+        `${a.practitioner.firstName} ${a.practitioner.lastName}`,
+        a.service,
+        a.visitType,
+        a.status,
+        a.source,
+        Number(a.price).toFixed(2),
+        a.duration,
+        a.notes ?? '',
+      ]),
+    );
     const csv = [csvRow(headers), ...rows].join('\n');
     await recordAudit(app.prisma, req, {
       userId: req.currentUser!.sub,
@@ -410,7 +442,10 @@ export async function appointmentsRoutes(app: FastifyInstance): Promise<void> {
     });
     reply
       .header('Content-Type', 'text/csv; charset=utf-8')
-      .header('Content-Disposition', `attachment; filename="reset-egypt-rdv-${new Date().toISOString().slice(0, 10)}.csv"`);
+      .header(
+        'Content-Disposition',
+        `attachment; filename="reset-egypt-rdv-${new Date().toISOString().slice(0, 10)}.csv"`,
+      );
     return csv;
   });
 }
@@ -458,7 +493,7 @@ async function notifyNextWaitingListEntry(
     );
     await sendEmail({
       to: match.patient.email,
-      subject: 'Un créneau s\'est libéré — Reset Egypt',
+      subject: "Un créneau s'est libéré — Reset Egypt",
       html,
     });
 
@@ -497,10 +532,19 @@ const SERVICE_LABEL: Record<string, string> = {
 };
 
 function escapeHtml(s: string): string {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-function renderWaitingNotifEmail(firstName: string, service: string, slotAt: Date, appUrl: string): string {
+function renderWaitingNotifEmail(
+  firstName: string,
+  service: string,
+  slotAt: Date,
+  appUrl: string,
+): string {
   const slotStr = slotAt.toLocaleString('fr-FR', {
     weekday: 'long',
     day: 'numeric',

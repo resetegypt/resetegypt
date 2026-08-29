@@ -38,7 +38,7 @@ const fr: ServicesDict = {
     title: 'Arrêtez de fumer en une séance.',
     tagline: 'Oubliez les patchs et les gommes.',
     intro:
-      "Notre technologie de photobiomodulation cible la dépendance à sa source pour neutraliser les symptômes de manque instantanément. Une séance suffit dans la grande majorité des cas — sans douleur, sans médicament, sans effet secondaire.",
+      'Notre technologie de photobiomodulation cible la dépendance à sa source pour neutraliser les symptômes de manque instantanément. Une séance suffit dans la grande majorité des cas — sans douleur, sans médicament, sans effet secondaire.',
     benefits: [
       {
         title: 'Neutralisation des envies physiques',
@@ -262,8 +262,7 @@ const en: ServicesDict = {
       },
       {
         title: 'No nicotine substitutes',
-        description:
-          'No patches, no gum, no e-cigarettes. A 100% natural and non-invasive method.',
+        description: 'No patches, no gum, no e-cigarettes. A 100% natural and non-invasive method.',
       },
     ],
     process: [
@@ -302,8 +301,7 @@ const en: ServicesDict = {
       },
       {
         title: 'Long-term support',
-        description:
-          'Regular follow-ups to prevent relapse and consolidate your new clean life.',
+        description: 'Regular follow-ups to prevent relapse and consolidate your new clean life.',
       },
     ],
     process: [
@@ -468,8 +466,7 @@ const ar: ServicesDict = {
       },
       {
         title: 'بدون بدائل نيكوتين',
-        description:
-          'لا لاصقات ولا علكات ولا سجائر إلكترونية. منهج طبيعي 100٪ وغير جراحي.',
+        description: 'لا لاصقات ولا علكات ولا سجائر إلكترونية. منهج طبيعي 100٪ وغير جراحي.',
       },
     ],
     process: [
@@ -503,13 +500,11 @@ const ar: ServicesDict = {
       },
       {
         title: 'بيئة سرّية',
-        description:
-          'تجري الجلسات في إطار خاص داخل مركز بلا حكم مسبق، مع ممارس مكرَّس لمسارك.',
+        description: 'تجري الجلسات في إطار خاص داخل مركز بلا حكم مسبق، مع ممارس مكرَّس لمسارك.',
       },
       {
         title: 'دعم طويل الأمد',
-        description:
-          'متابعة منتظمة للوقاية من الانتكاسة وتثبيت حياتك الجديدة النظيفة.',
+        description: 'متابعة منتظمة للوقاية من الانتكاسة وتثبيت حياتك الجديدة النظيفة.',
       },
     ],
     process: [
@@ -538,8 +533,7 @@ const ar: ServicesDict = {
       },
       {
         title: 'استعادة الصفاء الذهني',
-        description:
-          'باستقرار الجهاز العصبي تستعيد التركيز وضبط النفس اللازمَين لتغيير مستدام.',
+        description: 'باستقرار الجهاز العصبي تستعيد التركيز وضبط النفس اللازمَين لتغيير مستدام.',
       },
       {
         title: 'تنظيم الانفعال',
@@ -548,8 +542,7 @@ const ar: ServicesDict = {
       },
       {
         title: 'الاستدامة طويلة الأمد',
-        description:
-          'متابعة شخصية لمرافقتك في تثبيت نمط حياتك الجديد.',
+        description: 'متابعة شخصية لمرافقتك في تثبيت نمط حياتك الجديد.',
       },
     ],
     process: [
@@ -578,18 +571,15 @@ const ar: ServicesDict = {
       },
       {
         title: 'استقرار الطاقة',
-        description:
-          'لا مزيد من ارتفاعات وانخفاضات سكّر الدم. تستعيد طاقة ثابتة طوال اليوم.',
+        description: 'لا مزيد من ارتفاعات وانخفاضات سكّر الدم. تستعيد طاقة ثابتة طوال اليوم.',
       },
       {
         title: 'فقدان وزن طبيعي',
-        description:
-          'بتحييد الاشتهاء تُقلّل تلقائيًا سعراتك الحرارية دون إحباط أو حِمية صارمة.',
+        description: 'بتحييد الاشتهاء تُقلّل تلقائيًا سعراتك الحرارية دون إحباط أو حِمية صارمة.',
       },
       {
         title: 'الوقاية من السكّري',
-        description:
-          'تخفيف الإدمان على السكّر من أقوى وسائل الوقاية من السكّري من النوع الثاني.',
+        description: 'تخفيف الإدمان على السكّر من أقوى وسائل الوقاية من السكّري من النوع الثاني.',
       },
     ],
     process: [
@@ -618,13 +608,11 @@ const ar: ServicesDict = {
       },
       {
         title: 'نوم عميق',
-        description:
-          'تنظيم الجهاز العصبي لتنام أسرع وأعمق وتستيقظ مُستريحًا.',
+        description: 'تنظيم الجهاز العصبي لتنام أسرع وأعمق وتستيقظ مُستريحًا.',
       },
       {
         title: 'استعادة التركيز',
-        description:
-          'بدون الحِمل الذهني الدائم للتوتّر تستعيد الصفاء اللازم للتركيز والأداء.',
+        description: 'بدون الحِمل الذهني الدائم للتوتّر تستعيد الصفاء اللازم للتركيز والأداء.',
       },
       {
         title: 'بدون أدوية',

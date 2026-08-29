@@ -60,7 +60,11 @@ export function ThreadView({ threadId, onBack, onReply }: Props) {
     <div className="flex flex-col h-full">
       {/* Barre d'actions */}
       <div className="bg-surface border-b border-border p-3 flex items-center gap-2 sticky top-0 z-10">
-        <button onClick={onBack} className="lg:hidden p-1.5 rounded hover:bg-bg-secondary" aria-label={t('mail.backToList')}>
+        <button
+          onClick={onBack}
+          className="lg:hidden p-1.5 rounded hover:bg-bg-secondary"
+          aria-label={t('mail.backToList')}
+        >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <strong className="text-sm flex-1 truncate">{thread.subject || '(sans objet)'}</strong>
@@ -83,13 +87,17 @@ export function ThreadView({ threadId, onBack, onReply }: Props) {
       {/* Messages empilés */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
-          <p className="text-sm text-text-secondary text-center mt-12">{t('mail.noThreadMessages')}</p>
+          <p className="text-sm text-text-secondary text-center mt-12">
+            {t('mail.noThreadMessages')}
+          </p>
         )}
         {messages.map((m) => (
           <div key={m.id} className="bg-surface border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Avatar className="w-8 h-8">
-                <AvatarFallback>{(m.fromName ?? m.fromAddress).charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>
+                  {(m.fromName ?? m.fromAddress).charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold truncate">
@@ -133,7 +141,9 @@ export function ThreadView({ threadId, onBack, onReply }: Props) {
 function AttachmentChip({ attachment }: { attachment: MailAttachment }) {
   const { t } = useTranslation();
   const download = async () => {
-    const { url } = await apiGet<{ url: string }>(`/practitioner-mail/attachments/${attachment.id}`);
+    const { url } = await apiGet<{ url: string }>(
+      `/practitioner-mail/attachments/${attachment.id}`,
+    );
     window.open(url, '_blank', 'noopener');
   };
   return (

@@ -40,14 +40,14 @@ export function MailPage() {
       <PageHeader
         title={t('mail.title')}
         subtitle={data?.mailbox.address ?? t('mail.subtitle')}
-        actions={
-          <Button onClick={() => setComposer({ mode: 'new' })}>{t('mail.compose')}</Button>
-        }
+        actions={<Button onClick={() => setComposer({ mode: 'new' })}>{t('mail.compose')}</Button>}
       />
       {/* Desktop : 3 colonnes ; mobile : une colonne à la fois */}
       <div className="lg:grid lg:grid-cols-[320px_1fr_280px] h-[calc(100vh-89px)]">
         {/* Colonne 1 — liste : masquée sur mobile quand un thread est ouvert */}
-        <div className={`${selectedThreadId ? 'hidden lg:block' : 'block'} border-e border-border overflow-y-auto`}>
+        <div
+          className={`${selectedThreadId ? 'hidden lg:block' : 'block'} border-e border-border overflow-y-auto`}
+        >
           <ThreadList
             threads={threads}
             selectedThreadId={selectedThreadId}
@@ -60,7 +60,9 @@ export function MailPage() {
         </div>
 
         {/* Colonne 2 — thread ouvert */}
-        <div className={`${selectedThreadId ? 'block' : 'hidden lg:block'} overflow-y-auto bg-bg-secondary/40`}>
+        <div
+          className={`${selectedThreadId ? 'block' : 'hidden lg:block'} overflow-y-auto bg-bg-secondary/40`}
+        >
           {selectedThreadId ? (
             <ThreadView
               threadId={selectedThreadId}
@@ -83,10 +85,7 @@ export function MailPage() {
       </div>
 
       {composer.mode !== 'closed' && (
-        <Composer
-          state={composer}
-          onClose={() => setComposer({ mode: 'closed' })}
-        />
+        <Composer state={composer} onClose={() => setComposer({ mode: 'closed' })} />
       )}
     </>
   );

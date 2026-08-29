@@ -117,7 +117,10 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
                   patientLastName: a.patient.lastName,
                   practitionerName: `${a.practitioner.firstName} ${a.practitioner.lastName}`,
                   appointmentDate: a.scheduledAt.toLocaleDateString('fr-FR'),
-                  appointmentTime: a.scheduledAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                  appointmentTime: a.scheduledAt.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
                   language: a.patient.preferredLanguage,
                 },
               }));
@@ -130,10 +133,17 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
             // Patients dont l'anniversaire (mois+jour) = aujourd'hui
-            const rows = await app.prisma.$queryRaw<Array<{
-              id: string; firstName: string; lastName: string; email: string | null;
-              whatsapp: string | null; phone: string; preferredLanguage: string;
-            }>>`
+            const rows = await app.prisma.$queryRaw<
+              Array<{
+                id: string;
+                firstName: string;
+                lastName: string;
+                email: string | null;
+                whatsapp: string | null;
+                phone: string;
+                preferredLanguage: string;
+              }>
+            >`
               SELECT id, "firstName", "lastName", email, whatsapp, phone, "preferredLanguage"
               FROM "Patient"
               WHERE "dateOfBirth" IS NOT NULL
@@ -144,7 +154,11 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
               contextKey: `patient-${p.id}-${yyyymmdd(now)}`,
               toAddress: pickAddress(step.channel, p),
               emailFallback: p.email,
-              vars: { patientFirstName: p.firstName, patientLastName: p.lastName, language: p.preferredLanguage },
+              vars: {
+                patientFirstName: p.firstName,
+                patientLastName: p.lastName,
+                language: p.preferredLanguage,
+              },
             }));
             break;
           }
@@ -154,10 +168,17 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             // contextKey n'inclut PAS la date → un seul envoi à vie par workflow+step.
             // (Si on veut re-relancer après 6 mois, il faudra ajouter un yyyy-Hx suffix manuellement.)
             const cutoff = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
-            const rows = await app.prisma.$queryRaw<Array<{
-              id: string; firstName: string; lastName: string; email: string | null;
-              whatsapp: string | null; phone: string; preferredLanguage: string;
-            }>>`
+            const rows = await app.prisma.$queryRaw<
+              Array<{
+                id: string;
+                firstName: string;
+                lastName: string;
+                email: string | null;
+                whatsapp: string | null;
+                phone: string;
+                preferredLanguage: string;
+              }>
+            >`
               SELECT p.id, p."firstName", p."lastName", p.email, p.whatsapp, p.phone, p."preferredLanguage"
               FROM "Patient" p
               WHERE p.status = 'ACTIVE'
@@ -170,7 +191,11 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
               contextKey: `patient-${p.id}-reactivation`,
               toAddress: pickAddress(step.channel, p),
               emailFallback: p.email,
-              vars: { patientFirstName: p.firstName, patientLastName: p.lastName, language: p.preferredLanguage },
+              vars: {
+                patientFirstName: p.firstName,
+                patientLastName: p.lastName,
+                language: p.preferredLanguage,
+              },
             }));
             break;
           }
@@ -250,7 +275,8 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
       for (const candidate of candidates) {
         // Détermine si on peut envoyer via le canal d'origine + détermine le canal effectif
         const channelConfigured = isChannelConfigured(step.channel);
-        const useFallback = !channelConfigured && !!candidate.emailFallback && step.channel !== 'EMAIL';
+        const useFallback =
+          !channelConfigured && !!candidate.emailFallback && step.channel !== 'EMAIL';
         const effectiveChannel = useFallback ? 'EMAIL' : step.channel;
         const effectiveAddress = useFallback ? candidate.emailFallback : candidate.toAddress;
 
@@ -315,7 +341,10 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
             } else {
               await app.prisma.automationRun.update({
                 where: { id: created.id },
-                data: { status: 'FAILED', error: (sendResult.error ?? 'unknown_send_error') + fallbackTag },
+                data: {
+                  status: 'FAILED',
+                  error: (sendResult.error ?? 'unknown_send_error') + fallbackTag,
+                },
               });
               result.failed++;
             }
@@ -330,7 +359,10 @@ export async function executeAutomations(app: FastifyInstance): Promise<ExecuteR
           // WHATSAPP / SMS effectivement choisi : pas encore câblé → SKIPPED + audit
           await app.prisma.automationRun.update({
             where: { id: created.id },
-            data: { status: 'SKIPPED', error: `channel_${effectiveChannel.toLowerCase()}_not_configured_and_no_email_fallback` },
+            data: {
+              status: 'SKIPPED',
+              error: `channel_${effectiveChannel.toLowerCase()}_not_configured_and_no_email_fallback`,
+            },
           });
           result.skipped++;
         }

@@ -8,7 +8,13 @@
 // - escapeCsvCell : protection anti-injection CSV (cellules =/+/-/@ préfixées).
 // ============================================================================
 
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  scryptSync,
+  timingSafeEqual,
+} from 'node:crypto';
 import bcrypt from 'bcryptjs';
 
 const ALGO = 'aes-256-gcm';

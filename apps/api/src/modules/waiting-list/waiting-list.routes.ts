@@ -62,7 +62,8 @@ export async function waitingListRoutes(app: FastifyInstance): Promise<void> {
   // POST /waiting-list — ajoute un patient à la file
   app.post('/waiting-list', async (req, reply) => {
     const parsed = createSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const d = parsed.data;
     const entry = await app.prisma.waitingList.create({
       data: {
@@ -91,11 +92,14 @@ export async function waitingListRoutes(app: FastifyInstance): Promise<void> {
   app.patch('/waiting-list/:id', async (req, reply) => {
     const id = (req.params as { id: string }).id;
     const parsed = updateSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
+    if (!parsed.success)
+      return reply.status(400).send({ error: 'ValidationError', details: parsed.error.flatten() });
     const d = parsed.data;
     const data: Record<string, unknown> = { ...d };
-    if (d.preferredFrom !== undefined) data.preferredFrom = d.preferredFrom ? new Date(d.preferredFrom) : null;
-    if (d.preferredTo !== undefined) data.preferredTo = d.preferredTo ? new Date(d.preferredTo) : null;
+    if (d.preferredFrom !== undefined)
+      data.preferredFrom = d.preferredFrom ? new Date(d.preferredFrom) : null;
+    if (d.preferredTo !== undefined)
+      data.preferredTo = d.preferredTo ? new Date(d.preferredTo) : null;
     const entry = await app.prisma.waitingList.update({ where: { id }, data });
     await recordAudit(app.prisma, req, {
       userId: req.currentUser!.sub,

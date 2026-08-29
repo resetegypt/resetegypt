@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, Instagram, Clock } from 'lucide-react';
 import { getDict, localizedPath, DEFAULT_LOCALE, type Locale } from '../lib/i18n';
+import { BOOKING_URL } from '../lib/urls';
 
 function detectLocale(pathname: string): Locale {
   const seg = pathname.split('/').filter(Boolean)[0];
@@ -27,14 +28,20 @@ export function Footer() {
   const COMPANY = [
     { href: '/about', label: dict.nav.about },
     { href: '/contact', label: dict.nav.contact },
-    { href: 'https://book.reset-egypt.com', label: dict.nav.book, external: true },
+    { href: BOOKING_URL, label: dict.nav.book, external: true },
   ];
 
   return (
     <footer className="mt-20 lg:mt-32 bg-gradient-to-br from-primary via-[#160A99] to-[#100090] text-white relative overflow-hidden">
       {/* Halos décoratifs pour la profondeur */}
-      <div aria-hidden className="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
-      <div aria-hidden className="absolute -bottom-32 -right-20 w-96 h-96 rounded-full bg-danger/8 blur-3xl pointer-events-none" />
+      <div
+        aria-hidden
+        className="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-secondary/10 blur-3xl pointer-events-none"
+      />
+      <div
+        aria-hidden
+        className="absolute -bottom-32 -right-20 w-96 h-96 rounded-full bg-danger/8 blur-3xl pointer-events-none"
+      />
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
@@ -124,7 +131,10 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 shrink-0 text-white/80" />
-                <a href="mailto:hello@reset-egypt.com" className="hover:text-white transition-colors">
+                <a
+                  href="mailto:hello@reset-egypt.com"
+                  className="hover:text-white transition-colors"
+                >
                   hello@reset-egypt.com
                 </a>
               </div>

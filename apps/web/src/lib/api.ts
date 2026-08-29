@@ -20,9 +20,11 @@ export function setUnauthorizedHandler(fn: () => void): void {
   onUnauthorized = fn;
 }
 function shouldHandleUnauth(path: string): boolean {
-  return !path.startsWith('/auth/login')
-    && !path.startsWith('/auth/me')
-    && !path.startsWith('/auth/password/');
+  return (
+    !path.startsWith('/auth/login') &&
+    !path.startsWith('/auth/me') &&
+    !path.startsWith('/auth/password/')
+  );
 }
 
 export async function api<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {

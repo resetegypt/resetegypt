@@ -100,7 +100,9 @@ export function AccountingPage() {
         <Card>
           <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
             <div>
-              <label className="block text-xs font-medium mb-1">{t('accounting.filters.from')}</label>
+              <label className="block text-xs font-medium mb-1">
+                {t('accounting.filters.from')}
+              </label>
               <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             </div>
             <div>
@@ -108,7 +110,9 @@ export function AccountingPage() {
               <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">{t('accounting.filters.method')}</label>
+              <label className="block text-xs font-medium mb-1">
+                {t('accounting.filters.method')}
+              </label>
               <select
                 className="w-full h-10 rounded border border-border bg-surface px-3 text-sm"
                 value={method}
@@ -123,7 +127,9 @@ export function AccountingPage() {
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium mb-1">{t('accounting.filters.search')}</label>
+              <label className="block text-xs font-medium mb-1">
+                {t('accounting.filters.search')}
+              </label>
               <Input
                 placeholder={t('accounting.filters.searchPlaceholder')}
                 value={search}
@@ -137,7 +143,9 @@ export function AccountingPage() {
           <Card>
             <CardContent>
               <p className="text-xs text-text-secondary">🧾 {t('accounting.kpi.invoices')}</p>
-              <p className="text-3xl font-bold" data-numeric>{summary?.count ?? 0}</p>
+              <p className="text-3xl font-bold" data-numeric>
+                {summary?.count ?? 0}
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -211,7 +219,9 @@ export function AccountingPage() {
                 <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
                   <tr>
                     <th className="text-start px-4 py-2">{t('accounting.columns.date')}</th>
-                    <th className="text-start px-4 py-2">{t('accounting.columns.invoiceNumber')}</th>
+                    <th className="text-start px-4 py-2">
+                      {t('accounting.columns.invoiceNumber')}
+                    </th>
                     <th className="text-start px-4 py-2">{t('accounting.columns.patient')}</th>
                     <th className="text-start px-4 py-2">{t('accounting.columns.method')}</th>
                     <th className="text-end px-4 py-2">{t('accounting.columns.ht')}</th>
@@ -242,14 +252,24 @@ export function AccountingPage() {
                       <td className="px-4 py-2 text-end font-mono text-xs" data-numeric>
                         {Number(p.subtotal).toLocaleString(i18n.language)}
                       </td>
-                      <td className="px-4 py-2 text-end font-mono text-xs text-warning-dark" data-numeric>
+                      <td
+                        className="px-4 py-2 text-end font-mono text-xs text-warning-dark"
+                        data-numeric
+                      >
                         {Math.round(Number(p.vat)).toLocaleString(i18n.language)}
                       </td>
-                      <td className="px-4 py-2 text-end font-mono font-bold text-primary-dark" data-numeric>
+                      <td
+                        className="px-4 py-2 text-end font-mono font-bold text-primary-dark"
+                        data-numeric
+                      >
                         {Math.round(Number(p.total)).toLocaleString(i18n.language)}
                       </td>
                       <td className="px-4 py-2 text-center">
-                        {p.etaUuid ? <Badge variant="success">✓</Badge> : <Badge variant="neutral">—</Badge>}
+                        {p.etaUuid ? (
+                          <Badge variant="success">✓</Badge>
+                        ) : (
+                          <Badge variant="neutral">—</Badge>
+                        )}
                       </td>
                       <td className="px-4 py-2 text-center">
                         {p.emailSentAt ? (

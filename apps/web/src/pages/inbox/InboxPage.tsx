@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Avatar, AvatarFallback, Badge, Button, Card, CardContent, CardHeader, CardTitle, Chip, Input } from '@reset/ui';
+import {
+  Avatar,
+  AvatarFallback,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Chip,
+  Input,
+} from '@reset/ui';
 import { apiGet, apiPost } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
 
@@ -94,7 +105,9 @@ export function InboxPage() {
     <>
       <PageHeader title={t('inbox.title')} subtitle={t('inbox.subtitle')} />
       <div className="lg:grid lg:grid-cols-[320px_1fr_280px] h-[calc(100vh-100px)]">
-        <aside className={`${selectedKey ? 'hidden lg:block' : 'block'} border-e border-border bg-surface overflow-y-auto`}>
+        <aside
+          className={`${selectedKey ? 'hidden lg:block' : 'block'} border-e border-border bg-surface overflow-y-auto`}
+        >
           <div className="p-3 border-b border-border">
             <Input placeholder={t('inbox.searchPlaceholder')} />
           </div>
@@ -124,7 +137,9 @@ export function InboxPage() {
           ))}
         </aside>
 
-        <section className={`${selected ? 'flex' : 'hidden lg:flex'} flex-col bg-bg-secondary/40 overflow-hidden`}>
+        <section
+          className={`${selected ? 'flex' : 'hidden lg:flex'} flex-col bg-bg-secondary/40 overflow-hidden`}
+        >
           {selected ? (
             <>
               <div className="bg-surface border-b border-border p-3 flex items-center gap-3">
@@ -142,7 +157,9 @@ export function InboxPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <strong className="text-sm">{selected.patientName ?? selected.externalAddress}</strong>
+                  <strong className="text-sm">
+                    {selected.patientName ?? selected.externalAddress}
+                  </strong>
                   <p className="text-xs text-text-secondary">
                     {CHANNEL_ICON[selected.channel]} {selected.channel} · {selected.externalAddress}
                   </p>
@@ -200,7 +217,10 @@ export function InboxPage() {
                       if (e.key === 'Enter' && reply.trim()) sendMut.mutate();
                     }}
                   />
-                  <Button onClick={() => sendMut.mutate()} disabled={!reply.trim() || sendMut.isPending}>
+                  <Button
+                    onClick={() => sendMut.mutate()}
+                    disabled={!reply.trim() || sendMut.isPending}
+                  >
                     {t('inbox.send')}
                   </Button>
                 </div>
@@ -224,7 +244,9 @@ export function InboxPage() {
                   <p>
                     <strong>{selected.patientName ?? t('inbox.unknown')}</strong>
                   </p>
-                  <p className="text-text-secondary" data-numeric>{selected.externalAddress}</p>
+                  <p className="text-text-secondary" data-numeric>
+                    {selected.externalAddress}
+                  </p>
                   <Badge variant={CHANNEL_COLOR[selected.channel] ?? 'neutral'}>
                     {CHANNEL_ICON[selected.channel]} {selected.channel}
                   </Badge>

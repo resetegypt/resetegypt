@@ -2,8 +2,7 @@ import { type ReactElement, type ImgHTMLAttributes } from 'react';
 
 type Variant = 'full' | 'wordmark' | 'icon';
 
-interface ResetLogoProps
-  extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> {
+interface ResetLogoProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> {
   /**
    * - "full" : carte carrée bleue avec wordmark + tagline YOURSELF (logo officiel)
    * - "wordmark" : juste le wordmark sur fond transparent (utilise currentColor)
@@ -41,12 +40,6 @@ export function ResetLogo({
         ? `${baseUrl}/logo-icon.svg`
         : `${baseUrl}/logo-wordmark.svg`;
   return (
-    <img
-      src={src}
-      alt="Reset Yourself"
-      draggable={false}
-      className={className}
-      {...imgProps}
-    />
+    <img src={src} alt="Reset Yourself" draggable={false} className={className} {...imgProps} />
   );
 }

@@ -2,7 +2,11 @@ import type { FastifyInstance } from 'fastify';
 import { env } from '../../env.js';
 import { secretMatches } from './webhook-auth.js';
 import { inboundEmailSchema, type InboundEmailPayload } from './inbound-schema.js';
-import { extractThreadingRefs } from './threading.js';
+import {
+  extractThreadingRefs,
+  subjectsMatch,
+  THREADING_FALLBACK_WINDOW_DAYS,
+} from './threading.js';
 import { buildSnippet } from './mail-snippet.js';
 import { uploadAttachment, attachmentKey } from '../../lib/mail-storage.js';
 
@@ -53,6 +57,7 @@ export async function inboundRoutes(app: FastifyInstance): Promise<void> {
     }
 
     // 5. Threading : rattacher à un thread existant ou en créer un.
+    // Étape 1 — In-Reply-To + References (méthode canonique RFC 5322).
     const refs = extractThreadingRefs(d.inReplyTo, d.references);
     let threadId: string | null = null;
     if (refs.length > 0) {
@@ -61,6 +66,32 @@ export async function inboundRoutes(app: FastifyInstance): Promise<void> {
         select: { threadId: true },
       });
       if (refMsg) threadId = refMsg.threadId;
+    }
+
+    // Étape 2 — Fallback subject+sender si les headers étaient absents ou
+    // référençaient un thread hors mailbox. Cas fréquent : le patient répond
+    // depuis Gmail web (préserve les headers), MAIS transfère à un ami qui
+    // répond en oubliant le thread ; ou Cloudflare Email Routing qui reforge
+    // certains headers et casse la chaîne. Fenêtre 30 jours pour ne pas
+    // recoller un email 6 mois plus tard "Re: rendez-vous" à une conversation
+    // qui n'a plus rien à voir.
+    if (!threadId) {
+      const windowStart = new Date(
+        Date.now() - THREADING_FALLBACK_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+      );
+      const fromLower = d.from.toLowerCase();
+      const candidates = await app.prisma.emailThread.findMany({
+        where: {
+          mailboxId: mailbox.id,
+          lastEmailAt: { gte: windowStart },
+          participants: { has: fromLower },
+        },
+        orderBy: { lastEmailAt: 'desc' },
+        take: 50,
+        select: { id: true, subject: true },
+      });
+      const match = candidates.find((c) => subjectsMatch(c.subject, d.subject));
+      if (match) threadId = match.id;
     }
 
     // 6. Liaison patient : si l'expéditeur correspond à un patient connu.

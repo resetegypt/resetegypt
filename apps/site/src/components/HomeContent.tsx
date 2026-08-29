@@ -14,6 +14,7 @@ import { Section } from './Section';
 import { ServicesTabs } from './ServicesTabs';
 import type { Dict, Locale } from '../lib/i18n';
 import { localizedPath } from '../lib/i18n';
+import { BOOKING_URL } from '../lib/urls';
 
 interface Props {
   dict: Dict;
@@ -70,7 +71,13 @@ function Hero({ dict, locale }: Props) {
           </p>
 
           <ul className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 max-w-2xl text-sm sm:text-[15px] text-white/95">
-            {[d.bullets.tobacco, d.bullets.drugs, d.bullets.sugar, d.bullets.alcohol, d.bullets.stress].map((label) => (
+            {[
+              d.bullets.tobacco,
+              d.bullets.drugs,
+              d.bullets.sugar,
+              d.bullets.alcohol,
+              d.bullets.stress,
+            ].map((label) => (
               <li key={label} className="inline-flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-secondary shrink-0" strokeWidth={2.25} />
                 <span>{label}</span>
@@ -87,7 +94,7 @@ function Hero({ dict, locale }: Props) {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="https://book.reset-egypt.com"
+              href={BOOKING_URL}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 text-xs font-bold uppercase tracking-[0.16em] bg-primary-dark text-white border border-white/20 rounded-md hover:bg-primary transition-all"
             >
               {d.ctaBook}
@@ -164,11 +171,27 @@ function RegisteredSection({ dict }: { dict: Dict }) {
   );
 }
 
-function BadgeCard({ src, alt, title, subtitle }: { src: string; alt: string; title: string; subtitle: string }) {
+function BadgeCard({
+  src,
+  alt,
+  title,
+  subtitle,
+}: {
+  src: string;
+  alt: string;
+  title: string;
+  subtitle: string;
+}) {
   return (
     <div className="rounded-2xl bg-gradient-to-br from-primary-lightest to-white border border-primary-light p-3 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-sm">
       <div className="w-14 h-14 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center">
-        <Image src={src} alt={alt} width={200} height={200} className="object-contain max-w-full max-h-full" />
+        <Image
+          src={src}
+          alt={alt}
+          width={200}
+          height={200}
+          className="object-contain max-w-full max-h-full"
+        />
       </div>
       <div className="min-w-0 flex-1 text-start">
         <h3 className="text-xs sm:text-sm font-bold text-text leading-tight">{title}</h3>
@@ -187,7 +210,13 @@ function VisitCenterSection({ dict, locale }: Props) {
   return (
     <section className="px-4 sm:px-6 lg:px-8 my-16 lg:my-24">
       <div className="max-w-7xl mx-auto rounded-3xl overflow-hidden relative">
-        <Image src="/photos/center-bg.jpeg" alt="" fill className="object-cover -z-10" sizes="100vw" />
+        <Image
+          src="/photos/center-bg.jpeg"
+          alt=""
+          fill
+          className="object-cover -z-10"
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/85 via-primary/75 to-primary/30 -z-10" />
 
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 p-8 sm:p-12 lg:p-16">
@@ -217,7 +246,7 @@ function VisitCenterSection({ dict, locale }: Props) {
             </div>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link
-                href="https://book.reset-egypt.com"
+                href={BOOKING_URL}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] bg-secondary text-primary rounded-md hover:bg-white transition-all"
               >
                 {v.ctaBook}
@@ -383,7 +412,9 @@ function ProcessSection({ dict }: { dict: Dict }) {
             {p.step4.eyebrow}
           </div>
           <h3 className="text-base font-bold text-text">{p.step4.title}</h3>
-          <p className="text-sm text-text-secondary mt-1.5 leading-relaxed">{p.step4.description}</p>
+          <p className="text-sm text-text-secondary mt-1.5 leading-relaxed">
+            {p.step4.description}
+          </p>
         </div>
       </div>
     </Section>
@@ -395,7 +426,12 @@ function ProcessSection({ dict }: { dict: Dict }) {
 function TestimonialsSection({ dict }: { dict: Dict }) {
   const t = dict.testimonials;
   return (
-    <Section eyebrow={t.eyebrow} title={t.title} subtitle={t.subtitle} className="bg-bg-secondary/40">
+    <Section
+      eyebrow={t.eyebrow}
+      title={t.title}
+      subtitle={t.subtitle}
+      className="bg-bg-secondary/40"
+    >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         {t.items.map((item, idx) => (
           <figure
@@ -404,12 +440,19 @@ function TestimonialsSection({ dict }: { dict: Dict }) {
           >
             <div className="flex items-center gap-0.5 mb-4">
               {Array.from({ length: 5 }, (_, i) => (
-                <svg key={i} className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 24 24" aria-hidden>
+                <svg
+                  key={i}
+                  className="w-4 h-4 text-amber-400 fill-current"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
                   <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
                 </svg>
               ))}
             </div>
-            <blockquote className="text-sm text-text-secondary leading-relaxed">{item.quote}</blockquote>
+            <blockquote className="text-sm text-text-secondary leading-relaxed">
+              {item.quote}
+            </blockquote>
             <figcaption className="mt-5 pt-5 border-t border-border-light flex items-center gap-3">
               <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center text-sm font-bold shrink-0 shadow-md shadow-primary/15">
                 {item.name
@@ -491,7 +534,7 @@ function FinalCta({ dict }: { dict: Dict }) {
 
         <div className="mt-10 flex flex-col sm:flex-row gap-3 sm:items-center justify-center">
           <Link
-            href="https://book.reset-egypt.com"
+            href={BOOKING_URL}
             className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/30 hover:-translate-y-0.5"
           >
             {c.ctaBook}

@@ -21,7 +21,12 @@ import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 
 interface BackupResult {
   ok: boolean;
@@ -76,9 +81,9 @@ export async function runBackup(): Promise<BackupResult> {
         Body: readFileSync(dumpPath),
         ContentType: 'application/octet-stream',
         Metadata: {
-          'sha256': checksum,
+          sha256: checksum,
           'created-at': new Date().toISOString(),
-          'source': 'auto-cron-daily',
+          source: 'auto-cron-daily',
         },
       }),
     );
@@ -105,7 +110,11 @@ export async function runBackup(): Promise<BackupResult> {
     };
   } finally {
     // Cleanup tmp
-    try { rmSync(tmpDir, { recursive: true, force: true }); } catch { /* noop */ }
+    try {
+      rmSync(tmpDir, { recursive: true, force: true });
+    } catch {
+      /* noop */
+    }
   }
 }
 

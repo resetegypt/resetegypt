@@ -5,12 +5,14 @@ Status: **plugin déjà câblé dans `apps/web/vite.config.ts`**. Reste juste à
 ## Pourquoi
 
 Sans source maps, Sentry te montre des stack traces sur du JS minifié :
+
 ```
 TypeError: t.x is not a function
   at A (/assets/index-DOctwiaR.js:1:14823)
 ```
 
 Avec source maps :
+
 ```
 TypeError: patient.diagnoses is not a function
   at PatientDetailPage (src/pages/patients/PatientDetailPage.tsx:127:18)
@@ -33,24 +35,27 @@ Indispensable pour debug en prod.
 ### 2. Récupère l'org slug + project slug
 
 Visite ton dashboard Sentry :
+
 ```
 https://sentry.io/organizations/<ORG-SLUG>/projects/<PROJECT-SLUG>/
 ```
+
 Les 2 slugs sont dans l'URL.
 
 ### 3. Ajoute les 3 env vars dans Vercel
 
 Project Vercel : **reset-web** → Settings → Environment Variables
 
-| Key | Value | Target |
-|-----|-------|--------|
+| Key                 | Value                             | Target                             |
+| ------------------- | --------------------------------- | ---------------------------------- |
 | `SENTRY_AUTH_TOKEN` | `sntrys_...` (token de l'étape 1) | Production + Preview + Development |
-| `SENTRY_ORG` | ton org slug | Production + Preview + Development |
-| `SENTRY_PROJECT` | ton project slug | Production + Preview + Development |
+| `SENTRY_ORG`        | ton org slug                      | Production + Preview + Development |
+| `SENTRY_PROJECT`    | ton project slug                  | Production + Preview + Development |
 
 ### 4. Redéploie
 
 Push n'importe quelle modif minime sur main, ou clique "Redeploy" sur le dernier deploy Vercel. Le build doit afficher dans les logs :
+
 ```
 > sentry-vite-plugin: uploaded N sourcemaps to Sentry
 ```

@@ -9,6 +9,12 @@ const envSchema = z.object({
   DIRECT_URL: z.string().url().optional(),
   REDIS_URL: z.string().url().optional(),
   JWT_SECRET: z.string().min(16),
+  // ENCRYPTION_KEY dédiée pour chiffrer les secrets sensibles (totpSecret, futurs PII).
+  // Optionnelle : si absente, fallback silencieux sur JWT_SECRET (retrocompat critique
+  // — les secrets déjà chiffrés doivent rester déchiffrables). En prod set une valeur
+  // dédiée >= 32 chars et NE JAMAIS la faire tourner sans plan de re-chiffrement des
+  // colonnes existantes (User.totpSecret notamment).
+  ENCRYPTION_KEY: z.string().min(32).optional(),
   CORS_ORIGIN: z.string().transform((s) => s.split(',').map((o) => o.trim())),
   // Email (Resend ou SMTP fallback)
   RESEND_API_KEY: z.string().optional(),
@@ -42,6 +48,17 @@ export function parseEnv(): Env {
     console.error('❌ Invalid environment variables:');
     console.error(result.error.flatten().fieldErrors);
     process.exit(1);
+  }
+  // Sécurité : warn si on tourne en prod sans clé de chiffrement dédiée.
+  // Le fallback JWT_SECRET reste actif pour retrocompat (secrets déjà en base
+  // chiffrés avec JWT_SECRET dérivé), mais c'est une dette : rotation JWT_SECRET
+  // = perte des totpSecret existants.
+  if (result.data.NODE_ENV === 'production' && !result.data.ENCRYPTION_KEY) {
+    console.warn(
+      '⚠️  ENCRYPTION_KEY absente en production — fallback sur JWT_SECRET. ' +
+        'Set ENCRYPTION_KEY (>=32 chars) dans Vercel env pour découpler la ' +
+        'rotation JWT du chiffrement des secrets TOTP.',
+    );
   }
   return result.data;
 }

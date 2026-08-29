@@ -8,20 +8,21 @@ Plateforme intégrée de gestion de cabinet : agenda multi-praticiens, dossier p
 
 🟢 **Phases 1, 3-9 implémentées** · v1.0.0
 
-| Phase | Module(s) | Statut |
-|-------|-----------|--------|
-| 1 — Cadrage | Monorepo + Docker + Prisma + i18n + UI | ✅ |
-| 2 — Infrastructure (Hetzner + CI/CD + Sentry) | — | ⏳ Déploiement |
-| 3 — Auth + RBAC | 0a, 0b | ✅ |
-| 4 — RDV + Patient | 1, 2, 3 | ✅ |
-| 5 — Clinique + Dossier | 4, 5 | ✅ |
-| 6 — Encaissement | 6 (ETA mocké) | ✅ |
-| 7 — Réservation publique | 7 | ✅ |
-| 8 — Communications | 9 (mock), 11 | ✅ |
-| 9 — Stats + Agenda | 8, 10, 12 | ✅ |
-| 10 — Tests + Production | — | ⏳ |
+| Phase                                         | Module(s)                              | Statut         |
+| --------------------------------------------- | -------------------------------------- | -------------- |
+| 1 — Cadrage                                   | Monorepo + Docker + Prisma + i18n + UI | ✅             |
+| 2 — Infrastructure (Hetzner + CI/CD + Sentry) | —                                      | ⏳ Déploiement |
+| 3 — Auth + RBAC                               | 0a, 0b                                 | ✅             |
+| 4 — RDV + Patient                             | 1, 2, 3                                | ✅             |
+| 5 — Clinique + Dossier                        | 4, 5                                   | ✅             |
+| 6 — Encaissement                              | 6 (ETA mocké)                          | ✅             |
+| 7 — Réservation publique                      | 7                                      | ✅             |
+| 8 — Communications                            | 9 (mock), 11                           | ✅             |
+| 9 — Stats + Agenda                            | 8, 10, 12                              | ✅             |
+| 10 — Tests + Production                       | —                                      | ⏳             |
 
 **À brancher en production (mocks dev)** :
+
 - ETA Egypt (tax.gov.eg) — actuellement génère UUID fake
 - WhatsApp Business Cloud API — actuellement log seulement
 - Twilio SMS — non installé
@@ -75,18 +76,19 @@ pnpm dev
 
 ### Comptes (prod)
 
-| Rôle | Email |
-|------|-------|
-| Admin | direction@reset-egypt.com |
+| Rôle                          | Email                           |
+| ----------------------------- | ------------------------------- |
+| Admin                         | direction@reset-egypt.com       |
 | Praticien (Dr Ahmad Al Ashry) | dr.ahmadalashry@reset-egypt.com |
-| Secrétaire (Sara) | sara@reset-egypt.com |
-| Secrétaire (Nora) | nora@reset-egypt.com |
+| Secrétaire (Sara)             | sara@reset-egypt.com            |
+| Secrétaire (Nora)             | nora@reset-egypt.com            |
 
 > Mots de passe confiés au client en privé (jamais commités). Pour développement local, lancer `pnpm db:seed` régénère des comptes avec le mot de passe par défaut défini dans `apps/api/prisma/seed.ts` — **à changer immédiatement avant tout déploiement**.
 
 ## Fonctionnalités
 
 ### Pour la secrétaire 👤
+
 - **Tableau de bord** : KPIs du jour (RDV, demandes, recettes), liste chronologique des RDV
 - **Agenda hebdomadaire** : grille 7 jours × 18 créneaux (10h-22h, séances de 40 min), drag-to-create
 - **Création de RDV** : recherche patient autocomplete, détection conflits, calcul prix auto
@@ -96,16 +98,19 @@ pnpm dev
 - **Liste patients** : recherche, statut, addiction
 
 ### Pour le praticien 🩺
+
 - **Mon agenda** : ses RDV du jour
 - **Fiche clinique** (Étape 2) : anamnèse, échelles 0-10 (stress/anxiété/envies/sommeil/motivation), contre-indications (⚠️ pacemaker, épilepsie, grossesse), test Fagerström (tabac), mesures objectives + IMC auto, plan thérapeutique (points auriculaires, durée laser), notes privées
 - **Dossier patient 360°** : timeline complète, score d'évolution calculé, historique séances
 
 ### Pour la direction 👑
+
 - **Statistiques globales** : CA + tendance, séances, patients actifs, sources d'acquisition, performance praticiens
 - **Gestion comptes** : création/désactivation utilisateurs, déverrouillage, reset mot de passe
 - **Journal d'audit** : 200 derniers événements (logins, créations, paiements...) avec IP
 
 ### Pour le patient (public) 🌐
+
 - **Réservation 4 étapes** : service → date+créneau → coordonnées → confirmation
 - **18 créneaux/jour** affichés en temps réel (créneaux pris barrés)
 - **Confirmation immédiate** avec numéro `RES-YYYY-XXXX`
@@ -141,70 +146,80 @@ reset/
 
 ## Commandes utiles
 
-| Commande | Effet |
-|----------|-------|
-| `pnpm dev` | Lance API + web + booking en parallèle |
-| `pnpm dev:api` | API uniquement |
-| `pnpm dev:web` | Web uniquement |
-| `pnpm dev:booking` | Booking uniquement |
-| `pnpm build` | Build tous les workspaces |
-| `pnpm test` | Lance tous les tests |
-| `pnpm typecheck` | Vérification TypeScript |
-| `pnpm lint` | Lint tous les workspaces |
-| `pnpm format` | Format Prettier |
-| `pnpm db:up` | Lance Docker (Postgres + Redis + MailHog) |
-| `pnpm db:migrate` | `prisma migrate dev` |
-| `pnpm db:seed` | Réinjecte le seed |
-| `pnpm db:studio` | Ouvre Prisma Studio |
+| Commande           | Effet                                     |
+| ------------------ | ----------------------------------------- |
+| `pnpm dev`         | Lance API + web + booking en parallèle    |
+| `pnpm dev:api`     | API uniquement                            |
+| `pnpm dev:web`     | Web uniquement                            |
+| `pnpm dev:booking` | Booking uniquement                        |
+| `pnpm build`       | Build tous les workspaces                 |
+| `pnpm test`        | Lance tous les tests                      |
+| `pnpm typecheck`   | Vérification TypeScript                   |
+| `pnpm lint`        | Lint tous les workspaces                  |
+| `pnpm format`      | Format Prettier                           |
+| `pnpm db:up`       | Lance Docker (Postgres + Redis + MailHog) |
+| `pnpm db:migrate`  | `prisma migrate dev`                      |
+| `pnpm db:seed`     | Réinjecte le seed                         |
+| `pnpm db:studio`   | Ouvre Prisma Studio                       |
 
 ## API Endpoints
 
 ### Auth (public)
+
 - `POST /api/auth/login` - login + cookie JWT
 - `POST /api/auth/logout` - clear cookie + audit
 - `GET /api/auth/me` - current user (auth required)
 - `POST /api/auth/password/forgot` - mock reset
 
 ### Booking (public)
+
 - `GET /api/booking/slots?date=YYYY-MM-DD` - 18 slots avec disponibilité
 - `POST /api/booking` - create patient + appointment
 
 ### Users (admin only)
+
 - `GET/POST/PATCH /api/users`
 - `POST /api/users/:id/unlock`, `/reset-password`
 - `GET /api/audit-logs`
 - `GET /api/admin/kpis`
 
 ### Patients
+
 - `GET/POST/PATCH /api/patients`
 - `GET /api/patients/:id` (avec timeline + stats + evolution)
 
 ### Appointments
+
 - `GET/POST/PATCH/DELETE /api/appointments`
 - `GET /api/appointments/today` - RDV du jour (filtré par praticien)
 - `GET /api/appointments/week?start=...` - vue hebdo
 - `GET /api/practitioners` - liste praticiens actifs
 
 ### Medical Records (praticien only)
+
 - `POST /api/medical-records` - création/upsert + marque RDV completed
 - `GET /api/medical-records/:id`
 - `GET /api/appointments/:id/medical-record`
 
 ### Payments (secrétaire + admin)
+
 - `POST /api/payments` - calcul TVA + mock ETA submit + audit
 - `GET /api/payments/:id`, `GET /api/payments`
 
 ### Messages
+
 - `GET /api/messages/conversations` - groupées par patient/canal
 - `GET /api/messages?channel=...&unread=true`
 - `POST /api/messages` (envoi mocké)
 - `POST /api/messages/:id/read`
 
 ### Stats
+
 - `GET /api/stats/dashboard` - KPIs du jour
 - `GET /api/stats/global?period=day|week|month|year` (admin only)
 
 ### Automations
+
 - `GET /api/automation-workflows` - 6 workflows seed à la 1ère lecture
 - `PATCH /api/automation-workflows/:id`
 

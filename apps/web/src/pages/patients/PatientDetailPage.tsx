@@ -186,8 +186,7 @@ export function PatientDetailPage() {
   if (first && last && evolution.length > 1) {
     const initial =
       (first.stressScore ?? 0) + (first.anxietyScore ?? 0) + (first.cravingScore ?? 0);
-    const current =
-      (last.stressScore ?? 0) + (last.anxietyScore ?? 0) + (last.cravingScore ?? 0);
+    const current = (last.stressScore ?? 0) + (last.anxietyScore ?? 0) + (last.cravingScore ?? 0);
     if (initial > 0) evolutionScore = Math.round(((initial - current) / initial) * 100);
   }
 
@@ -223,17 +222,19 @@ export function PatientDetailPage() {
           <CardContent className="flex items-start gap-4">
             <PatientAvatarUpload
               patient={patient}
-              editable={!isPractitioner /* tout le monde sauf praticien peut éditer */ || user?.role === 'PRACTITIONER'}
+              editable={
+                !isPractitioner /* tout le monde sauf praticien peut éditer */ ||
+                user?.role === 'PRACTITIONER'
+              }
             />
             <div className="flex-1 min-w-0">
               <div className="flex gap-2 flex-wrap items-center">
                 <Badge variant={patient.status === 'ACTIVE' ? 'success' : 'neutral'}>
-                  {patient.status === 'ACTIVE'
-                    ? t('patients.detail.followingIn')
-                    : patient.status}
+                  {patient.status === 'ACTIVE' ? t('patients.detail.followingIn') : patient.status}
                 </Badge>
                 <Badge variant="warning">
-                  {ADDICTION_ICON[patient.primaryAddiction]} {t(`addiction.${patient.primaryAddiction}`)}
+                  {ADDICTION_ICON[patient.primaryAddiction]}{' '}
+                  {t(`addiction.${patient.primaryAddiction}`)}
                 </Badge>
                 {patient.preferredPractitioner && (
                   <Badge variant="info">
@@ -251,7 +252,9 @@ export function PatientDetailPage() {
           </CardContent>
         </Card>
 
-        <div className={`grid grid-cols-2 ${isPractitioner ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-4`}>
+        <div
+          className={`grid grid-cols-2 ${isPractitioner ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-4`}
+        >
           <Card>
             <CardContent>
               <p className="text-xs text-text-secondary">📋 {t('patients.detail.kpi.sessions')}</p>
@@ -263,7 +266,9 @@ export function PatientDetailPage() {
           {!isPractitioner && (
             <Card>
               <CardContent>
-                <p className="text-xs text-text-secondary">💰 {t('patients.detail.kpi.totalPaid')}</p>
+                <p className="text-xs text-text-secondary">
+                  💰 {t('patients.detail.kpi.totalPaid')}
+                </p>
                 <p className="text-3xl font-bold" data-numeric>
                   {stats.totalPaid.toLocaleString(i18n.language)} EGP
                 </p>
@@ -274,7 +279,8 @@ export function PatientDetailPage() {
             <CardContent>
               <p className="text-xs text-text-secondary">⏱️ {t('patients.detail.kpi.duration')}</p>
               <p className="text-3xl font-bold" data-numeric>
-                {weeksBetween(patient.createdAt, new Date().toISOString())} {t('patients.detail.weeks')}
+                {weeksBetween(patient.createdAt, new Date().toISOString())}{' '}
+                {t('patients.detail.weeks')}
               </p>
             </CardContent>
           </Card>
@@ -314,231 +320,248 @@ export function PatientDetailPage() {
         {/* === ONGLET SUIVI === */}
         {tab === 'suivi' && (
           <div className="space-y-6">
-            <ScoreEvolutionChart patientId={patient.id} hasMedicalRecord={!!patient.medicalRecord} />
+            <ScoreEvolutionChart
+              patientId={patient.id}
+              hasMedicalRecord={!!patient.medicalRecord}
+            />
             <FollowUpTimeline patientId={patient.id} />
           </div>
         )}
 
         {/* === ONGLET FICHE CLINIQUE === */}
         {tab === 'clinique' && (
-          <ClinicalTabContent
-            patient={patient}
-            isPractitioner={isPractitioner}
-          />
+          <ClinicalTabContent patient={patient} isPractitioner={isPractitioner} />
         )}
 
         {/* === ONGLET FICHE D'ACCUEIL — toutes les infos saisies à l'admission === */}
         {tab === 'accueil' && (
-        <>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-3 w-full">
-              <CardTitle>📋 {t('patients.detail.intakeSection', "Fiche d'accueil")}</CardTitle>
-              {!isPractitioner && (
-                <Button asChild size="sm" variant="outline">
-                  <Link to={`/patients/${patient.id}/edit`}>
-                    ✏️ {t('common.edit', 'Modifier')}
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y divide-border-light">
-              <IntakeSection title={t('patients.intake.identity', 'Identité')} icon="🆔">
-                <Field
-                  label={t('patients.intake.firstName', 'Prénom')}
-                  value={patient.firstName}
-                />
-                <Field
-                  label={t('patients.intake.lastName', 'Nom')}
-                  value={patient.lastName}
-                />
-                <Field
-                  label={t('patients.intake.dateOfBirth', 'Date de naissance')}
-                  value={
-                    patient.dateOfBirth
-                      ? new Date(patient.dateOfBirth).toLocaleDateString(i18n.language)
-                      : '—'
-                  }
-                />
-                <Field
-                  label={t('patients.intake.age', 'Âge')}
-                  value={patient.age ? `${patient.age} ${t('patients.detail.yearsLabel', 'ans')}` : '—'}
-                />
-                <Field
-                  label={t('patients.intake.gender', 'Genre')}
-                  value={
-                    patient.gender === 'MALE'
-                      ? t('patients.intake.male', 'Homme')
-                      : patient.gender === 'FEMALE'
-                        ? t('patients.intake.female', 'Femme')
-                        : '—'
-                  }
-                />
-                <Field
-                  label={t('patients.intake.preferredLanguage', 'Langue préférée')}
-                  value={
-                    patient.preferredLanguage === 'fr'
-                      ? 'Français'
-                      : patient.preferredLanguage === 'ar'
-                        ? 'العربية'
-                        : 'English'
-                  }
-                />
-              </IntakeSection>
-
-              <IntakeSection title={t('patients.intake.contact', 'Contact')} icon="📞">
-                <Field
-                  label={t('patients.intake.phone', 'Téléphone')}
-                  value={patient.phone}
-                  mono
-                />
-                <Field
-                  label={t('patients.intake.whatsapp', 'WhatsApp')}
-                  value={patient.whatsapp ?? '—'}
-                  mono
-                />
-                <Field
-                  label={t('patients.intake.email', 'Email')}
-                  value={patient.email ?? '—'}
-                />
-                <Field
-                  label={t('patients.intake.profession', 'Profession')}
-                  value={patient.profession ?? '—'}
-                />
-                <Field
-                  label={t('patients.intake.address', 'Adresse')}
-                  value={patient.address ?? '—'}
-                  wide
-                />
-                <Field
-                  label={t('patients.intake.governorate', 'Gouvernorat')}
-                  value={patient.governorate ?? '—'}
-                />
-              </IntakeSection>
-
-              <IntakeSection title={t('patients.intake.consultationReason', 'Motif de consultation')} icon="🎯">
-                <Field
-                  label={t('patients.intake.addictionType', 'Type d\'addiction')}
-                  value={`${ADDICTION_ICON[patient.primaryAddiction]} ${t(`addiction.${patient.primaryAddiction}`)}`}
-                />
-                <Field
-                  label={t('patients.intake.previousAttempts', 'Tentatives précédentes')}
-                  value={patient.previousAttempts ?? '—'}
-                />
-                <Field
-                  label={t('patients.intake.motivationLevel', 'Niveau de motivation')}
-                  value={
-                    patient.motivationLevel === 'high'
-                      ? t('patients.intake.motivation.high', 'Élevé')
-                      : patient.motivationLevel === 'medium'
-                        ? t('patients.intake.motivation.medium', 'Moyen')
-                        : patient.motivationLevel === 'low'
-                          ? t('patients.intake.motivation.low', 'Faible')
-                          : '—'
-                  }
-                />
-                <Field
-                  label={t('patients.intake.acquisitionSource', "Source d'acquisition")}
-                  value={
-                    patient.acquisitionSource.length > 0
-                      ? patient.acquisitionSource
-                          .map((s) => t(`patients.intake.sources.${s}`, s))
-                          .join(', ')
-                      : '—'
-                  }
-                  wide
-                />
-              </IntakeSection>
-
-              <IntakeSection title={t('patients.intake.emergencyContact', 'Contact d\'urgence')} icon="🆘">
-                <Field
-                  label={t('patients.intake.emergencyName', 'Nom')}
-                  value={patient.emergencyContact?.name ?? '—'}
-                />
-                <Field
-                  label={t('patients.intake.emergencyPhone', 'Téléphone')}
-                  value={patient.emergencyContact?.phone ?? '—'}
-                  mono
-                />
-              </IntakeSection>
-
-              <IntakeSection title={t('patients.intake.consents', 'Consentements')} icon="🛡️">
-                <ConsentRow
-                  label={t('patients.intake.consent1', 'Protection des données (loi 151/2020)')}
-                  consent={patient.consents.dataProtection}
-                  required
-                />
-                <ConsentRow
-                  label={t('patients.intake.consent2', 'Autorisation SMS / WhatsApp')}
-                  consent={patient.consents.smsAuthorization}
-                />
-                <ConsentRow
-                  label={t('patients.intake.consent3', 'Reconnaissance centre non-médical')}
-                  consent={patient.consents.nonMedicalAcknowledgement}
-                  required
-                />
-              </IntakeSection>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>📜 {t('patients.detail.history')}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <table className="w-full text-sm">
-              <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
-                <tr>
-                  <th className="text-start px-4 py-2">{t('patients.detail.columns.date')}</th>
-                  <th className="text-start px-4 py-2">{t('patients.detail.columns.practitioner')}</th>
-                  <th className="text-start px-4 py-2">{t('patients.detail.columns.type')}</th>
-                  <th className="text-start px-4 py-2">{t('patients.detail.columns.status')}</th>
+          <>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <CardTitle>📋 {t('patients.detail.intakeSection', "Fiche d'accueil")}</CardTitle>
                   {!isPractitioner && (
-                    <th className="text-end px-4 py-2">{t('patients.detail.columns.amount')}</th>
+                    <Button asChild size="sm" variant="outline">
+                      <Link to={`/patients/${patient.id}/edit`}>
+                        ✏️ {t('common.edit', 'Modifier')}
+                      </Link>
+                    </Button>
                   )}
-                  <th className="text-end px-4 py-2">{t('patients.detail.columns.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {patient.appointments.map((a) => (
-                  <tr key={a.id}>
-                    <td className="px-4 py-2" data-numeric>
-                      {new Date(a.scheduledAt).toLocaleString(i18n.language)}
-                    </td>
-                    <td className="px-4 py-2 text-text-secondary">Dr. {a.practitioner.firstName}</td>
-                    <td className="px-4 py-2">
-                      {ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)} ·{' '}
-                      {t(`dashboard.visitType.${a.visitType}`)}
-                    </td>
-                    <td className="px-4 py-2">
-                      <Badge variant={statusVariant(a.status)}>{t(`appointmentStatus.${a.status}`)}</Badge>
-                    </td>
-                    {!isPractitioner && (
-                      <td className="px-4 py-2 text-end font-mono text-xs" data-numeric>
-                        {a.payment
-                          ? `${Number(a.payment.total).toLocaleString(i18n.language)} EGP`
-                          : `${Number(a.price).toLocaleString(i18n.language)} (${t('patients.detail.toCash')})`}
-                      </td>
-                    )}
-                    <td className="px-4 py-2 text-end space-x-1">
-                      {!isPractitioner && !a.payment && a.status !== 'CANCELLED' && (
-                        <Link to={`/payment/${a.id}`}>
-                          <Button size="sm" variant="outline">
-                            {t('patients.detail.cash')}
-                          </Button>
-                        </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y divide-border-light">
+                  <IntakeSection title={t('patients.intake.identity', 'Identité')} icon="🆔">
+                    <Field
+                      label={t('patients.intake.firstName', 'Prénom')}
+                      value={patient.firstName}
+                    />
+                    <Field label={t('patients.intake.lastName', 'Nom')} value={patient.lastName} />
+                    <Field
+                      label={t('patients.intake.dateOfBirth', 'Date de naissance')}
+                      value={
+                        patient.dateOfBirth
+                          ? new Date(patient.dateOfBirth).toLocaleDateString(i18n.language)
+                          : '—'
+                      }
+                    />
+                    <Field
+                      label={t('patients.intake.age', 'Âge')}
+                      value={
+                        patient.age
+                          ? `${patient.age} ${t('patients.detail.yearsLabel', 'ans')}`
+                          : '—'
+                      }
+                    />
+                    <Field
+                      label={t('patients.intake.gender', 'Genre')}
+                      value={
+                        patient.gender === 'MALE'
+                          ? t('patients.intake.male', 'Homme')
+                          : patient.gender === 'FEMALE'
+                            ? t('patients.intake.female', 'Femme')
+                            : '—'
+                      }
+                    />
+                    <Field
+                      label={t('patients.intake.preferredLanguage', 'Langue préférée')}
+                      value={
+                        patient.preferredLanguage === 'fr'
+                          ? 'Français'
+                          : patient.preferredLanguage === 'ar'
+                            ? 'العربية'
+                            : 'English'
+                      }
+                    />
+                  </IntakeSection>
+
+                  <IntakeSection title={t('patients.intake.contact', 'Contact')} icon="📞">
+                    <Field
+                      label={t('patients.intake.phone', 'Téléphone')}
+                      value={patient.phone}
+                      mono
+                    />
+                    <Field
+                      label={t('patients.intake.whatsapp', 'WhatsApp')}
+                      value={patient.whatsapp ?? '—'}
+                      mono
+                    />
+                    <Field
+                      label={t('patients.intake.email', 'Email')}
+                      value={patient.email ?? '—'}
+                    />
+                    <Field
+                      label={t('patients.intake.profession', 'Profession')}
+                      value={patient.profession ?? '—'}
+                    />
+                    <Field
+                      label={t('patients.intake.address', 'Adresse')}
+                      value={patient.address ?? '—'}
+                      wide
+                    />
+                    <Field
+                      label={t('patients.intake.governorate', 'Gouvernorat')}
+                      value={patient.governorate ?? '—'}
+                    />
+                  </IntakeSection>
+
+                  <IntakeSection
+                    title={t('patients.intake.consultationReason', 'Motif de consultation')}
+                    icon="🎯"
+                  >
+                    <Field
+                      label={t('patients.intake.addictionType', "Type d'addiction")}
+                      value={`${ADDICTION_ICON[patient.primaryAddiction]} ${t(`addiction.${patient.primaryAddiction}`)}`}
+                    />
+                    <Field
+                      label={t('patients.intake.previousAttempts', 'Tentatives précédentes')}
+                      value={patient.previousAttempts ?? '—'}
+                    />
+                    <Field
+                      label={t('patients.intake.motivationLevel', 'Niveau de motivation')}
+                      value={
+                        patient.motivationLevel === 'high'
+                          ? t('patients.intake.motivation.high', 'Élevé')
+                          : patient.motivationLevel === 'medium'
+                            ? t('patients.intake.motivation.medium', 'Moyen')
+                            : patient.motivationLevel === 'low'
+                              ? t('patients.intake.motivation.low', 'Faible')
+                              : '—'
+                      }
+                    />
+                    <Field
+                      label={t('patients.intake.acquisitionSource', "Source d'acquisition")}
+                      value={
+                        patient.acquisitionSource.length > 0
+                          ? patient.acquisitionSource
+                              .map((s) => t(`patients.intake.sources.${s}`, s))
+                              .join(', ')
+                          : '—'
+                      }
+                      wide
+                    />
+                  </IntakeSection>
+
+                  <IntakeSection
+                    title={t('patients.intake.emergencyContact', "Contact d'urgence")}
+                    icon="🆘"
+                  >
+                    <Field
+                      label={t('patients.intake.emergencyName', 'Nom')}
+                      value={patient.emergencyContact?.name ?? '—'}
+                    />
+                    <Field
+                      label={t('patients.intake.emergencyPhone', 'Téléphone')}
+                      value={patient.emergencyContact?.phone ?? '—'}
+                      mono
+                    />
+                  </IntakeSection>
+
+                  <IntakeSection title={t('patients.intake.consents', 'Consentements')} icon="🛡️">
+                    <ConsentRow
+                      label={t('patients.intake.consent1', 'Protection des données (loi 151/2020)')}
+                      consent={patient.consents.dataProtection}
+                      required
+                    />
+                    <ConsentRow
+                      label={t('patients.intake.consent2', 'Autorisation SMS / WhatsApp')}
+                      consent={patient.consents.smsAuthorization}
+                    />
+                    <ConsentRow
+                      label={t('patients.intake.consent3', 'Reconnaissance centre non-médical')}
+                      consent={patient.consents.nonMedicalAcknowledgement}
+                      required
+                    />
+                  </IntakeSection>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>📜 {t('patients.detail.history')}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <table className="w-full text-sm">
+                  <thead className="bg-bg-secondary text-xs uppercase text-text-secondary">
+                    <tr>
+                      <th className="text-start px-4 py-2">{t('patients.detail.columns.date')}</th>
+                      <th className="text-start px-4 py-2">
+                        {t('patients.detail.columns.practitioner')}
+                      </th>
+                      <th className="text-start px-4 py-2">{t('patients.detail.columns.type')}</th>
+                      <th className="text-start px-4 py-2">
+                        {t('patients.detail.columns.status')}
+                      </th>
+                      {!isPractitioner && (
+                        <th className="text-end px-4 py-2">
+                          {t('patients.detail.columns.amount')}
+                        </th>
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-        </>
+                      <th className="text-end px-4 py-2">{t('patients.detail.columns.actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {patient.appointments.map((a) => (
+                      <tr key={a.id}>
+                        <td className="px-4 py-2" data-numeric>
+                          {new Date(a.scheduledAt).toLocaleString(i18n.language)}
+                        </td>
+                        <td className="px-4 py-2 text-text-secondary">
+                          Dr. {a.practitioner.firstName}
+                        </td>
+                        <td className="px-4 py-2">
+                          {ADDICTION_ICON[a.service]} {t(`addiction.${a.service}`)} ·{' '}
+                          {t(`dashboard.visitType.${a.visitType}`)}
+                        </td>
+                        <td className="px-4 py-2">
+                          <Badge variant={statusVariant(a.status)}>
+                            {t(`appointmentStatus.${a.status}`)}
+                          </Badge>
+                        </td>
+                        {!isPractitioner && (
+                          <td className="px-4 py-2 text-end font-mono text-xs" data-numeric>
+                            {a.payment
+                              ? `${Number(a.payment.total).toLocaleString(i18n.language)} EGP`
+                              : `${Number(a.price).toLocaleString(i18n.language)} (${t('patients.detail.toCash')})`}
+                          </td>
+                        )}
+                        <td className="px-4 py-2 text-end space-x-1">
+                          {!isPractitioner && !a.payment && a.status !== 'CANCELLED' && (
+                            <Link to={`/payment/${a.id}`}>
+                              <Button size="sm" variant="outline">
+                                {t('patients.detail.cash')}
+                              </Button>
+                            </Link>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          </>
         )}
       </div>
     </>
@@ -563,9 +586,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`group relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all ${
-        active
-          ? 'text-primary'
-          : 'text-text-secondary hover:text-text'
+        active ? 'text-primary' : 'text-text-secondary hover:text-text'
       }`}
     >
       <Icon className={`w-4 h-4 ${active ? 'text-primary' : 'text-text-tertiary'}`} />
@@ -573,9 +594,7 @@ function TabButton({
       {badge !== undefined && badge > 0 && (
         <span
           className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-semibold ${
-            active
-              ? 'bg-primary text-white'
-              : 'bg-bg-secondary text-text-secondary'
+            active ? 'bg-primary text-white' : 'bg-bg-secondary text-text-secondary'
           }`}
         >
           {badge}
@@ -606,24 +625,24 @@ function ClinicalTabContent({
             <Stethoscope className="w-10 h-10" />
           </div>
           <h3 className="text-lg font-semibold mb-1">
-            {t('patients.detail.clinical.noneTitle', "Aucune fiche clinique pour ce patient")}
+            {t('patients.detail.clinical.noneTitle', 'Aucune fiche clinique pour ce patient')}
           </h3>
           <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
             {isPractitioner
               ? t(
                   'patients.detail.clinical.noneHintDoctor',
-                  "Créez la fiche clinique en posant les questions nécessaires au patient pour comprendre son addiction en détail.",
+                  'Créez la fiche clinique en posant les questions nécessaires au patient pour comprendre son addiction en détail.',
                 )
               : t(
                   'patients.detail.clinical.noneHintOther',
-                  "La fiche clinique sera créée par le médecin lors de la première consultation.",
+                  'La fiche clinique sera créée par le médecin lors de la première consultation.',
                 )}
           </p>
           {isPractitioner && (
             <Link to={`/patients/${patient.id}/clinical`}>
               <Button>
                 <Plus className="w-4 h-4 me-1.5" />
-                {t('patients.detail.clinical.createFull', "Créer la fiche clinique")}
+                {t('patients.detail.clinical.createFull', 'Créer la fiche clinique')}
               </Button>
             </Link>
           )}
@@ -676,11 +695,36 @@ function ClinicalTabContent({
       </div>
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <SummaryStat label="Stress" value={mr.stressScore} max={10} tone={mr.stressScore && mr.stressScore >= 7 ? 'danger' : 'default'} />
-          <SummaryStat label="Anxiété" value={mr.anxietyScore} max={10} tone={mr.anxietyScore && mr.anxietyScore >= 7 ? 'danger' : 'default'} />
-          <SummaryStat label="Envies" value={mr.cravingScore} max={10} tone={mr.cravingScore && mr.cravingScore >= 7 ? 'warning' : 'default'} />
-          <SummaryStat label="Sommeil" value={mr.sleepScore} max={10} tone={mr.sleepScore && mr.sleepScore <= 3 ? 'warning' : 'default'} />
-          <SummaryStat label="Motivation" value={mr.motivationScore} max={10} tone={mr.motivationScore && mr.motivationScore >= 7 ? 'success' : 'default'} />
+          <SummaryStat
+            label="Stress"
+            value={mr.stressScore}
+            max={10}
+            tone={mr.stressScore && mr.stressScore >= 7 ? 'danger' : 'default'}
+          />
+          <SummaryStat
+            label="Anxiété"
+            value={mr.anxietyScore}
+            max={10}
+            tone={mr.anxietyScore && mr.anxietyScore >= 7 ? 'danger' : 'default'}
+          />
+          <SummaryStat
+            label="Envies"
+            value={mr.cravingScore}
+            max={10}
+            tone={mr.cravingScore && mr.cravingScore >= 7 ? 'warning' : 'default'}
+          />
+          <SummaryStat
+            label="Sommeil"
+            value={mr.sleepScore}
+            max={10}
+            tone={mr.sleepScore && mr.sleepScore <= 3 ? 'warning' : 'default'}
+          />
+          <SummaryStat
+            label="Motivation"
+            value={mr.motivationScore}
+            max={10}
+            tone={mr.motivationScore && mr.motivationScore >= 7 ? 'success' : 'default'}
+          />
         </div>
         {scoresFilled === 0 && (
           <p className="text-xs text-text-tertiary italic mt-3 text-center">
@@ -715,8 +759,12 @@ function SummaryStat({
   const isSet = value !== null && value !== undefined;
   return (
     <div className="rounded-lg bg-bg-secondary/40 border border-border-light px-3 py-2.5">
-      <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">{label}</div>
-      <div className={`mt-0.5 font-bold tabular-nums ${isSet ? `text-xl ${colors[tone]}` : 'text-base text-text-tertiary italic'}`}>
+      <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">
+        {label}
+      </div>
+      <div
+        className={`mt-0.5 font-bold tabular-nums ${isSet ? `text-xl ${colors[tone]}` : 'text-base text-text-tertiary italic'}`}
+      >
         {isSet ? `${value}/${max}` : '—'}
       </div>
     </div>
@@ -752,9 +800,7 @@ function IntakeSection({
         <span>{icon}</span>
         <span>{title}</span>
       </h4>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
-        {children}
-      </dl>
+      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">{children}</dl>
     </div>
   );
 }
@@ -798,9 +844,7 @@ function ConsentRow({
   required?: boolean;
 }) {
   const accepted = consent?.accepted ?? false;
-  const dateStr = consent?.timestamp
-    ? new Date(consent.timestamp).toLocaleDateString()
-    : null;
+  const dateStr = consent?.timestamp ? new Date(consent.timestamp).toLocaleDateString() : null;
   return (
     <div className="sm:col-span-2 lg:col-span-3 flex items-start gap-3 py-1">
       <span
@@ -819,11 +863,7 @@ function ConsentRow({
           {label}
           {required && <span className="text-danger ms-1">*</span>}
         </div>
-        {dateStr && (
-          <div className="text-[11px] text-text-tertiary mt-0.5">
-            Signé le {dateStr}
-          </div>
-        )}
+        {dateStr && <div className="text-[11px] text-text-tertiary mt-0.5">Signé le {dateStr}</div>}
       </div>
     </div>
   );
@@ -871,8 +911,7 @@ function PatientAvatarUpload({
   const [uploading, setUploading] = useState(false);
 
   const setAvatar = useMutation({
-    mutationFn: (dataUrl: string | null) =>
-      apiPatch(`/patients/${patient.id}/avatar`, { dataUrl }),
+    mutationFn: (dataUrl: string | null) => apiPatch(`/patients/${patient.id}/avatar`, { dataUrl }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patient', patient.id] });
     },
@@ -1096,13 +1135,11 @@ function ScoreEvolutionChart({
 
   const { data, isLoading } = useQuery({
     queryKey: ['patient-score-snapshots', patientId],
-    queryFn: () =>
-      apiGet<{ snapshots: ScoreSnapshot[] }>(`/patients/${patientId}/score-snapshots`),
+    queryFn: () => apiGet<{ snapshots: ScoreSnapshot[] }>(`/patients/${patientId}/score-snapshots`),
   });
 
   const takeSnapshot = useMutation({
-    mutationFn: () =>
-      apiPost(`/patients/${patientId}/score-snapshots`, { useCurrent: true }),
+    mutationFn: () => apiPost(`/patients/${patientId}/score-snapshots`, { useCurrent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patient-score-snapshots', patientId] });
       toast.success(
@@ -1226,7 +1263,7 @@ function SingleSnapshotView({ snapshot, lang }: { snapshot: ScoreSnapshot; lang:
       <div className="text-xs text-text-secondary mb-3">
         {t(
           'patients.detail.scoresEvolution.firstSnapshot',
-          'Premier snapshot enregistré le {{date}}. Prenez-en un nouveau après la prochaine séance pour voir la courbe d\'évolution.',
+          "Premier snapshot enregistré le {{date}}. Prenez-en un nouveau après la prochaine séance pour voir la courbe d'évolution.",
           {
             date: new Date(snapshot.takenAt).toLocaleDateString(lang, {
               day: 'numeric',
@@ -1466,8 +1503,7 @@ function FollowUpTimeline({ patientId }: { patientId: string }) {
           <ol className="relative border-s-2 border-border-light ms-3 space-y-5">
             {notes.map((n) => {
               const meta = NOTE_KIND_META[n.kind] ?? NOTE_KIND_META.NOTE!;
-              const canDelete =
-                user?.role === 'ADMIN' || (user && n.author.id === user.id);
+              const canDelete = user?.role === 'ADMIN' || (user && n.author.id === user.id);
               return (
                 <li key={n.id} className="ms-6 relative">
                   <span

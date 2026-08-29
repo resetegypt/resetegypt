@@ -1,4 +1,11 @@
-import { PrismaClient, Role, Addiction, Gender, AppointmentStatus, VisitType } from '@prisma/client';
+import {
+  PrismaClient,
+  Role,
+  Addiction,
+  Gender,
+  AppointmentStatus,
+  VisitType,
+} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();

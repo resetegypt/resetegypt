@@ -122,8 +122,7 @@ export default function PrivacyPage() {
         <li>Mots de passe hashés bcrypt cost 12</li>
         <li>2FA disponible pour tous les comptes staff</li>
         <li>
-          Rate-limit anti brute-force sur les endpoints d&apos;authentification (10 essais / 15
-          min)
+          Rate-limit anti brute-force sur les endpoints d&apos;authentification (10 essais / 15 min)
         </li>
         <li>Audit log de toutes les actions sensibles</li>
         <li>Backup base de données quotidien (rétention 30 jours)</li>
@@ -133,8 +132,8 @@ export default function PrivacyPage() {
       <p>
         Toute réclamation peut être adressée à{' '}
         <a href="mailto:contact@reset-egypt.com">contact@reset-egypt.com</a>. Tu peux également
-        saisir le régulateur compétent (Personal Data Protection Center en Égypte, ou l&apos;autorité
-        de protection de ton pays de résidence pour les visiteurs EU).
+        saisir le régulateur compétent (Personal Data Protection Center en Égypte, ou
+        l&apos;autorité de protection de ton pays de résidence pour les visiteurs EU).
       </p>
     </article>
   );

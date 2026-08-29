@@ -8,6 +8,7 @@ import { Microscope, Zap, HeartHandshake, ArrowRight, Sparkles, Award, Shield } 
 import { Section } from './Section';
 import type { Locale } from '../lib/i18n';
 import { getAboutContent } from '../lib/page-content';
+import { BOOKING_URL } from '../lib/urls';
 
 const PILLAR_ICONS = [Microscope, Zap, HeartHandshake];
 
@@ -133,7 +134,7 @@ export function LocalizedAboutPage({ locale }: { locale: Locale }) {
           </h2>
           <p className="mt-4 text-base text-text-secondary leading-relaxed">{c.cta.description}</p>
           <Link
-            href="https://book.reset-egypt.com"
+            href={BOOKING_URL}
             className="inline-flex items-center gap-2 mt-8 px-8 py-4 text-base font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/25"
           >
             {c.cta.button}

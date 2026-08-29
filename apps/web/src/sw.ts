@@ -85,7 +85,11 @@ self.addEventListener('notificationclick', (event) => {
         if ('focus' in c) {
           await (c as WindowClient).focus();
           if ('navigate' in c) {
-            try { await (c as WindowClient).navigate(url); } catch { /* noop */ }
+            try {
+              await (c as WindowClient).navigate(url);
+            } catch {
+              /* noop */
+            }
           }
           return;
         }

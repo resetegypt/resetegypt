@@ -87,7 +87,10 @@ export function CookieConsent({ locale: localeProp }: { locale?: 'fr' | 'en' | '
       <div className="pointer-events-auto max-w-3xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-2xl p-5 sm:p-6">
         {!showDetails ? (
           <>
-            <h2 id="cookie-consent-title" className="font-semibold text-base sm:text-lg text-gray-900">
+            <h2
+              id="cookie-consent-title"
+              className="font-semibold text-base sm:text-lg text-gray-900"
+            >
               {t.title}
             </h2>
             <p id="cookie-consent-desc" className="text-sm text-gray-600 mt-2 leading-relaxed">
@@ -120,7 +123,12 @@ export function CookieConsent({ locale: localeProp }: { locale?: 'fr' | 'en' | '
             <p className="text-sm text-gray-600 mt-1">{t.detailsDescription}</p>
             <div className="mt-4 space-y-3">
               <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-                <input type="checkbox" checked disabled className="mt-1 cursor-not-allowed opacity-60" />
+                <input
+                  type="checkbox"
+                  checked
+                  disabled
+                  className="mt-1 cursor-not-allowed opacity-60"
+                />
                 <div>
                   <div className="font-medium text-sm text-gray-900">{t.essentialTitle}</div>
                   <div className="text-xs text-gray-600 mt-0.5">{t.essentialDesc}</div>
@@ -169,11 +177,13 @@ const TRANSLATIONS = {
     essentialOnly: 'Essentiels uniquement',
     customize: 'Personnaliser',
     detailsTitle: 'Paramètres des cookies',
-    detailsDescription: "Choisissez ce que vous autorisez. Vous pouvez changer d'avis à tout moment.",
+    detailsDescription:
+      "Choisissez ce que vous autorisez. Vous pouvez changer d'avis à tout moment.",
     essentialTitle: 'Cookies essentiels (toujours actifs)',
     essentialDesc: 'Indispensables au fonctionnement : session, sécurité, préférence de langue.',
     analyticsTitle: "Cookies d'analyse",
-    analyticsDesc: "Mesure d'audience anonyme pour améliorer le site (pages vues, durée). Aucune donnée personnelle.",
+    analyticsDesc:
+      "Mesure d'audience anonyme pour améliorer le site (pages vues, durée). Aucune donnée personnelle.",
     save: 'Enregistrer mes choix',
     back: 'Retour',
   },
@@ -189,7 +199,8 @@ const TRANSLATIONS = {
     essentialTitle: 'Essential cookies (always on)',
     essentialDesc: 'Required for site operation: session, security, language preference.',
     analyticsTitle: 'Analytics cookies',
-    analyticsDesc: 'Anonymous audience measurement to improve the site (pageviews, duration). No personal data.',
+    analyticsDesc:
+      'Anonymous audience measurement to improve the site (pageviews, duration). No personal data.',
     save: 'Save my preferences',
     back: 'Back',
   },

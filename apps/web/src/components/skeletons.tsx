@@ -12,9 +12,7 @@ interface SkelProps {
 
 export function Skel({ className = '' }: SkelProps) {
   return (
-    <div
-      className={`bg-bg-secondary rounded animate-pulse relative overflow-hidden ${className}`}
-    >
+    <div className={`bg-bg-secondary rounded animate-pulse relative overflow-hidden ${className}`}>
       <div
         className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent"
         style={{ animation: 'shimmer 2s infinite' }}
@@ -95,7 +93,10 @@ export function SkelList({ rows = 5 }: { rows?: number }) {
 export function SkelTable({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
     <div className="rounded-xl border border-border bg-surface overflow-hidden">
-      <div className="px-5 py-3 bg-bg-secondary/40 border-b border-border-light grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      <div
+        className="px-5 py-3 bg-bg-secondary/40 border-b border-border-light grid gap-4"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+      >
         {Array.from({ length: cols }, (_, i) => (
           <Skel key={i} className="h-3 w-2/3" />
         ))}
@@ -108,7 +109,10 @@ export function SkelTable({ rows = 5, cols = 4 }: { rows?: number; cols?: number
             style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
           >
             {Array.from({ length: cols }, (_, c) => (
-              <Skel key={c} className={`h-3 ${c === 0 ? 'w-3/4' : c === cols - 1 ? 'w-1/2' : 'w-2/3'}`} />
+              <Skel
+                key={c}
+                className={`h-3 ${c === 0 ? 'w-3/4' : c === cols - 1 ? 'w-1/2' : 'w-2/3'}`}
+              />
             ))}
           </div>
         ))}
@@ -122,7 +126,10 @@ export function SkelTable({ rows = 5, cols = 4 }: { rows?: number; cols?: number
 export function SkelAgendaWeek() {
   return (
     <div className="rounded-xl border border-border bg-surface overflow-hidden">
-      <div className="grid border-b border-border-light bg-bg-secondary/40" style={{ gridTemplateColumns: '64px repeat(7, minmax(0, 1fr))' }}>
+      <div
+        className="grid border-b border-border-light bg-bg-secondary/40"
+        style={{ gridTemplateColumns: '64px repeat(7, minmax(0, 1fr))' }}
+      >
         <div className="p-3" />
         {Array.from({ length: 7 }, (_, i) => (
           <div key={i} className="p-3 space-y-1">
@@ -133,7 +140,11 @@ export function SkelAgendaWeek() {
       </div>
       <div className="divide-y divide-border-light">
         {Array.from({ length: 6 }, (_, r) => (
-          <div key={r} className="grid" style={{ gridTemplateColumns: '64px repeat(7, minmax(0, 1fr))' }}>
+          <div
+            key={r}
+            className="grid"
+            style={{ gridTemplateColumns: '64px repeat(7, minmax(0, 1fr))' }}
+          >
             <div className="p-2 flex items-start justify-end">
               <Skel className="h-2 w-8" />
             </div>

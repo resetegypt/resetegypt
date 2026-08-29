@@ -16,9 +16,25 @@ import { Button, Card, CardContent, Input } from '@reset/ui';
 import { apiGet, apiPost, apiPut, apiDelete } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth';
 
-interface Slot { id?: string; dayOfWeek: number; startMinutes: number; endMinutes: number; isActive: boolean }
-interface TimeOff { id: string; startAt: string; endAt: string; type: 'TIME_OFF' | 'EXTRA'; reason: string | null }
-interface Practitioner { id: string; firstName: string; lastName: string }
+interface Slot {
+  id?: string;
+  dayOfWeek: number;
+  startMinutes: number;
+  endMinutes: number;
+  isActive: boolean;
+}
+interface TimeOff {
+  id: string;
+  startAt: string;
+  endAt: string;
+  type: 'TIME_OFF' | 'EXTRA';
+  reason: string | null;
+}
+interface Practitioner {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
 
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
@@ -44,7 +60,9 @@ export function AvailabilityPage() {
     enabled: isAdmin,
   });
 
-  const [selectedId, setSelectedId] = useState<string>(user?.role === 'PRACTITIONER' ? user.id : '');
+  const [selectedId, setSelectedId] = useState<string>(
+    user?.role === 'PRACTITIONER' ? user.id : '',
+  );
 
   useEffect(() => {
     if (isAdmin && !selectedId && practitioners.length > 0) {
@@ -54,7 +72,10 @@ export function AvailabilityPage() {
 
   const { data: availability } = useQuery({
     queryKey: ['availability', selectedId],
-    queryFn: async () => apiGet<{ weekly: Slot[]; upcomingTimeOff: TimeOff[] }>(`/practitioners/${selectedId}/availability`),
+    queryFn: async () =>
+      apiGet<{ weekly: Slot[]; upcomingTimeOff: TimeOff[] }>(
+        `/practitioners/${selectedId}/availability`,
+      ),
     enabled: !!selectedId,
   });
 
@@ -64,14 +85,23 @@ export function AvailabilityPage() {
   }, [availability]);
 
   const saveMutation = useMutation({
-    mutationFn: async () => apiPut(`/practitioners/${selectedId}/availability`, { slots: draft.map((s) => ({
-      dayOfWeek: s.dayOfWeek, startMinutes: s.startMinutes, endMinutes: s.endMinutes, isActive: s.isActive,
-    })) }),
+    mutationFn: async () =>
+      apiPut(`/practitioners/${selectedId}/availability`, {
+        slots: draft.map((s) => ({
+          dayOfWeek: s.dayOfWeek,
+          startMinutes: s.startMinutes,
+          endMinutes: s.endMinutes,
+          isActive: s.isActive,
+        })),
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['availability', selectedId] }),
   });
 
   function addSlot(day: number) {
-    setDraft([...draft, { dayOfWeek: day, startMinutes: 10 * 60, endMinutes: 18 * 60, isActive: true }]);
+    setDraft([
+      ...draft,
+      { dayOfWeek: day, startMinutes: 10 * 60, endMinutes: 18 * 60, isActive: true },
+    ]);
   }
   function updateSlot(idx: number, patch: Partial<Slot>) {
     setDraft(draft.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
@@ -81,14 +111,20 @@ export function AvailabilityPage() {
   }
 
   // Time-off
-  const [newTimeOff, setNewTimeOff] = useState<{ startAt: string; endAt: string; type: 'TIME_OFF' | 'EXTRA'; reason: string }>({ startAt: '', endAt: '', type: 'TIME_OFF', reason: '' });
+  const [newTimeOff, setNewTimeOff] = useState<{
+    startAt: string;
+    endAt: string;
+    type: 'TIME_OFF' | 'EXTRA';
+    reason: string;
+  }>({ startAt: '', endAt: '', type: 'TIME_OFF', reason: '' });
   const timeOffMutation = useMutation({
-    mutationFn: async () => apiPost(`/practitioners/${selectedId}/time-off`, {
-      startAt: new Date(newTimeOff.startAt).toISOString(),
-      endAt: new Date(newTimeOff.endAt).toISOString(),
-      type: newTimeOff.type,
-      reason: newTimeOff.reason || undefined,
-    }),
+    mutationFn: async () =>
+      apiPost(`/practitioners/${selectedId}/time-off`, {
+        startAt: new Date(newTimeOff.startAt).toISOString(),
+        endAt: new Date(newTimeOff.endAt).toISOString(),
+        type: newTimeOff.type,
+        reason: newTimeOff.reason || undefined,
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['availability', selectedId] });
       setNewTimeOff({ startAt: '', endAt: '', type: 'TIME_OFF', reason: '' });
@@ -142,7 +178,9 @@ export function AvailabilityPage() {
           </div>
           <div className="space-y-3">
             {DAYS.map((label, dayIdx) => {
-              const slotsForDay = draft.map((s, i) => ({ ...s, _idx: i })).filter((s) => s.dayOfWeek === dayIdx);
+              const slotsForDay = draft
+                .map((s, i) => ({ ...s, _idx: i }))
+                .filter((s) => s.dayOfWeek === dayIdx);
               return (
                 <div key={dayIdx} className="border border-border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -155,7 +193,9 @@ export function AvailabilityPage() {
                     </button>
                   </div>
                   {slotsForDay.length === 0 ? (
-                    <p className="text-xs text-text-secondary italic">Aucun créneau — praticien indisponible ce jour</p>
+                    <p className="text-xs text-text-secondary italic">
+                      Aucun créneau — praticien indisponible ce jour
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {slotsForDay.map((s) => (
@@ -163,14 +203,18 @@ export function AvailabilityPage() {
                           <Input
                             type="time"
                             value={toHHMM(s.startMinutes)}
-                            onChange={(e) => updateSlot(s._idx, { startMinutes: fromHHMM(e.target.value) })}
+                            onChange={(e) =>
+                              updateSlot(s._idx, { startMinutes: fromHHMM(e.target.value) })
+                            }
                             className="w-28"
                           />
                           <span className="text-text-secondary">→</span>
                           <Input
                             type="time"
                             value={toHHMM(s.endMinutes)}
-                            onChange={(e) => updateSlot(s._idx, { endMinutes: fromHHMM(e.target.value) })}
+                            onChange={(e) =>
+                              updateSlot(s._idx, { endMinutes: fromHHMM(e.target.value) })
+                            }
                             className="w-28"
                           />
                           <label className="flex items-center gap-1 text-xs text-text-secondary">
@@ -218,7 +262,9 @@ export function AvailabilityPage() {
             />
             <select
               value={newTimeOff.type}
-              onChange={(e) => setNewTimeOff({ ...newTimeOff, type: e.target.value as 'TIME_OFF' | 'EXTRA' })}
+              onChange={(e) =>
+                setNewTimeOff({ ...newTimeOff, type: e.target.value as 'TIME_OFF' | 'EXTRA' })
+              }
               className="border border-border rounded-lg px-3 py-2 text-sm bg-surface"
             >
               <option value="TIME_OFF">Congé / indisponible</option>
@@ -239,11 +285,18 @@ export function AvailabilityPage() {
           </div>
           <div className="space-y-2">
             {(availability?.upcomingTimeOff ?? []).map((t) => (
-              <div key={t.id} className="flex items-center justify-between border border-border rounded-lg p-3 text-sm">
+              <div
+                key={t.id}
+                className="flex items-center justify-between border border-border rounded-lg p-3 text-sm"
+              >
                 <div>
-                  <span className={`inline-block text-xs px-2 py-0.5 rounded ${
-                    t.type === 'EXTRA' ? 'bg-info-light text-info-dark' : 'bg-danger-light text-danger-dark'
-                  } me-2`}>
+                  <span
+                    className={`inline-block text-xs px-2 py-0.5 rounded ${
+                      t.type === 'EXTRA'
+                        ? 'bg-info-light text-info-dark'
+                        : 'bg-danger-light text-danger-dark'
+                    } me-2`}
+                  >
                     {t.type === 'EXTRA' ? 'Extra' : 'Congé'}
                   </span>
                   <strong>{new Date(t.startAt).toLocaleString('fr-FR')}</strong>

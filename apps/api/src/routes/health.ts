@@ -35,7 +35,9 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
       try {
         const { timingSafeEqual } = await import('node:crypto');
         ok = timingSafeEqual(Buffer.from(gotStr), Buffer.from(expected));
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
     }
     if (!ok) {
       reply.status(404).send({ error: 'NotFound' });

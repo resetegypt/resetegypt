@@ -4,7 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@reset/ui';
 import { apiGet } from '../../lib/api';
 import { PageHeader } from '../../components/AppShell';
-import { Heatmap, LineChart, Sparkline, type LineSeries, type HeatmapCell } from '../../components/charts';
+import {
+  Heatmap,
+  LineChart,
+  Sparkline,
+  type LineSeries,
+  type HeatmapCell,
+} from '../../components/charts';
 import { SkelKpiGrid, SkelCard, SkelTable, SkelChart } from '../../components/skeletons';
 import {
   TrendingUp,
@@ -119,7 +125,10 @@ export function StatsPage() {
     })
     .filter((c): c is HeatmapCell => c !== null);
   const heatmapTotal = heatmapCells.reduce((s, c) => s + c.value, 0);
-  const peakCell = heatmapCells.reduce<HeatmapCell | null>((acc, c) => (acc && acc.value >= c.value ? acc : c), null);
+  const peakCell = heatmapCells.reduce<HeatmapCell | null>(
+    (acc, c) => (acc && acc.value >= c.value ? acc : c),
+    null,
+  );
 
   return (
     <>
@@ -203,7 +212,9 @@ export function StatsPage() {
             {heatmapLoading ? (
               <SkelChart height={220} />
             ) : heatmapCells.length === 0 ? (
-              <p className="text-sm text-text-secondary py-8 text-center">{t('stats.noDataPeriod')}</p>
+              <p className="text-sm text-text-secondary py-8 text-center">
+                {t('stats.noDataPeriod')}
+              </p>
             ) : (
               <div dir="ltr">
                 <Heatmap
@@ -215,7 +226,10 @@ export function StatsPage() {
                   formatTitle={(cell, rl, cl) => `${rl} ${cl} — ${cell.value} RDV`}
                 />
                 <div className="text-[10px] text-text-tertiary mt-3 text-center">
-                  {t('stats.heatmap.legend', "L'intensité de la couleur reflète le nombre de RDV. Survolez chaque cellule pour le détail.")}
+                  {t(
+                    'stats.heatmap.legend',
+                    "L'intensité de la couleur reflète le nombre de RDV. Survolez chaque cellule pour le détail.",
+                  )}
                 </div>
               </div>
             )}
@@ -376,10 +390,7 @@ export function StatsPage() {
                   <div key={s.source} className="flex items-center gap-2 text-sm">
                     <span className="w-32 truncate">{s.source}</span>
                     <div className="flex-1 bg-bg-secondary rounded h-3 relative">
-                      <div
-                        className="bg-info h-3 rounded"
-                        style={{ width: `${s.percentage}%` }}
-                      />
+                      <div className="bg-info h-3 rounded" style={{ width: `${s.percentage}%` }} />
                     </div>
                     <span className="font-bold w-12 text-end" data-numeric>
                       {s.percentage}%
@@ -415,10 +426,7 @@ function RevenueBars({ data, lang }: { data: GlobalStats['revenueByDay']; lang: 
         {data.map((d) => {
           const heightPct = Math.max(2, (d.total / maxDayRevenue) * 100);
           return (
-            <div
-              key={d.day}
-              className="flex-1 max-w-[48px] flex flex-col items-center group"
-            >
+            <div key={d.day} className="flex-1 max-w-[48px] flex flex-col items-center group">
               <div className="text-[10px] text-text-tertiary mb-1 group-hover:text-primary font-medium tabular-nums">
                 {d.total > 0 ? d.total.toLocaleString(lang) : ''}
               </div>
@@ -487,7 +495,12 @@ function StatsKPI({
       </div>
       {sparkline && sparkline.length >= 2 && (
         <div className="mt-2 -mx-1">
-          <Sparkline values={sparkline} width={200} height={32} ariaLabel={`${label} 14 derniers jours`} />
+          <Sparkline
+            values={sparkline}
+            width={200}
+            height={32}
+            ariaLabel={`${label} 14 derniers jours`}
+          />
         </div>
       )}
       {trend && (

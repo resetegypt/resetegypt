@@ -249,7 +249,12 @@ export function Heatmap({
   cells.forEach((c) => lookup.set(`${c.row}-${c.col}`, c.value));
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={ariaLabel ?? 'heatmap'} className="w-full h-auto">
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      role="img"
+      aria-label={ariaLabel ?? 'heatmap'}
+      className="w-full h-auto"
+    >
       {/* Col labels (header) */}
       {colLabels.map((cl, i) => (
         <text
@@ -297,7 +302,9 @@ export function Heatmap({
                 strokeWidth={1}
               >
                 <title>
-                  {formatTitle ? formatTitle({ row: r, col: c, value: v }, rl, cl) : `${rl} ${cl}: ${v}`}
+                  {formatTitle
+                    ? formatTitle({ row: r, col: c, value: v }, rl, cl)
+                    : `${rl} ${cl}: ${v}`}
                 </title>
               </rect>
               {v > 0 && intensity > 0.45 && (
@@ -306,7 +313,12 @@ export function Heatmap({
                   y={y + cellSize / 2 + 4}
                   textAnchor="middle"
                   className="fill-white"
-                  style={{ fontSize: 10, fontWeight: 600, fontVariantNumeric: 'tabular-nums', pointerEvents: 'none' }}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    pointerEvents: 'none',
+                  }}
                 >
                   {v}
                 </text>
@@ -317,7 +329,12 @@ export function Heatmap({
                   y={y + cellSize / 2 + 4}
                   textAnchor="middle"
                   className="fill-primary-dark"
-                  style={{ fontSize: 10, fontWeight: 600, fontVariantNumeric: 'tabular-nums', pointerEvents: 'none' }}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    pointerEvents: 'none',
+                  }}
                 >
                   {v}
                 </text>

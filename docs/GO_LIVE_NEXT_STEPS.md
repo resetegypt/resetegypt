@@ -16,20 +16,22 @@ J'ai par erreur déclenché un mode de vérification plus strict en supprimant +
 1. https://dash.cloudflare.com/ → `reset-egypt.com` → **DNS** → **Add record**
 2. Ajoute :
 
-| Champ | Valeur |
-|-------|--------|
-| **Type** | `TXT` |
-| **Name** | `_vercel` |
+| Champ                   | Valeur                                                       |
+| ----------------------- | ------------------------------------------------------------ |
+| **Type**                | `TXT`                                                        |
+| **Name**                | `_vercel`                                                    |
 | **Content** (ou Target) | `vc-domain-verify=book.reset-egypt.com,3df23e5e879130c0735a` |
-| **Proxy** | `DNS only` (n/a pour TXT, mais par défaut) |
-| **TTL** | `Auto` |
+| **Proxy**               | `DNS only` (n/a pour TXT, mais par défaut)                   |
+| **TTL**                 | `Auto`                                                       |
 
 3. Attends 1-2 min la propagation
 4. Re-déclenche la vérification :
+
    ```bash
    curl -X POST -H "Authorization: Bearer $VERCEL_TOKEN" \
      "https://api.vercel.com/v9/projects/reset-booking/domains/book.reset-egypt.com/verify?teamId=team_fXp0nrCsvZKkaQk9U3mkCYPx"
    ```
+
    Ou simplement : va sur Vercel dashboard → reset-booking → Settings → Domains → clique "Refresh"
 
 5. Vercel émet le cert Let's Encrypt en <2 min. `https://book.reset-egypt.com` devient accessible.
@@ -41,6 +43,7 @@ J'ai par erreur déclenché un mode de vérification plus strict en supprimant +
 Sans le numéro fiscal du centre et la vraie intégration ETA, **toute facture émise au-dessus du seuil légal égyptien est invalide**. Décret 188/2020.
 
 **Actions** :
+
 - Obtenir le TIN du centre (auprès du fisc égyptien si pas déjà connu)
 - Créer un compte sur https://invoicing.eta.gov.eg
 - Récupérer `ETA_CLIENT_ID`, `ETA_CLIENT_SECRET`, certificat numérique
@@ -71,10 +74,12 @@ Major version bump — il y aura probablement quelques fixes TypeScript à faire
 Code 100% prêt, 3 actions côté toi pour la mettre en service :
 
 **A. Supabase Storage bucket**
+
 1. https://supabase.com → projet `pubrtdtigucvhjydtifo`
 2. Storage → New bucket → nom **`email-attachments`** → **DÉCOCHER** "Public"
 
 **B. Cloudflare Worker**
+
 1. Génère un secret partagé :
    ```bash
    openssl rand -base64 32
@@ -91,6 +96,7 @@ Code 100% prêt, 3 actions côté toi pour la mettre en service :
 3. Cloudflare dashboard → **Email** → **Email Routing** → route `dr.ahmadalashry@reset-egypt.com` → **"Send to a Worker"** → choisir `reset-inbound-email`
 
 **C. Faire tourner le script (côté ton terminal)**
+
 1. Copie `scripts/mailbox-go-live.env.example` → `scripts/mailbox-go-live.env`
 2. Remplis :
    - `SUPABASE_SERVICE_KEY` (Supabase → Settings → API → service_role key)
@@ -107,11 +113,13 @@ Code 100% prêt, 3 actions côté toi pour la mettre en service :
 Au cœur du business (relances auto J-2, J-1, J+1...). Actuellement **mocké** — rien ne part vers les patients.
 
 **Pré-requis** :
+
 - Compte Meta Business
 - App Meta avec WhatsApp Business product
 - Numéro de téléphone vérifié
 
 **Une fois obtenus** :
+
 - `WHATSAPP_TOKEN` et `WHATSAPP_PHONE_ID` sur Vercel reset-api
 - Brancher la vraie API dans `apps/api/src/lib/whatsapp.ts` (cherche le mock)
 - Activer les 6 workflows dans `AutomationWorkflow`
@@ -143,6 +151,7 @@ Au cœur du business (relances auto J-2, J-1, J+1...). Actuellement **mocké** �
 Pas faits. Risque de régressions à chaque deploy.
 
 Au minimum, couvrir :
+
 - Login + logout
 - Créer un RDV
 - Remplir une fiche d'accueil + clinique
@@ -157,6 +166,7 @@ Modèle d'exécution : ajouter un workflow GitHub Actions qui lance les tests su
 ### 8. Tokens temporaires à révoquer
 
 Actuellement actifs (1 jour pour Vercel, 7 jours pour GitHub) :
+
 - **Vercel API token** : https://vercel.com/account/tokens → trouve `transfer-from-egyptttw` → Delete
 - **GitHub PAT** : https://github.com/settings/tokens → trouve `push-from-tradecost` → Delete
 
@@ -173,6 +183,7 @@ Voir `docs/SECURITY_AUDIT.md` section "Configuration headers sécurité". Ajoute
 ### 11. Formation équipe + doc utilisateur
 
 Sara, Nora, Dr Ahmad ne savent pas encore utiliser l'app. Prévoir :
+
 - Session de formation (2-3 h)
 - Doc PDF FR + AR (cheat-sheet par rôle)
 
@@ -192,10 +203,10 @@ Sara, Nora, Dr Ahmad ne savent pas encore utiliser l'app. Prévoir :
 
 ## 📞 Tokens à utiliser (jusqu'à expiration)
 
-| Token | Use | Expiration |
-|-------|-----|------------|
-| Vercel API `vcp_3JAQF...` | Set env vars + déclencher deploys via API | dans ~6h |
-| GitHub PAT `ghp_3zpI...` | Push sur resetegypt/resetegypt | 2026-05-22 |
+| Token                     | Use                                       | Expiration |
+| ------------------------- | ----------------------------------------- | ---------- |
+| Vercel API `vcp_3JAQF...` | Set env vars + déclencher deploys via API | dans ~6h   |
+| GitHub PAT `ghp_3zpI...`  | Push sur resetegypt/resetegypt            | 2026-05-22 |
 
 **À révoquer dès la fin du go-live final.**
 

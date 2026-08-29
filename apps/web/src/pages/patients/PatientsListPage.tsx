@@ -106,7 +106,7 @@ export function PatientsListPage() {
                     'patients.emptyHint',
                     statusFilter === 'ACTIVE'
                       ? 'Aucun patient actif. Ajoutez-en un avec le bouton ci-dessus.'
-                      : "Aucun patient ne correspond à ces critères.",
+                      : 'Aucun patient ne correspond à ces critères.',
                   )}
                 </p>
               </div>
@@ -166,7 +166,9 @@ function PatientRowItem({ p }: { p: PatientRow }) {
       </td>
       <td className="px-3 py-3">
         <span className="inline-flex items-center gap-2 text-sm text-text-secondary">
-          <span className={`w-1.5 h-1.5 rounded-full ${SERVICE_DOT[p.primaryAddiction] ?? 'bg-text-tertiary'}`} />
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${SERVICE_DOT[p.primaryAddiction] ?? 'bg-text-tertiary'}`}
+          />
           {t(`addiction.${p.primaryAddiction}`)}
         </span>
       </td>
