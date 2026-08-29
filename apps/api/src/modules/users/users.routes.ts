@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { recordAudit } from '../../lib/audit.js';
+import { passwordSchema } from '../../lib/password-policy.js';
 
 const createUserSchema = z.object({
   email: z.string().email(),
@@ -10,7 +11,7 @@ const createUserSchema = z.object({
   lastName: z.string().min(1),
   phone: z.string().optional(),
   preferredLanguage: z.string().default('fr'),
-  password: z.string().min(8),
+  password: passwordSchema,
 });
 
 const updateUserSchema = createUserSchema
@@ -118,7 +119,7 @@ export async function usersRoutes(app: FastifyInstance): Promise<void> {
 
   app.post('/users/:id/reset-password', async (req, reply) => {
     const id = (req.params as { id: string }).id;
-    const schema = z.object({ newPassword: z.string().min(8) });
+    const schema = z.object({ newPassword: passwordSchema });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return reply.status(400).send({ error: 'ValidationError' });
     const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);

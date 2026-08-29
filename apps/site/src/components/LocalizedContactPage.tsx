@@ -7,7 +7,7 @@ import { MapPin, Phone, Mail, Clock, MessageCircle, ArrowRight, Instagram } from
 import { Section } from './Section';
 import type { Locale } from '../lib/i18n';
 import { getContactContent } from '../lib/page-content';
-import { BOOKING_URL } from '../lib/urls';
+import { BOOKING_URL, WHATSAPP_URL, CENTER_PHONE } from '../lib/urls';
 
 export function LocalizedContactPage({ locale }: { locale: Locale }) {
   const c = getContactContent(locale);
@@ -39,16 +39,16 @@ export function LocalizedContactPage({ locale }: { locale: Locale }) {
           <ContactCard
             Icon={MessageCircle}
             title={c.cards.whatsapp.title}
-            value="+20 1xx xxx xxxx"
-            href="https://wa.me/201234567890"
+            value={CENTER_PHONE}
+            href={WHATSAPP_URL}
             cta={c.cards.whatsapp.cta}
             primary
           />
           <ContactCard
             Icon={Phone}
             title={c.cards.phone.title}
-            value="+20 1xx xxx xxxx"
-            href="tel:+201234567890"
+            value={CENTER_PHONE}
+            href={`tel:${CENTER_PHONE}`}
             cta={c.cards.phone.cta}
           />
           <ContactCard

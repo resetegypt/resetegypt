@@ -14,7 +14,7 @@ import { Section } from './Section';
 import { ServicesTabs } from './ServicesTabs';
 import type { Dict, Locale } from '../lib/i18n';
 import { localizedPath } from '../lib/i18n';
-import { BOOKING_URL } from '../lib/urls';
+import { BOOKING_URL, WHATSAPP_URL } from '../lib/urls';
 
 interface Props {
   dict: Dict;
@@ -541,7 +541,7 @@ function FinalCta({ dict }: { dict: Dict }) {
             <ArrowRight className="w-4 h-4" />
           </Link>
           <a
-            href="https://wa.me/201234567890"
+            href={WHATSAPP_URL}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-text hover:text-primary border border-border-light rounded-xl hover:border-primary/40 transition-all"

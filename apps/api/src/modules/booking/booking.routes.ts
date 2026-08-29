@@ -1,6 +1,33 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { isPractitionerAvailable } from '../availability/availability.routes.js';
+import { env } from '../../env.js';
+import { sendEmail } from '../../lib/email.js';
+import { renderTemplate } from '../automations/templates.js';
+
+const SERVICE_LABEL_BY_LANG: Record<string, Record<string, string>> = {
+  fr: {
+    TOBACCO: 'Sevrage tabagique',
+    DRUGS: 'Sevrage drogues',
+    ALCOHOL: 'Sevrage alcool',
+    SUGAR: 'Gestion du sucre',
+    STRESS: 'Stress / anxiété',
+  },
+  en: {
+    TOBACCO: 'Smoking cessation',
+    DRUGS: 'Drug detox',
+    ALCOHOL: 'Alcohol detox',
+    SUGAR: 'Sugar management',
+    STRESS: 'Stress / anxiety',
+  },
+  ar: {
+    TOBACCO: 'الإقلاع عن التدخين',
+    DRUGS: 'الإقلاع عن المخدرات',
+    ALCOHOL: 'الإقلاع عن الكحول',
+    SUGAR: 'إدارة السكر',
+    STRESS: 'التوتر / القلق',
+  },
+};
 
 const bookingSchema = z.object({
   service: z.enum(['TOBACCO', 'DRUGS', 'ALCOHOL', 'SUGAR', 'STRESS']),
@@ -246,6 +273,50 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
         });
 
         const confirmationNumber = `RES-${new Date().getFullYear()}-${result.appointment.id.slice(0, 4).toUpperCase()}`;
+
+        // Email de confirmation au patient — non-bloquant. Si le patient n'a
+        // pas fourni d'email, ou si l'envoi Resend échoue, la réponse HTTP
+        // reste 201 : le RDV est bien pris, l'email est un bonus UX.
+        if (result.patient.email) {
+          const lang = ['fr', 'en', 'ar'].includes(d.preferredLanguage)
+            ? d.preferredLanguage
+            : 'fr';
+          // Cairo UTC+2 pour l'affichage
+          const cairoDate = new Date(scheduledAt.getTime() + 2 * 60 * 60 * 1000);
+          const locale = lang === 'ar' ? 'ar-EG' : lang === 'en' ? 'en-GB' : 'fr-FR';
+          const appointmentDate = cairoDate.toLocaleDateString(locale, {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC', // cairoDate a déjà l'offset appliqué
+          });
+          const appointmentTime = `${String(cairoDate.getUTCHours()).padStart(2, '0')}:${String(cairoDate.getUTCMinutes()).padStart(2, '0')}`;
+          const serviceName = SERVICE_LABEL_BY_LANG[lang]?.[d.service] ?? d.service;
+
+          const rendered = renderTemplate('booking_created', {
+            language: lang,
+            patientFirstName: d.firstName,
+            appointmentDate,
+            appointmentTime,
+            serviceName,
+            confirmationNumber,
+            centerPhone: env.CENTER_PHONE,
+            centerWhatsapp: env.CENTER_WHATSAPP,
+          });
+          sendEmail({
+            to: result.patient.email,
+            subject: rendered.subject,
+            text: rendered.text,
+            html: rendered.html,
+          }).catch((err) =>
+            app.log.error(
+              { err, patientEmail: result.patient.email },
+              'booking confirmation email failed',
+            ),
+          );
+        }
+
         return reply.status(201).send({
           confirmationNumber,
           appointmentId: result.appointment.id,

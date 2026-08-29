@@ -378,6 +378,73 @@ const TEMPLATES: Record<string, TemplateDef> = {
       ),
     }),
   },
+
+  // Confirmation immédiate après une prise de RDV en ligne (public /booking).
+  // Variables : patientFirstName, appointmentDate, appointmentTime, serviceName,
+  //             confirmationNumber, centerPhone, centerWhatsapp (E.164 sans +),
+  //             cancellationInfo (texte libre optionnel : email/phone/lien).
+  booking_created: {
+    fr: (v) => ({
+      subject: `RDV confirmé — Reset Egypt · ${v.confirmationNumber}`,
+      text: `Bonjour ${v.patientFirstName},\n\nVotre demande de RDV est bien enregistrée.\n\n📅 ${v.appointmentDate} à ${v.appointmentTime}\n🧘 Service : ${v.serviceName}\n🔖 N° de confirmation : ${v.confirmationNumber}\n\nAdresse : N Teseen, New Cairo (à proximité de la CMC). Parking sur place.\n\nUn membre de l'équipe vous contactera au ${v.centerPhone ?? '+20 123 456 78 90'} en cas de besoin.\n\nPour annuler ou reporter, répondez à ce mail ou WhatsApp : https://wa.me/${v.centerWhatsapp ?? '201234567890'}\n\nÀ très bientôt,\nL'équipe Reset Egypt`,
+      html: wrap(
+        `<p>Bonjour <strong>${v.patientFirstName}</strong>,</p>
+        <p>Votre demande de RDV est bien <strong>enregistrée</strong>.</p>
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:14px 18px;margin:16px 0;">
+          <p style="margin:0 0 6px;font-size:15px;">📅 <strong>${v.appointmentDate}</strong> à <strong>${v.appointmentTime}</strong></p>
+          <p style="margin:0 0 6px;font-size:14px;">🧘 Service : <strong>${v.serviceName}</strong></p>
+          <p style="margin:0;font-size:13px;color:#4f46e5;">🔖 N° de confirmation : <code>${v.confirmationNumber}</code></p>
+        </div>
+        <p style="font-size:13px;color:#555;">📍 <em>N Teseen, New Cairo (à proximité de la CMC). Parking sur place.</em></p>
+        <p style="font-size:13px;">Pour annuler ou reporter :
+          <a href="https://wa.me/${v.centerWhatsapp ?? '201234567890'}" style="color:#4f46e5;text-decoration:none">WhatsApp</a>
+          &nbsp;·&nbsp; répondez à ce mail
+        </p>
+        <p>À très bientôt,<br/>L'équipe Reset Egypt</p>`,
+        'fr',
+      ),
+    }),
+    en: (v) => ({
+      subject: `Appointment confirmed — Reset Egypt · ${v.confirmationNumber}`,
+      text: `Hello ${v.patientFirstName},\n\nYour booking request is registered.\n\n📅 ${v.appointmentDate} at ${v.appointmentTime}\n🧘 Service: ${v.serviceName}\n🔖 Confirmation number: ${v.confirmationNumber}\n\nAddress: N Teseen, New Cairo (near CMC). Parking available.\n\nA team member will contact you at ${v.centerPhone ?? '+20 123 456 78 90'} if needed.\n\nTo cancel or reschedule, reply to this email or WhatsApp: https://wa.me/${v.centerWhatsapp ?? '201234567890'}\n\nSee you soon,\nReset Egypt team`,
+      html: wrap(
+        `<p>Hello <strong>${v.patientFirstName}</strong>,</p>
+        <p>Your booking request is <strong>registered</strong>.</p>
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:14px 18px;margin:16px 0;">
+          <p style="margin:0 0 6px;font-size:15px;">📅 <strong>${v.appointmentDate}</strong> at <strong>${v.appointmentTime}</strong></p>
+          <p style="margin:0 0 6px;font-size:14px;">🧘 Service: <strong>${v.serviceName}</strong></p>
+          <p style="margin:0;font-size:13px;color:#4f46e5;">🔖 Confirmation number: <code>${v.confirmationNumber}</code></p>
+        </div>
+        <p style="font-size:13px;color:#555;">📍 <em>N Teseen, New Cairo (near CMC). Parking available.</em></p>
+        <p style="font-size:13px;">To cancel or reschedule:
+          <a href="https://wa.me/${v.centerWhatsapp ?? '201234567890'}" style="color:#4f46e5;text-decoration:none">WhatsApp</a>
+          &nbsp;·&nbsp; reply to this email
+        </p>
+        <p>See you soon,<br/>Reset Egypt team</p>`,
+        'en',
+      ),
+    }),
+    ar: (v) => ({
+      subject: `تم تأكيد الموعد — ريسيت إيجبت · ${v.confirmationNumber}`,
+      text: `مرحبا ${v.patientFirstName}،\n\nتم تسجيل طلب موعدك.\n\n📅 ${v.appointmentDate} في ${v.appointmentTime}\n🧘 الخدمة : ${v.serviceName}\n🔖 رقم التأكيد : ${v.confirmationNumber}\n\nالعنوان : N Teseen، New Cairo (بالقرب من CMC). يوجد موقف سيارات.\n\nسيتصل بك أحد أعضاء الفريق على ${v.centerPhone ?? '+20 123 456 78 90'} عند الحاجة.\n\nللإلغاء أو التأجيل، رد على هذا البريد أو WhatsApp: https://wa.me/${v.centerWhatsapp ?? '201234567890'}\n\nنراك قريبا،\nفريق ريسيت إيجبت`,
+      html: wrap(
+        `<p>مرحبا <strong>${v.patientFirstName}</strong>،</p>
+        <p>تم <strong>تسجيل</strong> طلب موعدك.</p>
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:14px 18px;margin:16px 0;">
+          <p style="margin:0 0 6px;font-size:15px;">📅 <strong>${v.appointmentDate}</strong> في <strong>${v.appointmentTime}</strong></p>
+          <p style="margin:0 0 6px;font-size:14px;">🧘 الخدمة : <strong>${v.serviceName}</strong></p>
+          <p style="margin:0;font-size:13px;color:#4f46e5;">🔖 رقم التأكيد : <code>${v.confirmationNumber}</code></p>
+        </div>
+        <p style="font-size:13px;color:#555;">📍 <em>N Teseen، New Cairo (بالقرب من CMC). يوجد موقف سيارات.</em></p>
+        <p style="font-size:13px;">للإلغاء أو التأجيل :
+          <a href="https://wa.me/${v.centerWhatsapp ?? '201234567890'}" style="color:#4f46e5;text-decoration:none">WhatsApp</a>
+          &nbsp;·&nbsp; رد على هذا البريد
+        </p>
+        <p>نراك قريبا،<br/>فريق ريسيت إيجبت</p>`,
+        'ar',
+      ),
+    }),
+  },
 };
 
 export function renderTemplate(name: string, vars: Record<string, string>): RenderedEmail {

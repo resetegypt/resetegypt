@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_SEC } from '../../plugins/auth.js';
 import { recordAudit } from '../../lib/audit.js';
 import { env } from '../../env.js';
+import { passwordSchema } from '../../lib/password-policy.js';
 
 const MAX_FAILED_ATTEMPTS = 5;
 
@@ -235,7 +236,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     async (req, reply) => {
       const schema = z.object({
         token: z.string().min(1),
-        newPassword: z.string().min(8).max(200),
+        newPassword: passwordSchema,
       });
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) return reply.status(400).send({ error: 'ValidationError' });

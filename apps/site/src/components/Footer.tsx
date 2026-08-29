@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, Instagram, Clock } from 'lucide-react';
 import { getDict, localizedPath, DEFAULT_LOCALE, type Locale } from '../lib/i18n';
-import { BOOKING_URL } from '../lib/urls';
+import { BOOKING_URL, WHATSAPP_URL, CONTACT_EMAIL } from '../lib/urls';
 
 function detectLocale(pathname: string): Locale {
   const seg = pathname.split('/').filter(Boolean)[0];
@@ -69,7 +69,7 @@ export function Footer() {
                 <Instagram className="w-4 h-4 text-white" />
               </a>
               <a
-                href="https://wa.me/201234567890"
+                href={WHATSAPP_URL}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="WhatsApp"
@@ -131,11 +131,8 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 shrink-0 text-white/80" />
-                <a
-                  href="mailto:hello@reset-egypt.com"
-                  className="hover:text-white transition-colors"
-                >
-                  hello@reset-egypt.com
+                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-white transition-colors">
+                  {CONTACT_EMAIL}
                 </a>
               </div>
             </div>
