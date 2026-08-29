@@ -28,20 +28,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Install pg_dump 16 + gpg + AWS CLI
+      - name: Install pg_dump 16 (Supabase runs pg16)
         run: |
-          # Ubuntu runner vient avec postgresql-client 14, on veut le 16 pour matcher Supabase.
-          # awscli n'est plus dans apt depuis Ubuntu 24.04 → install v2 via installer officiel AWS.
+          # Runner Ubuntu vient avec postgresql-client 14, on veut le 16 pour matcher Supabase.
+          # aws CLI et gnupg sont déjà pré-installés sur le runner ubuntu-latest.
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client-16 gnupg unzip
-
-          # AWS CLI v2 via installer officiel (works for R2 via --endpoint-url)
-          curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
-          unzip -q /tmp/awscliv2.zip -d /tmp
-          sudo /tmp/aws/install
-          rm -rf /tmp/aws /tmp/awscliv2.zip
+          sudo apt-get install -y postgresql-client-16
 
           echo "== versions =="
           pg_dump --version
