@@ -1,0 +1,117 @@
+name: Backup Database → R2
+
+# Backup quotidien de la DB Supabase prod vers Cloudflare R2.
+# Rétention : 30 dernières nuits, avec purge automatique côté R2 lifecycle rule.
+#
+# Nécessite les 6 secrets GitHub Actions suivants (Settings → Secrets and variables → Actions) :
+#   DATABASE_URL_PROD          # postgresql://... (Supabase direct connection, pas pgbouncer)
+#   R2_ACCOUNT_ID              # Cloudflare account ID (32 chars hex)
+#   R2_ACCESS_KEY_ID           # R2 API token access key
+#   R2_SECRET_ACCESS_KEY       # R2 API token secret
+#   R2_BUCKET                  # ex: "reset-egypt-backups"
+#   BACKUP_ENCRYPTION_PASSWORD # gpg symmetric key (openssl rand -base64 32)
+#
+# Optional : R2_ENDPOINT (défaut https://<accountId>.r2.cloudflarestorage.com)
+
+on:
+  schedule:
+    # 03:00 UTC = 05:00 Cairo (heure creuse patients)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # bouton manuel dans l'UI Actions
+
+concurrency:
+  group: backup-db
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install pg_dump 16 + gpg + AWS CLI
+        run: |
+          # Le runner Ubuntu vient avec postgresql-client 14, on veut le 16 pour matcher Supabase
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16 gnupg awscli
+          pg_dump --version
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          TS=$(date -u +%Y%m%d_%H%M%S)
+          FILE="reset-egypt-${TS}.sql.gz"
+          echo "DUMP_FILE=$FILE" >> $GITHUB_ENV
+          # --no-owner --no-acl → compatible restore vers une autre DB (Supabase gère les owners)
+          # --exclude-table-data pour les logs verbeux (optional, décommenter si backup trop gros) :
+          # --exclude-table-data='AuditLog' --exclude-table-data='EmailAttachment'
+          pg_dump "$DATABASE_URL" \
+            --no-owner \
+            --no-acl \
+            --clean \
+            --if-exists \
+            --format=plain \
+            | gzip -9 > "$FILE"
+          ls -lh "$FILE"
+
+      - name: Encrypt (GPG symmetric AES-256)
+        env:
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        run: |
+          gpg --batch --yes \
+            --passphrase "$BACKUP_ENCRYPTION_PASSWORD" \
+            --symmetric --cipher-algo AES256 \
+            --output "${DUMP_FILE}.gpg" \
+            "$DUMP_FILE"
+          rm "$DUMP_FILE"
+          ls -lh "${DUMP_FILE}.gpg"
+
+      - name: Upload to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          ENDPOINT="${R2_ENDPOINT:-https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com}"
+          aws s3 cp "${DUMP_FILE}.gpg" \
+            "s3://${R2_BUCKET}/daily/${DUMP_FILE}.gpg" \
+            --endpoint-url "$ENDPOINT"
+          echo "✅ Uploaded s3://${R2_BUCKET}/daily/${DUMP_FILE}.gpg"
+
+      - name: Prune old backups (> 30 days)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          ENDPOINT="${R2_ENDPOINT:-https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com}"
+          # Utilise lifecycle-rule côté R2 pour un vrai TTL. En attendant, on liste et delete manuellement.
+          CUTOFF=$(date -u -d '30 days ago' +%s)
+          aws s3api list-objects-v2 \
+            --bucket "$R2_BUCKET" \
+            --prefix "daily/" \
+            --endpoint-url "$ENDPOINT" \
+            --query "Contents[?LastModified<'$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)'].[Key]" \
+            --output text | while read -r key; do
+              if [[ -n "$key" ]]; then
+                echo "🗑️  Deleting old backup: $key"
+                aws s3 rm "s3://${R2_BUCKET}/${key}" --endpoint-url "$ENDPOINT"
+              fi
+            done
+
+      - name: Notify success (optional)
+        if: success()
+        run: echo "🎉 Backup completed successfully at $(date -u)"
+
+      - name: Notify failure (Sentry breadcrumb if configured)
+        if: failure()
+        run: |
+          echo "❌ Backup failed at $(date -u)"
+          # TODO: curl -X POST $SENTRY_WEBHOOK avec le message si tu ajoutes un webhook
+          exit 1
