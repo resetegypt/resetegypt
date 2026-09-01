@@ -28,14 +28,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Install pg_dump 16 (Supabase runs pg16)
+      - name: Install pg_dump 17 (Supabase runs pg17)
         run: |
-          # Runner Ubuntu vient avec postgresql-client 14, on veut le 16 pour matcher Supabase.
+          set -euo pipefail
+          # Runner Ubuntu vient avec postgresql-client 14, on veut la 17 pour matcher Supabase.
           # aws CLI et gnupg sont déjà pré-installés sur le runner ubuntu-latest.
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client-16
+          sudo apt-get install -y postgresql-client-17
+
+          # Force le PATH sur pg 17 (au cas où pg 14 traîne)
+          echo "/usr/lib/postgresql/17/bin" >> $GITHUB_PATH
+          export PATH="/usr/lib/postgresql/17/bin:$PATH"
 
           echo "== versions =="
           pg_dump --version
@@ -46,6 +51,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
         run: |
+          set -euo pipefail  # CRITIQUE : sans pipefail, pg_dump peut fail silencieusement et gzip gagne
           TS=$(date -u +%Y%m%d_%H%M%S)
           FILE="reset-egypt-${TS}.sql.gz"
           echo "DUMP_FILE=$FILE" >> $GITHUB_ENV
@@ -59,6 +65,14 @@ jobs:
             --if-exists \
             --format=plain \
             | gzip -9 > "$FILE"
+          # Sanity : un dump valide fait >10KB (schema+data). <1KB = suspect.
+          SIZE=$(stat -c%s "$FILE")
+          echo "Dump size: $SIZE bytes"
+          if [ "$SIZE" -lt 1024 ]; then
+            echo "❌ Dump suspiciously small (<1KB) — aborting to avoid silent-failure backup"
+            gunzip -c "$FILE" | head -20 || true
+            exit 1
+          fi
           ls -lh "$FILE"
 
       - name: Encrypt (GPG symmetric AES-256)
