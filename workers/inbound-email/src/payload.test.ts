@@ -3,7 +3,9 @@ import { buildWebhookPayload, type ParsedEmailLike } from './payload.js';
 
 function toArrayBuffer(s: string): ArrayBuffer {
   const enc = new TextEncoder().encode(s);
-  return enc.buffer.slice(enc.byteOffset, enc.byteOffset + enc.byteLength);
+  // Uint8Array.buffer peut être ArrayBuffer | SharedArrayBuffer depuis TS 5.7 ;
+  // on force le narrow ici (TextEncoder ne renvoie jamais SAB).
+  return enc.buffer.slice(enc.byteOffset, enc.byteOffset + enc.byteLength) as ArrayBuffer;
 }
 
 describe('buildWebhookPayload', () => {

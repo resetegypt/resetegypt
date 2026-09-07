@@ -6,8 +6,7 @@ import { X, Paperclip } from 'lucide-react';
 import { apiPost } from '../../lib/api';
 
 type ComposerState =
-  | { mode: 'new' }
-  | { mode: 'reply'; threadId: string; to: string[]; subject: string };
+  { mode: 'new' } | { mode: 'reply'; threadId: string; to: string[]; subject: string };
 
 interface Props {
   state: ComposerState;
