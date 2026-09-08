@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /formation/
 
 Sitemap: https://reset-egypt.com/sitemap.xml

@@ -1,0 +1,1166 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><meta name="robots" content="noindex, nofollow, noarchive"><meta name="googlebot" content="noindex, nofollow"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Discours praticien RESET</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=Noto+Kufi+Arabic:wght@500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F2F0EB;
+  --surface:#FFFFFF;
+  --ink:#16201D;
+  --muted:#5D6C67;
+  --accent:#0E6E68;
+  --accent-soft:rgba(14,110,104,.10);
+  --ember:#B8542F;
+  --ember-soft:rgba(184,84,47,.10);
+  --line:rgba(22,32,29,.14);
+  --line-soft:rgba(22,32,29,.07);
+  --shadow:0 1px 2px rgba(22,32,29,.05),0 18px 44px -28px rgba(22,32,29,.35);
+  --display:"Familjen Grotesk",'Helvetica Neue',Arial,sans-serif;
+  --body:"Newsreader",Georgia,'Times New Roman',serif;
+  --mono:"IBM Plex Mono",ui-monospace,'SF Mono',Menlo,monospace;
+  --q-open:"«\00a0"; --q-close:"\00a0»";
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1412; --surface:#161F1D; --ink:#E8EEEB; --muted:#94A39E;
+    --accent:#54C3B7; --accent-soft:rgba(84,195,183,.13);
+    --ember:#E38C64; --ember-soft:rgba(227,140,100,.13);
+    --line:rgba(232,238,235,.16); --line-soft:rgba(232,238,235,.08);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 44px -28px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1412; --surface:#161F1D; --ink:#E8EEEB; --muted:#94A39E;
+  --accent:#54C3B7; --accent-soft:rgba(84,195,183,.13);
+  --ember:#E38C64; --ember-soft:rgba(227,140,100,.13);
+  --line:rgba(232,238,235,.16); --line-soft:rgba(232,238,235,.08);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 44px -28px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.app{min-height:100vh;display:flex;flex-direction:column}
+
+/* Arabic typographic set */
+.app[data-lang="ar"]{
+  --display:"Noto Kufi Arabic","Segoe UI",Tahoma,sans-serif;
+  --body:"Noto Naskh Arabic","Segoe UI",Tahoma,serif;
+  --mono:"Noto Kufi Arabic","Segoe UI",Tahoma,sans-serif;
+  line-height:1.85;
+}
+.app[data-lang="ar"] *{letter-spacing:normal!important;text-transform:none!important}
+.app[data-lang="ar"] h1,.app[data-lang="ar"] h2{line-height:1.4}
+.app[data-lang="en"]{--q-open:"\201C";--q-close:"\201D"}
+
+/* chrome */
+.rail{position:fixed;top:0;left:0;right:0;height:3px;background:var(--line-soft);z-index:20}
+.rail i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;padding:20px clamp(16px,4vw,44px) 0}
+.brand{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.brand b{color:var(--accent);font-weight:500}
+.topright{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.chapter{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.langs{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.langs button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:6px 11px;color:var(--muted);transition:background .15s,color .15s}
+.langs button+button{border-inline-start:1px solid var(--line)}
+.langs button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.langs button:hover:not([aria-pressed="true"]){color:var(--ink)}
+
+.stage{flex:1;display:flex;align-items:center;justify-content:center;padding:clamp(14px,3vw,32px) clamp(14px,4vw,44px)}
+.slide{width:100%;max-width:1080px;background:var(--surface);border:1px solid var(--line-soft);border-radius:4px;box-shadow:var(--shadow);padding:clamp(26px,4.4vw,58px);animation:rise .34s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:.4;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:none}.rail i{transition:none}}
+
+.bottombar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 clamp(16px,4vw,44px) 22px}
+.nav{display:flex;gap:8px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.btn{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:2px;padding:8px 14px;color:var(--muted);transition:border-color .15s,color .15s}
+.btn:hover{color:var(--ink);border-color:var(--ink)}
+.btn:disabled{opacity:.32;cursor:default}
+.btn:disabled:hover{color:var(--muted);border-color:var(--line)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.count{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);font-variant-numeric:tabular-nums}
+.hint{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);opacity:.7}
+@media (max-width:700px){.hint,.chapter{display:none}}
+
+/* slide typography */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);margin-bottom:16px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,5.2vw,3.4rem);line-height:1.05;letter-spacing:-.022em;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,3.2vw,2.15rem);line-height:1.12;letter-spacing:-.016em;margin:0 0 18px;text-wrap:balance}
+.lede{font-size:clamp(1.02rem,1.7vw,1.2rem);color:var(--muted);max-width:62ch;margin:0 0 22px}
+p{margin:0 0 14px;max-width:66ch}
+p:last-child{margin-bottom:0}
+strong{font-weight:600;color:var(--ink)}
+.tag{color:var(--accent);font-weight:600}
+
+.title-slide{display:grid;gap:30px}
+.title-meta{display:flex;flex-wrap:wrap;gap:10px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:20px}
+.title-meta b{color:var(--ink);font-weight:500}
+
+.cols{display:grid;gap:clamp(16px,2.4vw,28px);grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.cols.two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.cols h3{font-family:var(--display);font-size:1.05rem;font-weight:600;margin:0 0 8px;color:var(--accent)}
+.cols .sub{font-size:.97rem;color:var(--muted);margin:0}
+
+.steps{display:grid;gap:14px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:baseline;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
+.steps li:last-child{border-bottom:0;padding-bottom:0}
+.steps li::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-size:11px;color:var(--ember);border:1px solid var(--ember);border-radius:50%;width:24px;height:24px;display:grid;place-items:center;line-height:1}
+.steps h3{font-family:var(--display);font-weight:600;font-size:1.02rem;margin:0 0 3px}
+.steps p{font-size:.95rem;color:var(--muted);margin:0}
+
+.senses{display:grid;gap:0;border-top:1px solid var(--line-soft);margin:0}
+.sense{display:grid;grid-template-columns:minmax(96px,130px) 1fr;gap:clamp(12px,2vw,26px);padding:14px 0;border-bottom:1px solid var(--line-soft);align-items:baseline}
+.sense dt{font-family:var(--display);font-weight:600;font-size:1.06rem;color:var(--accent)}
+.sense dd{margin:0;font-size:.97rem;color:var(--muted)}
+.sense dd b{color:var(--ink);font-weight:600}
+@media (max-width:520px){.sense{grid-template-columns:1fr;gap:2px}}
+
+.script{border-inline-start:2px solid var(--ember);background:var(--ember-soft);padding:18px 22px;border-radius:3px}
+.script .who{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);display:block;margin-bottom:9px}
+.script q{font-size:clamp(1.02rem,1.9vw,1.26rem);line-height:1.5;font-style:italic;quotes:var(--q-open) var(--q-close)}
+.app[data-lang="ar"] .script q{font-style:normal}
+.note{background:var(--accent-soft);border-radius:3px;padding:16px 20px;font-size:.95rem}
+.note .who{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:8px}
+.note b{color:var(--ink);font-weight:600}
+
+.compare{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line-soft);border-radius:3px;overflow:hidden}
+.compare>div{padding:22px}
+.compare>div+div{border-inline-start:1px solid var(--line-soft)}
+.compare h3{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px}
+.yes h3{color:var(--accent)}
+.no h3{color:var(--ember)}
+.compare ul{margin:0;padding-inline-start:18px;font-size:.97rem;color:var(--muted)}
+.compare li{margin-bottom:8px}
+.compare li:last-child{margin-bottom:0}
+@media (max-width:620px){.compare{grid-template-columns:1fr}.compare>div+div{border-inline-start:0;border-top:1px solid var(--line-soft)}}
+
+.figure{border:1px solid var(--line-soft);border-radius:3px;padding:18px;overflow-x:auto}
+.figure svg{display:block;min-width:520px;width:100%;height:auto}
+.cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+.tl{display:grid;margin-top:6px}
+.tl>div{display:grid;grid-template-columns:minmax(84px,110px) 1fr;gap:clamp(12px,2vw,24px);padding:13px 0;border-top:1px solid var(--line-soft);align-items:baseline}
+.tl span{font-family:var(--mono);font-size:11px;color:var(--ember);font-variant-numeric:tabular-nums}
+.tl p{font-size:.97rem;color:var(--muted);margin:0}
+.tl p b{color:var(--ink);font-weight:600}
+
+.recap{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.recap li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;font-size:1rem}
+.recap li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);transform:translateY(-2px)}
+.next{margin-top:26px;border-top:1px solid var(--line);padding-top:20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px}
+.next .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.next .v{font-family:var(--display);font-weight:600;font-size:clamp(1.2rem,2.6vw,1.7rem);letter-spacing:-.012em}
+.stack{display:grid;gap:22px}
+
+/* ---- home / module menu ---- */
+.home{display:grid;gap:clamp(26px,4vw,38px)}
+.modules{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(275px,1fr))}
+.module{
+  display:flex;flex-direction:column;gap:13px;text-align:start;
+  padding:24px;border:1px solid var(--line);border-radius:4px;background:transparent;
+  transition:border-color .18s,transform .18s,background .18s;
+}
+.module:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--accent-soft)}
+.module .num{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ember)}
+.module h3{font-family:var(--display);font-weight:600;font-size:1.22rem;line-height:1.2;margin:0;letter-spacing:-.012em;color:var(--ink)}
+.module .blurb{font-size:.94rem;color:var(--muted);margin:0;max-width:none}
+.module ul{list-style:none;padding:0;margin:0;display:grid;gap:5px;font-size:.9rem;color:var(--muted)}
+.module li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline}
+.module li::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent);transform:translateY(-2px)}
+.module .foot{margin-top:auto;padding-top:15px;border-top:1px solid var(--line-soft);display:grid;gap:9px}
+.module .bar{height:3px;background:var(--line-soft);border-radius:2px;overflow:hidden}
+.module .bar i{display:block;height:100%;background:var(--accent)}
+.module .meta{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.module .cta{color:var(--accent);font-weight:500}
+.module .cta.done{color:var(--ember)}
+.chips{display:flex;gap:6px}
+.chips button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;border:1px solid var(--line);border-radius:2px;padding:6px 10px;color:var(--muted);transition:color .15s,border-color .15s}
+.chips button:hover{color:var(--ink);border-color:var(--ink)}
+.chips button[aria-current="true"]{color:var(--accent);border-color:var(--accent)}
+.restart{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.restart:hover{color:var(--ember)}
+@media (max-width:700px){.chips{display:none}}
+</style>
+
+<div class="app" id="app" data-lang="fr">
+  <div class="rail"><i id="rail"></i></div>
+
+  <header class="topbar">
+    <div class="brand" id="brand"></div>
+    <div class="topright">
+      <div class="chips" id="chips" role="group" aria-label="Chapitres"></div>
+      <div class="langs" role="group" aria-label="Langue">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="ar" aria-pressed="false">مصري</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="stage"><div class="slide" id="slide"></div></main>
+
+  <footer class="bottombar">
+    <div class="nav">
+      <button class="btn" id="home"></button>
+      <button class="btn" id="prev"></button>
+      <button class="btn" id="next"></button>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px">
+      <span class="chapter" id="chapterLabel"></span>
+      <span class="hint" id="hint"></span>
+      <span class="count" id="count"></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var UI = {
+  brand:{fr:"<b>RESET</b> · Formation praticien", ar:"<b>RESET</b> · تدريب الممارس", en:"<b>RESET</b> · Practitioner training"},
+  prev:{fr:"← Précédent", ar:"→ السابق", en:"← Previous"},
+  next:{fr:"Suivant →", ar:"التالي ←", en:"Next →"},
+  nextCh:{fr:"Chapitre suivant →", ar:"الفصل اللي بعده ←", en:"Next chapter →"},
+  finish:{fr:"Terminer →", ar:"إنهاء ←", en:"Finish →"},
+  home:{fr:"Sommaire", ar:"المحتويات", en:"Contents"},
+  hint:{fr:"Naviguez avec ← →", ar:"استعمل ← →", en:"Navigate with ← →"},
+  hintHome:{fr:"Choisissez un chapitre", ar:"اختار فصل", en:"Pick a chapter"},
+  start:{fr:"Commencer", ar:"ابدأ", en:"Start"},
+  resume:{fr:"Reprendre", ar:"كمّل", en:"Resume"},
+  doneL:{fr:"Terminé", ar:"خلص", en:"Completed"},
+  restart:{fr:"Recommencer", ar:"من الأول", en:"Restart"},
+  seq:{fr:"séquences", ar:"شريحة", en:"sequences"},
+  chap:{fr:"Chapitre", ar:"الفصل", en:"Chapter"}
+};
+
+var HOME = {
+  eyebrow:{fr:"Formation praticien · RESET",ar:"تدريب الممارس · RESET",en:"Practitioner training · RESET"},
+  h1:{fr:"Le discours praticien",ar:"كلام الممارس مع العميل",en:"The practitioner script"},
+  lede:{fr:"Trois chapitres, du premier regard échangé au démarrage de la séance. Chacun se suit indépendamment — choisissez celui que vous voulez travailler.",
+        ar:"تلات فصول، من أول نظرة بينك وبين العميل لحد بداية الجلسة. كل فصل تقدر تاخده لوحده — اختار اللي عايز تشتغل عليه.",
+        en:"Three chapters, from the first exchanged look to the start of the session. Each stands on its own — pick the one you want to work on."},
+  meta:[
+    {k:{fr:"Format",ar:"الشكل",en:"Format"},v:{fr:"3 chapitres · 41 séquences",ar:"٣ فصول · ٤١ شريحة",en:"3 chapters · 41 sequences"}},
+    {k:{fr:"Source",ar:"المصدر",en:"Source"},v:{fr:"3 notes vocales du 08.09",ar:"٣ رسايل صوتية ٨/٩",en:"3 voice notes, 08.09"}},
+    {k:{fr:"Langues",ar:"اللغات",en:"Languages"},v:{fr:"Français · مصري · English",ar:"فرنساوي · مصري · إنجليزي",en:"French · Egyptian Arabic · English"}}
+  ]
+};
+
+var CH_META = [
+  {title:{fr:"Recevoir et expliquer l'addiction",ar:"الاستقبال وشرح الإدمان",en:"Welcome and explain addiction"},
+   blurb:{fr:"Ce qui se joue avant que vous ayez dit un mot, puis la manière de rendre l'addiction et la machine compréhensibles.",
+          ar:"اللي بيحصل قبل ما تتكلم أصلًا، وبعدين إزاي تخلّي الإدمان والجهاز مفهومين.",
+          en:"What happens before you have said a word, then how to make addiction and the machine understandable."},
+   topics:[
+     {fr:"L'accueil et les 30 premières secondes",ar:"الاستقبال وأول ٣٠ ثانية",en:"The welcome and the first 30 seconds"},
+     {fr:"La règle des cinq sens",ar:"قاعدة الحواس الخمسة",en:"The five-senses rule"},
+     {fr:"La définition de l'addiction",ar:"تعريف الإدمان",en:"The definition of addiction"},
+     {fr:"Le détecteur, le laser, l'après-séance",ar:"الكاشف، الليزر، وما بعد الجلسة",en:"The detector, the laser, the after-session"}
+   ]},
+  {title:{fr:"Établir le sevrage",ar:"وضع خطة الإقلاع",en:"Setting the quit plan"},
+   blurb:{fr:"Les 20 % que le laser ne fait pas : la part psychologique, en trois appuis que le client emporte avec lui.",
+          ar:"الـ٢٠٪ اللي الليزر مبيعملهاش: الجزء النفسي، في تلات ركايز العميل بياخدها معاه.",
+          en:"The 20% the laser does not do: the psychological part, in three supports the client takes home."},
+   topics:[
+     {fr:"Le cœur — changer la croyance",ar:"القلب — تغيير القناعة",en:"The heart — changing belief"},
+     {fr:"Le corps — reprendre le contrôle",ar:"الجسم — استرجاع التحكّم",en:"The body — taking back control"},
+     {fr:"L'esprit — discipline, pas détermination",ar:"العقل — انضباط، مش حماس",en:"The mind — discipline, not determination"},
+     {fr:"Les images : l'ex, la case du refuge",ar:"الصور: الطليقة، وخانة الملجأ",en:"The images: the ex, the refuge slot"}
+   ]},
+  {title:{fr:"La récompense et la séance",ar:"المكافأة والجلسة",en:"The reward and the session"},
+   blurb:{fr:"Ce que le client gagne au bout de son combat, et la façon de l'installer pour commencer.",
+          ar:"اللي العميل هيكسبه في آخر معركته، وإزاي تجهّزه علشان تبدأ.",
+          en:"What the client wins at the end of the fight, and how to settle them in to begin."},
+   topics:[
+     {fr:"Combler le vide laissé par l'habitude",ar:"ملّي الفراغ اللي سابته العادة",en:"Filling the gap the habit leaves"},
+     {fr:"Famille, argent, santé, religion",ar:"العيلة، الفلوس، الصحة، الدين",en:"Family, money, health, faith"},
+     {fr:"La chronologie santé de l'OMS",ar:"الجدول الصحي لمنظمة الصحة العالمية",en:"The WHO health timeline"},
+     {fr:"Installer, rassurer, commencer",ar:"جهّزه، طمّنه، وابدأ",en:"Settle, reassure, begin"}
+   ]}
+];
+
+var S = [];
+
+S.push({ch:{fr:"Chapitre 1 — Le discours",ar:"الفصل ١ — الكلام",en:"Chapter 1 — The script"},section:{
+  eyebrow:{fr:"Chapitre 1",ar:"الفصل الأول",en:"Chapter 1"},
+  h1:{fr:"Recevoir le client<br>et expliquer l'addiction",ar:"استقبال العميل<br>وشرح الإدمان",en:"Welcome the client,<br>explain the addiction"},
+  lede:{fr:"L'accueil et la règle des cinq sens, la définition de l'addiction à voix haute, le détecteur et le laser, puis ce que le client doit attendre de l'après-séance.",
+        ar:"الاستقبال وقاعدة الحواس الخمسة، تعريف الإدمان بصوت عالي، الكاشف والليزر، وبعدين العميل يتوقع إيه بعد الجلسة.",
+        en:"The welcome and the five-senses rule, the definition of addiction said out loud, the detector and the laser, then what the client should expect after the session."}}});
+
+S.push({ch:{fr:"Chapitre 1 — Vue d'ensemble",ar:"الفصل ١ — نظرة عامة",en:"Chapter 1 — Overview"},blocks:[
+  {t:"eyebrow",v:{fr:"Vue d'ensemble",ar:"نظرة عامة",en:"Overview"}},
+  {t:"h2",v:{fr:"L'ordre du discours",ar:"ترتيب الكلام",en:"The order of the script"}},
+  {t:"lede",v:{fr:"Le déroulé est une séquence : chaque étape prépare la suivante. On ne parle jamais de la machine avant d'avoir expliqué l'origine du problème.",
+              ar:"الترتيب ده متسلسل: كل خطوة بتجهّز اللي بعدها. عمرك ما تتكلم عن الجهاز قبل ما تشرح أصل المشكلة.",
+              en:"The flow is a sequence: each step sets up the next. Never talk about the machine before explaining where the problem comes from."}},
+  {t:"steps",items:[
+    {h:{fr:"Recevoir",ar:"الاستقبال",en:"Welcome"},p:{fr:"Les 30 premières secondes déterminent la séance. On satisfait les cinq sens.",ar:"أول ٣٠ ثانية بتحدد الجلسة كلها. بنرضّي الحواس الخمسة.",en:"The first 30 seconds set the tone for the session. You satisfy the five senses."}},
+    {h:{fr:"Installer et cadrer",ar:"التجهيز والتأطير",en:"Settle and frame"},p:{fr:"Pourquoi tu es venu, pour quelle addiction. Puis la phrase d'introduction.",ar:"جاي ليه، ولأي إدمان. وبعدين جملة الافتتاح.",en:"Why you came, for which addiction. Then the opening line."}},
+    {h:{fr:"Définir l'addiction",ar:"تعريف الإدمان",en:"Define addiction"},p:{fr:"Comportement → habitude → apprentissage → connexions neuronales.",ar:"سلوك ← عادة ← تعليم ← وصلات عصبية.",en:"Behaviour → habit → learning → neural connections."}},
+    {h:{fr:"Situer et traiter",ar:"تحديد المكان والعلاج",en:"Locate and treat"},p:{fr:"L'oreille, le détecteur, le laser, le rééquilibrage du cerveau.",ar:"الودن، الكاشف، الليزر، وإعادة توازن المخ.",en:"The ear, the detector, the laser, the brain rebalancing."}},
+    {h:{fr:"Projeter l'après-séance",ar:"توقّع ما بعد الجلسة",en:"Project the after-session"},p:{fr:"Ce qui disparaît, ce qui reste, et le calendrier du sevrage.",ar:"إيه اللي هيروح، إيه اللي هيفضل، وجدول الإقلاع.",en:"What goes away, what stays, and the quit timeline."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — L'accueil",ar:"الفصل ١ — الاستقبال",en:"Chapter 1 — The welcome"},blocks:[
+  {t:"eyebrow",v:{fr:"L'accueil",ar:"الاستقبال",en:"The welcome"}},
+  {t:"h2",v:{fr:"Les 30 premières secondes",ar:"أول ٣٠ ثانية",en:"The first 30 seconds"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"L'attitude et l'énergie projetées au moment où le client vous voit <strong>déterminent souvent toute la séance</strong>.",
+              ar:"الطاقة والأسلوب اللي بتظهر بيهم أول ما العميل يشوفك <strong>بيحددوا الجلسة كلها في أغلب الوقت</strong>.",
+              en:"The attitude and energy you project the moment the client sees you <strong>often decide the whole session</strong>."}},
+    {t:"p",v:{fr:"Une personne qui se bloque psychologiquement n'a plus envie — et la raison est presque toujours la même : <strong>vous ne lui avez pas inspiré confiance</strong>.",
+              ar:"لو الشخص اتقفل نفسيًا مش هيبقى عايز يكمّل — والسبب دايمًا واحد: <strong>مديتهوش إحساس بالثقة</strong>.",
+              en:"A client who shuts down psychologically loses the will to continue — and the reason is almost always the same: <strong>you did not inspire confidence</strong>."}}
+  ],right:[
+    {t:"note",who:{fr:"Le point clé",ar:"النقطة الأساسية",en:"The key point"},v:{fr:"C'est ici que se joue la différence entre un praticien et un autre. Pas dans la technique : dans les trente premières secondes.",
+      ar:"هنا بالظبط بيبان الفرق بين ممارس وممارس. مش في التقنية: في أول تلاتين ثانية.",
+      en:"This is where one practitioner differs from another. Not in the technique — in the first thirty seconds."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — La règle des 5 sens",ar:"الفصل ١ — قاعدة الحواس الخمسة",en:"Chapter 1 — The five-senses rule"},blocks:[
+  {t:"eyebrow",v:{fr:"La règle des cinq sens",ar:"قاعدة الحواس الخمسة",en:"The five-senses rule"}},
+  {t:"h2",v:{fr:"Cinq sens satisfaits, en très peu de temps",ar:"خمس حواس تترضي في وقت قصير جدًا",en:"Five senses satisfied, in very little time"}},
+  {t:"lede",v:{fr:"Aucun de ces cinq points n'a la priorité sur un autre — ils agissent ensemble, et vite.",
+              ar:"مفيش نقطة من الخمسة أهم من التانية — بيشتغلوا مع بعض، وبسرعة.",
+              en:"None of the five outranks the others — they work together, and fast."}},
+  {t:"senses",items:[
+    {dt:{fr:"Odorat",ar:"الشم",en:"Smell"},dd:{fr:"Le cabinet doit <b>sentir bon</b> dès l'entrée. Huiles essentielles aux propriétés apaisantes.",
+      ar:"المكان لازم <b>ريحته حلوة</b> من أول ما يدخل. زيوت عطرية ليها خاصية مهدّئة.",
+      en:"The room must <b>smell good</b> the moment they walk in. Essential oils with calming properties."}},
+    {dt:{fr:"Vue",ar:"النظر",en:"Sight"},dd:{fr:"Propre, <b>rangé symétriquement</b>, décoration soignée. Et l'attitude : un grand sourire, comme si on n'attendait que lui de la journée.",
+      ar:"نضيف، <b>مرتّب ومتناسق</b>، وديكور شيك. وكمان الأسلوب: ابتسامة كبيرة، كإنك مستنيه هو بالذات طول اليوم.",
+      en:"Clean, <b>symmetrically arranged</b>, thoughtfully decorated. And your attitude: a big smile, as if they were the one person you had been waiting for all day."}},
+    {dt:{fr:"Ouïe",ar:"السمع",en:"Hearing"},dd:{fr:"Une parole <b>crédible</b>. On explique la séance, on nomme les choses.",
+      ar:"كلام <b>مقنع وموثوق</b>. بتشرح الجلسة وبتسمّي كل حاجة باسمها.",
+      en:"A <b>credible</b> voice. You explain the session and name things clearly."}},
+    {dt:{fr:"Goût",ar:"التذوق",en:"Taste"},dd:{fr:"Pendant ou après la séance : <b>un café, un thé, une boisson, un petit dessert</b>. Peu importe, mais quelque chose.",
+      ar:"أثناء الجلسة أو بعدها: <b>قهوة، شاي، مشروب، أو حاجة حلوة صغيرة</b>. أي حاجة، بس تكون فيه حاجة.",
+      en:"During or after the session: <b>a coffee, a tea, a drink, a small sweet</b>. It hardly matters what — but something."}},
+    {dt:{fr:"Toucher",ar:"اللمس",en:"Touch"},dd:{fr:"Rassurer sur le fait qu'on ne fait pas mal — <b>et ne pas faire mal</b>.",
+      ar:"تطمّنه إن مفيش وجع — <b>وفعلًا متوجّعوش</b>.",
+      en:"Reassure them that it will not hurt — <b>and do not hurt them</b>."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — La règle des 5 sens",ar:"الفصل ١ — قاعدة الحواس الخمسة",en:"Chapter 1 — The five-senses rule"},blocks:[
+  {t:"eyebrow",v:{fr:"Pourquoi cette règle",ar:"ليه القاعدة دي",en:"Why this rule"}},
+  {t:"h2",v:{fr:"Même le plus ingrat parlera de vous",ar:"حتى أكتر واحد ناكر للجميل هيتكلم عنك",en:"Even the least grateful client will talk about you"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"Quand les cinq sens d'une personne sont stimulés et satisfaits, l'effet est <strong>psychologique et automatique</strong>.",
+      ar:"لما حواس الشخص الخمسة تتحفّز وتترضي، التأثير بيبقى <strong>نفسي وتلقائي</strong>.",
+      en:"When all five senses are stimulated and satisfied, the effect is <strong>psychological and automatic</strong>."}},
+    {t:"p",v:{fr:"Même une personne ingrate laissera un avis, ou parlera de vous au moins une fois. C'est ce qui transforme une séance réussie en <strong>recommandation</strong>.",
+      ar:"حتى الشخص الناكر للجميل هيسيب تقييم، أو هيتكلم عنك مرة على الأقل. ده اللي بيحوّل جلسة ناجحة لـ<strong>ترشيح</strong>.",
+      en:"Even an ungrateful person will leave a review, or mention you at least once. That is what turns a good session into a <strong>referral</strong>."}}
+  ],right:[
+    {t:"note",who:{fr:"À retenir",ar:"للتذكير",en:"Remember"},v:{fr:"La règle des cinq sens n'est pas du confort : c'est le levier de bouche-à-oreille le moins cher et le plus fiable du cabinet.",
+      ar:"قاعدة الحواس الخمسة مش رفاهية: دي أرخص وأضمن وسيلة للكلام الحلو عنك.",
+      en:"The five-senses rule is not about comfort: it is the cheapest and most reliable word-of-mouth engine you have."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — L'installation",ar:"الفصل ١ — التجهيز",en:"Chapter 1 — Settling in"},blocks:[
+  {t:"eyebrow",v:{fr:"L'installation",ar:"التجهيز",en:"Settling in"}},
+  {t:"h2",v:{fr:"La phrase d'introduction",ar:"جملة الافتتاح",en:"The opening line"}},
+  {t:"p",v:{fr:"On installe le client, on se renseigne, on installe une bonne ambiance : <strong>pourquoi tu es venu, pour quelle addiction</strong>. Le tabac revient le plus souvent. Puis on ouvre le discours toujours de la même façon.",
+    ar:"بتقعّد العميل، وتسأله، وتعمل جو مريح: <strong>جاي ليه، ولأي إدمان</strong>. السجاير هي الأكتر. وبعدين بتفتح الكلام بنفس الجملة كل مرة.",
+    en:"You settle the client, you ask, you set a good atmosphere: <strong>why did you come, for which addiction</strong>. Tobacco is the most common. Then you open the script the same way every time."}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Avant de t'expliquer comment la machine fonctionne et pourquoi ça fonctionne, il faut d'abord que je t'explique quelle est l'origine du problème.",
+    ar:"قبل ما أشرحلك الجهاز بيشتغل إزاي وليه بينجح، لازم الأول أشرحلك أصل المشكلة إيه.",
+    en:"Before I explain how the machine works and why it works, I first have to explain where the problem comes from."}},
+  {t:"p",cls:"muted",v:{fr:"Cette phrase fait une chose précise : elle <strong>reporte la machine</strong> et ouvre le chapitre 1. L'origine du problème, c'est l'addiction.",
+    ar:"الجملة دي بتعمل حاجة واحدة بالظبط: <strong>بتأجّل الكلام عن الجهاز</strong> وبتفتح الفصل الأول. وأصل المشكلة هو الإدمان.",
+    en:"That line does one precise thing: it <strong>postpones the machine</strong> and opens chapter 1. The origin of the problem is the addiction."}}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — L'addiction",ar:"الفصل ١ — الإدمان",en:"Chapter 1 — Addiction"},blocks:[
+  {t:"eyebrow",v:{fr:"Définition",ar:"التعريف",en:"Definition"}},
+  {t:"h2",v:{fr:"Qu'est-ce que l'addiction ?",ar:"الإدمان ده إيه؟",en:"What is addiction?"}},
+  {t:"script",who:{fr:"La définition à donner",ar:"التعريف اللي بتقوله",en:"The definition to give"},q:{
+    fr:"L'addiction, c'est le résultat d'un comportement, une habitude, un apprentissage qu'on donne à notre corps, à tel point que ça finit par créer des connexions neuronales — et le cerveau finit par penser que tu as besoin de cette chose-là.",
+    ar:"الإدمان ده نتيجة سلوك، وعادة، وتعليم إحنا بنعلّمه لجسمنا، لدرجة إنه بيعمل وصلات عصبية — والمخ في الآخر بيفتكر إنك محتاج الحاجة دي.",
+    en:"Addiction is the result of a behaviour, a habit, a learning we give our body — to the point that it creates neural connections, and the brain ends up believing you need that thing."}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"C'est la version <strong>vulgarisée</strong>, celle qu'on prononce à voix haute. En face, on a un client : si on part tout de suite sur les synapses et les connexions, on le perd.",
+      ar:"دي النسخة <strong>المبسّطة</strong>، اللي بتتقال بصوت عالي. قدامك عميل: لو بدأت على طول بالمشابك والوصلات، هتضيّعه.",
+      en:"This is the <strong>plain-language</strong> version, the one you say out loud. You have a client in front of you: start with synapses and connections and you lose them."}}
+  ],right:[
+    {t:"p",v:{fr:"Mais l'addiction reste, au fond, <strong>un déséquilibre</strong> — c'est cette idée qui rendra le rééquilibrage compréhensible plus tard.",
+      ar:"بس الإدمان في الآخر هو <strong>اختلال في التوازن</strong> — الفكرة دي هي اللي هتخلّي إعادة التوازن مفهومة بعدين.",
+      en:"But addiction is, at bottom, <strong>an imbalance</strong> — and it is that idea which makes the rebalancing make sense later."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Méthode",ar:"الفصل ١ — طريقة الكلام",en:"Chapter 1 — Method"},blocks:[
+  {t:"eyebrow",v:{fr:"Méthode de discours",ar:"طريقة الكلام",en:"Delivery method"}},
+  {t:"h2",v:{fr:"Jongler entre technique et vulgarisation",ar:"توازن بين المصطلح والتبسيط",en:"Balance the technical and the plain"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"Quelques termes techniques sont nécessaires : ils font dire au client <em>« je suis avec quelqu'un qui maîtrise son domaine »</em>.",
+      ar:"شوية مصطلحات تقنية ضرورية: بتخلي العميل يقول <em>«أنا قاعد مع حد فاهم شغله»</em>.",
+      en:"A few technical terms are necessary: they make the client think <em>“I am with someone who knows their field”</em>."}},
+    {t:"p",v:{fr:"<strong>Mais pas trop.</strong> C'est un dosage permanent.",ar:"<strong>بس مش كتير.</strong> ده ميزان بتظبطه طول الوقت.",en:"<strong>But not too many.</strong> It is a constant balancing act."}}
+  ],right:[
+    {t:"note",who:{fr:"La règle appliquée",ar:"القاعدة عمليًا",en:"The rule in practice"},v:{
+      fr:"Terme technique → <b>immédiatement</b> schématisé et vulgarisé. Jamais de terme technique laissé seul, jamais deux images qui se contredisent.",
+      ar:"مصطلح تقني ← <b>على طول</b> تبسّطه وتشرحه بصورة. عمرك ما تسيب مصطلح لوحده، وعمرك ما تحط صورتين بيناقضوا بعض.",
+      en:"Technical term → <b>immediately</b> illustrated and translated into plain language. Never leave a term standing alone, and never use two images that contradict each other."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Image 1 : la tétine",ar:"الفصل ١ — الصورة ١: التتينة",en:"Chapter 1 — Image 1: the pacifier"},blocks:[
+  {t:"eyebrow",v:{fr:"Image 1 · La tétine",ar:"الصورة ١ · التتينة",en:"Image 1 · The pacifier"}},
+  {t:"h2",v:{fr:"Ce n'est pas la substance qui calme",ar:"مش المادة هي اللي بتهدّي",en:"It is not the substance that calms you"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Le bébé, on lui donne la tétine une fois, deux fois, trois fois. Si tu la retires, il pleure. Son cerveau pense que la tétine le rassure, que la tétine le calme. La cigarette que tu fumes, c'est la tétine.",
+    ar:"البيبي لما تديله التتينة مرة واتنين وتلاتة، لو شلتها منه بيعيّط. مخه فاكر إن التتينة بتطمّنه وبتهدّيه. السجارة اللي بتشربها دي هي التتينة.",
+    en:"You give a baby a pacifier once, twice, three times. Take it away and he cries. His brain believes the pacifier reassures him, that it calms him. The cigarette you smoke is the pacifier."}},
+  {t:"p",v:{fr:"Puis on enfonce le clou : dans une tétine, <strong>il n'y a aucune substance</strong> — alors comment est-ce que ça calme ? Et dans la cigarette, il y a <strong>4 000 substances nocives</strong>, aucune qui calme, pas de camomille. Alors comment ?",
+    ar:"وبعدين تثبّت الفكرة: التتينة <strong>مفيهاش أي مادة خالص</strong> — أومال بتهدّي إزاي؟ والسجارة فيها <strong>٤٠٠٠ مادة ضارة</strong>، مفيش ولا واحدة فيهم بتهدّي، مفيش بابونج. أومال إزاي؟",
+    en:"Then you drive it home: a pacifier <strong>contains no substance at all</strong> — so how does it calm anyone? And a cigarette contains <strong>4,000 harmful substances</strong>, none of which calms you, no chamomile. So how?"}},
+  {t:"p",cls:"tagline",v:{fr:"Parce que c'est ton cerveau.",ar:"علشان ده مخك.",en:"Because it is your brain."}}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Le traitement",ar:"الفصل ١ — العلاج",en:"Chapter 1 — The treatment"},blocks:[
+  {t:"eyebrow",v:{fr:"Où agit-on",ar:"بنشتغل فين",en:"Where we act"}},
+  {t:"h2",v:{fr:"L'oreille, le détecteur, le laser",ar:"الودن، الكاشف، الليزر",en:"The ear, the detector, the laser"}},
+  {t:"cols3",items:[
+    {h:{fr:"L'oreille",ar:"الودن",en:"The ear"},p:{fr:"L'organe le plus réceptif et le plus innervé. C'est là que se trouvent les terminaisons nerveuses, c'est là qu'on travaille.",
+      ar:"أكتر عضو مستقبِل وأغناه بالأعصاب. النهايات العصبية موجودة هنا، وهنا بنشتغل.",
+      en:"The most receptive and most densely innervated organ. That is where the nerve endings are, and that is where we work."}},
+    {h:{fr:"Le détecteur",ar:"الكاشف",en:"The detector"},p:{fr:"Il repère les synapses qui ne sont pas naturelles — celles qui ont été créées par l'addiction.",
+      ar:"بيحدد المشابك اللي مش طبيعية — اللي الإدمان هو اللي عملها.",
+      en:"It finds the synapses that are not natural — the ones the addiction created."}},
+    {h:{fr:"Le laser",ar:"الليزر",en:"The laser"},p:{fr:"Il envoie un balayage de fréquence qui déconnecte ces synapses liées à l'addiction.",
+      ar:"بيبعت مسح ترددي بيفصل المشابك المرتبطة بالإدمان.",
+      en:"It sends a frequency sweep that disconnects those addiction-linked synapses."}}
+  ]},
+  {t:"note",who:{fr:"L'enchaînement logique",ar:"التسلسل المنطقي",en:"The logic, in order"},v:{
+    fr:"Détecter les synapses non naturelles → les déconnecter → le cerveau se met à jour vis-à-vis de l'addiction → il ne perçoit plus la cigarette comme un besoin.",
+    ar:"تكشف المشابك غير الطبيعية ← تفصلها ← المخ بيحدّث نفسه بخصوص الإدمان ← مبقاش شايف السجارة كاحتياج.",
+    en:"Detect the unnatural synapses → disconnect them → the brain updates itself about the addiction → it stops reading the cigarette as a need."}}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Le traitement",ar:"الفصل ١ — العلاج",en:"Chapter 1 — The treatment"},blocks:[
+  {t:"eyebrow",v:{fr:"Le principe",ar:"المبدأ",en:"The principle"}},
+  {t:"h2",v:{fr:"On rétablit un équilibre",ar:"بنرجّع التوازن",en:"We restore a balance"}},
+  {t:"p",v:{fr:"On envoie au cerveau le signal qu'il y a ici <strong>un déséquilibre</strong> vis-à-vis de quelque chose consommé d'habitude — le sucre, le tabac, l'addiction en question. Le cerveau se rééquilibre.",
+    ar:"بنبعت للمخ إشارة إن فيه <strong>اختلال في التوازن</strong> تجاه حاجة بيستهلكها عادةً — السكر، السجاير، أو الإدمان اللي هو فيه. والمخ بيرجّع توازنه.",
+    en:"We send the brain a signal that there is <strong>an imbalance</strong> here around something habitually consumed — sugar, tobacco, whichever addiction. The brain rebalances."}},
+  {t:"steps",items:[
+    {h:{fr:"Détecter",ar:"الكشف",en:"Detect"},p:{fr:"Les synapses non naturelles, repérables à leur fréquence électrique très basse.",ar:"المشابك غير الطبيعية، وبنعرفها من ترددها الكهربائي الواطي جدًا.",en:"The unnatural synapses, recognisable by their very low electrical frequency."}},
+    {h:{fr:"Déconnecter",ar:"الفصل",en:"Disconnect"},p:{fr:"Le balayage de fréquence du laser coupe le lien.",ar:"المسح الترددي بتاع الليزر بيقطع الوصلة.",en:"The laser's frequency sweep cuts the link."}},
+    {h:{fr:"Rééquilibrer",ar:"إعادة التوازن",en:"Rebalance"},p:{fr:"Le cerveau met à jour sa lecture du besoin. La dépendance physique tombe.",ar:"المخ بيحدّث قراءته للاحتياج. والاعتماد الجسدي بيقع.",en:"The brain updates its reading of the need. The physical dependence falls away."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Image 2 : le faux capteur",ar:"الفصل ١ — الصورة ٢: الحسّاس الزيادة",en:"Chapter 1 — Image 2: the false sensor"},blocks:[
+  {t:"eyebrow",v:{fr:"Image 2 · Le faux capteur",ar:"الصورة ٢ · الحسّاس الزيادة",en:"Image 2 · The false sensor"}},
+  {t:"h2",v:{fr:"Un capteur en trop, et le cerveau y croit",ar:"حسّاس زيادة، والمخ مصدّقه",en:"One extra sensor, and the brain believes it"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Ton corps a des capteurs qui préviennent ton cerveau quand tu as un vrai besoin : j'ai faim, j'ai soif. À force de fumer, il s'est installé un capteur en plus — une synapse — qui n'a rien à faire là et qui envoie le même signal d'alerte pour la cigarette. Le détecteur repère ce capteur en trop : sa fréquence électrique est très basse, c'est comme ça qu'on le reconnaît. Et le laser l'éteint. Tes vrais capteurs, on n'y touche pas : tu auras toujours faim, toujours soif. C'est juste le faux qui s'arrête.",
+    ar:"جسمك فيه حسّاسات بتبلّغ مخك لما يكون عندك احتياج حقيقي: أنا جعان، أنا عطشان. من كتر التدخين، اتركّب حسّاس زيادة — مشبك عصبي — ملوش لازمة أصلًا، وبيبعت نفس إشارة الإنذار بس عن السجارة. الكاشف بيلاقي الحسّاس الزيادة ده: ترددّه الكهربائي واطي جدًا، وبكده بنعرفه. والليزر بيطفّيه. أما حسّاساتك الحقيقية فإحنا مش بنقرّب منها: هتفضل تجوع وتعطش عادي. اللي بيقف هو الحسّاس المزيّف بس.",
+    en:"Your body has sensors that tell your brain when you have a real need: I am hungry, I am thirsty. From smoking, an extra sensor got installed — a synapse — that has no business being there, and it sends the same alert signal for the cigarette. The detector finds that extra sensor: its electrical frequency is very low, and that is how we recognise it. Then the laser switches it off. We do not touch your real sensors: you will still get hungry, still get thirsty. It is only the false one that stops."}},
+  {t:"figure"}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Le périmètre",ar:"الفصل ١ — حدود الشغل",en:"Chapter 1 — The scope"},blocks:[
+  {t:"eyebrow",v:{fr:"Le périmètre — à répéter au client",ar:"حدود الشغل — كرّرها للعميل",en:"The scope — repeat it to the client"}},
+  {t:"h2",v:{fr:"On enlève l'envie, pas la mémoire",ar:"بنشيل الرغبة، مش الذاكرة",en:"We remove the craving, not the memory"}},
+  {t:"compare",
+    yes:{h:{fr:"Ce qu'on élimine",ar:"اللي بنشيله",en:"What we remove"},items:[
+      {fr:"La dépendance physique",ar:"الاعتماد الجسدي",en:"The physical dependence"},
+      {fr:"L'envie ressentie après la séance",ar:"الرغبة بعد الجلسة",en:"The craving felt after the session"},
+      {fr:"Les synapses non naturelles liées à l'addiction",ar:"المشابك غير الطبيعية المرتبطة بالإدمان",en:"The unnatural synapses tied to the addiction"}]},
+    no:{h:{fr:"Ce qu'on n'élimine pas",ar:"اللي مش بنشيله",en:"What we do not remove"},items:[
+      {fr:"La mémoire, la mémoire musculaire",ar:"الذاكرة، وذاكرة العضلات",en:"Memory, muscle memory"},
+      {fr:"Les habitudes — le réflexe d'après le repas",ar:"العادات — رد الفعل اللي بعد الأكل",en:"Habits — the reflex after a meal"},
+      {fr:"Le souvenir des moments associés",ar:"ذكرى المواقف المرتبطة بيها",en:"The memory of the moments attached to it"}]}},
+  {t:"p",style:"margin-top:22px",v:{
+    fr:"<strong>Répétez-le.</strong> Après manger, le client aura toujours le réflexe de vouloir fumer — mais pas l'envie. Il aura ce sentiment : <em>« je peux m'en passer »</em>.",
+    ar:"<strong>كرّرها.</strong> بعد الأكل، العميل هيفضل عنده رد الفعل إنه يشرب سجارة — بس من غير رغبة. هيحس بإحساس: <em>«أنا أقدر أستغنى عنها»</em>.",
+    en:"<strong>Repeat it.</strong> After a meal the client will still have the reflex to reach for a cigarette — but not the craving. What they will feel is: <em>“I can do without it.”</em>"}}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Image 3 : le tagine",ar:"الفصل ١ — الصورة ٣: الطاجن",en:"Chapter 1 — Image 3: the tagine"},blocks:[
+  {t:"eyebrow",v:{fr:"Image 3 · La satiété",ar:"الصورة ٣ · الشبع",en:"Image 3 · Satiety"}},
+  {t:"h2",v:{fr:"« C'est quoi ton plat préféré ? »",ar:"«أكلتك المفضلة إيه؟»",en:"“What is your favourite dish?”"}},
+  {t:"p",v:{fr:"On échange, on prend son plat à lui. Dans l'exemple : tagine poulet-olive.",
+    ar:"بتتكلم معاه وتاخد أكلته هو. في المثال: طاجن فراخ بزيتون.",
+    en:"You engage, and you use their dish. In the example: chicken and olive tagine."}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Imagine, tu as mangé, mangé, mangé du tagine poulet-olive. Tu n'en peux plus, tu es calé. Et on te repose un plat de tagine. Tu sais que tu aimes bien — mais là, si je mange, je vais vomir.",
+    ar:"تخيّل إنك أكلت وأكلت وأكلت طاجن فراخ بزيتون. مبقتش قادر، اتشبعت خالص. وييجي حد يحطلك طبق طاجن تاني. إنت عارف إنك بتحبه — بس دلوقتي، لو أكلت هرجّع.",
+    en:"Imagine you have eaten and eaten and eaten chicken and olive tagine. You cannot take any more, you are full. And someone sets another dish of tagine in front of you. You know you love it — but right now, if I eat I will be sick."}},
+  {t:"p",v:{fr:"C'est exactement la sensation d'après-séance : <strong>un sentiment de satiété</strong>, même envers quelque chose qu'on aime. Le client se rappellera « à ce moment-là, je prends du sucre » — et se dira, en vrai, qu'il peut s'en passer.",
+    ar:"ده بالظبط الإحساس بعد الجلسة: <strong>إحساس بالشبع</strong>، حتى تجاه حاجة بتحبها. العميل هيفتكر «أنا في الوقت ده بآخد سكر» — وهيقول لنفسه إنه فعلًا يقدر يستغنى.",
+    en:"That is exactly the after-session feeling: <strong>a sense of satiety</strong>, even towards something you like. The client will remember “this is when I have my sugar” — and will find that, in truth, they can do without it."}}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — L'après-séance",ar:"الفصل ١ — بعد الجلسة",en:"Chapter 1 — After the session"},blocks:[
+  {t:"eyebrow",v:{fr:"L'après-séance",ar:"بعد الجلسة",en:"After the session"}},
+  {t:"h2",v:{fr:"Ce qui se passe, jour après jour",ar:"بيحصل إيه، يوم ورا يوم",en:"What happens, day by day"}},
+  {t:"lede",v:{fr:"Une chronologie réelle, à annoncer avant la séance pour que rien ne surprenne le client.",
+    ar:"جدول زمني حقيقي، قوله قبل الجلسة علشان محصلش حاجة تفاجئ العميل.",
+    en:"A real timeline, announced before the session so nothing takes the client by surprise."}},
+  {t:"timeline",items:[
+    {k:{fr:"J+1 à J+7",ar:"يوم ١ لـ ٧",en:"Day 1–7"},p:{
+      fr:"<b>Des petits pics de souvenir</b>, quelques minutes, où il se rappelle fortement du geste. Ce n'est pas une envie : c'est un sentiment bizarre, facile à chasser.",
+      ar:"<b>لحظات صغيرة من الذكرى</b>، دقايق معدودة، بيفتكر فيها الحركة بقوة. دي مش رغبة: ده إحساس غريب سهل يطرده.",
+      en:"<b>Small spikes of memory</b>, a few minutes each, where the gesture comes back strongly. It is not a craving: it is an odd feeling, easy to push away."}},
+    {k:{fr:"≈ 1 semaine",ar:"حوالي أسبوع",en:"≈ 1 week"},p:{
+      fr:"<b>En général : plus de sensations, plus d'envie, plus rien.</b> C'est le repère réaliste à donner.",
+      ar:"<b>عمومًا: مفيش إحساس، مفيش رغبة، ولا حاجة.</b> ده المعيار الواقعي اللي بتديه.",
+      en:"<b>Generally: no more sensations, no more craving, nothing.</b> That is the realistic marker to give."}},
+    {k:{fr:"21 jours",ar:"٢١ يوم",en:"21 days"},p:{
+      fr:"<b>Le sentier s'est refermé.</b> C'est la durée annoncée pour que le sevrage se termine.",
+      ar:"<b>الطريق قفل خلاص.</b> دي المدة اللي بنقولها علشان الإقلاع يخلص.",
+      en:"<b>The path has closed over.</b> That is the stated duration for the withdrawal to be complete."}}
+  ]},
+  {t:"script",style:"margin-top:24px",who:{fr:"Image 4 · Le sentier",ar:"الصورة ٤ · الطريق في الزرع",en:"Image 4 · The path"},q:{
+    fr:"Une habitude, c'est un sentier dans l'herbe : à force de passer au même endroit, le chemin se creuse. Le laser enlève l'envie de reprendre ce chemin. Et comme plus personne n'y passe, en trois semaines l'herbe repousse. C'est ça, tes 21 jours.",
+    ar:"العادة زي طريق اتعمل في الزرع: من كتر ما بتعدّي من نفس المكان، الطريق بيتحفر. الليزر بيشيل الرغبة إنك ترجع تمشي في الطريق ده. ومحدش بيعدّي منه تاني، فخلال تلات أسابيع الزرع بيطلع من تاني ويقفله. دي الـ٢١ يوم بتوعك.",
+    en:"A habit is a path worn through grass: walk the same line often enough and the track sinks in. The laser removes the urge to take that path again. And since nobody walks it any more, within three weeks the grass grows back. That is your 21 days."}},
+  {t:"note",style:"margin-top:20px",who:{fr:"Condition",ar:"شرط",en:"Condition"},v:{
+    fr:"Une personne avec de la volonté, un sevrage mis en place, et qui respecte ce sevrage, saura chasser ce souvenir de quelques minutes.",
+    ar:"الشخص اللي عنده إرادة، وعامل خطة إقلاع، وملتزم بيها، هيعرف يطرد الذكرى دي اللي بتاخد دقايق.",
+    en:"A client with willpower, a quit plan in place, and the discipline to follow it, will know how to push away that few-minute memory."}}
+]});
+
+S.push({ch:{fr:"Chapitre 1 — Récapitulatif",ar:"الفصل ١ — الخلاصة",en:"Chapter 1 — Recap"},blocks:[
+  {t:"eyebrow",v:{fr:"Fin du chapitre 1",ar:"نهاية الفصل الأول",en:"End of chapter 1"}},
+  {t:"h2",v:{fr:"Ce que le client a compris en sortant du chapitre",ar:"العميل فهم إيه لما خلّصنا الفصل ده",en:"What the client understands by the end"}},
+  {t:"recap",items:[
+    {fr:"Ce qu'est l'addiction — un apprentissage devenu connexion neuronale.",ar:"الإدمان إيه — تعليم اتحوّل لوصلة عصبية.",en:"What addiction is — a learning that became a neural connection."},
+    {fr:"Où se situent les synapses — dans l'oreille, l'organe le plus innervé.",ar:"المشابك فين — في الودن، أغنى عضو بالأعصاب.",en:"Where the synapses are — in the ear, the most innervated organ."},
+    {fr:"Comment on traite ces synapses — le détecteur les repère.",ar:"بنعالج المشابك دي إزاي — الكاشف هو اللي بيلاقيها.",en:"How those synapses are treated — the detector finds them."},
+    {fr:"Quel est le rôle du laser — il déconnecte et rééquilibre.",ar:"دور الليزر إيه — بيفصل وبيرجّع التوازن.",en:"What the laser does — it disconnects and rebalances."},
+    {fr:"Ce qui disparaît et ce qui reste — l'envie part, la mémoire reste.",ar:"إيه اللي بيروح وإيه اللي بيفضل — الرغبة بتروح، والذاكرة بتفضل.",en:"What goes and what stays — the craving leaves, the memory remains."}
+  ]},
+  {t:"next",k:{fr:"Chapitre 2",ar:"الفصل الثاني",en:"Chapter 2"},v:{
+    fr:"Établir le sevrage — l'après-séance",ar:"وضع خطة الإقلاع — ما بعد الجلسة",en:"Setting the quit plan — the after-session"}}
+]});
+
+/* ====================== CHAPITRE 2 ====================== */
+
+S.push({ch:{fr:"Chapitre 2 — Le sevrage",ar:"الفصل ٢ — خطة الإقلاع",en:"Chapter 2 — The quit plan"},section:{
+  eyebrow:{fr:"Chapitre 2",ar:"الفصل الثاني",en:"Chapter 2"},
+  h1:{fr:"Établir le sevrage",ar:"وضع خطة الإقلاع",en:"Setting the quit plan"},
+  lede:{fr:"Le laser traite la dépendance physique. Il reste 20 % du travail — la dépendance psychologique — et c'est ce chapitre qui la couvre, en trois sevrages : le cœur, le corps, l'esprit.",
+        ar:"الليزر بيعالج الاعتماد الجسدي. وفاضل ٢٠٪ من الشغل — الاعتماد النفسي — والفصل ده هو اللي بيغطّيه، في تلات مراحل: القلب، والجسم، والعقل.",
+        en:"The laser treats the physical dependence. Twenty per cent of the work remains — the psychological dependence — and this chapter covers it, in three withdrawals: heart, body, mind."}}});
+
+S.push({ch:{fr:"Chapitre 2 — Le cadre",ar:"الفصل ٢ — الإطار",en:"Chapter 2 — The frame"},blocks:[
+  {t:"eyebrow",v:{fr:"Le cadre",ar:"الإطار",en:"The frame"}},
+  {t:"h2",v:{fr:"Les 20 % qui restent",ar:"الـ٢٠٪ الباقية",en:"The remaining 20%"}},
+  {t:"p",v:{fr:"On explique au client que nous, on traite <strong>la dépendance physique</strong>. Il reste 20 % du travail : <strong>la dépendance psychologique</strong>. C'est sa part à lui — mais il ne la fait pas seul.",
+    ar:"بتوضّح للعميل إن إحنا بنعالج <strong>الاعتماد الجسدي</strong>. وفاضل ٢٠٪ من الشغل: <strong>الاعتماد النفسي</strong>. ده الجزء بتاعه هو — بس مش هيعمله لوحده.",
+    en:"You explain to the client that we treat <strong>the physical dependence</strong>. Twenty per cent of the work is left: <strong>the psychological dependence</strong>. That part is theirs — but they do not do it alone."}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Je ne vais pas te laisser comme ça dans le vent, tout seul. Je vais quand même te donner les grandes lignes et les astuces pour t'aider dans ton sevrage.",
+    ar:"مش هسيبك كده في الهوا لوحدك. هديك الخطوط العريضة والحيل اللي هتساعدك في الإقلاع.",
+    en:"I am not going to leave you hanging on your own. I will still give you the main lines and the tricks that will help you through your quit."}},
+  {t:"cols3",items:[
+    {h:{fr:"Le cœur",ar:"القلب",en:"The heart"},p:{fr:"La croyance : changer ce que tu ressens envers la chose que tu arrêtes.",ar:"القناعة: تغيّر إحساسك ناحية الحاجة اللي بتبطّلها.",en:"Belief: changing how you feel about the thing you are quitting."}},
+    {h:{fr:"Le corps",ar:"الجسم",en:"The body"},p:{fr:"Le contrôle et l'environnement : ce que tu élimines et les trajets que tu changes.",ar:"التحكّم والبيئة: إيه اللي بتشيله وإيه الطرق اللي بتغيّرها.",en:"Control and environment: what you get rid of, and the routes you change."}},
+    {h:{fr:"L'esprit",ar:"العقل",en:"The mind"},p:{fr:"La discipline, pas la détermination. C'est la partie qui tient dans la durée.",ar:"الانضباط، مش الحماس. ده الجزء اللي بيثبت مع الوقت.",en:"Discipline, not determination. This is the part that lasts."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Le cœur",ar:"الفصل ٢ — القلب",en:"Chapter 2 — The heart"},blocks:[
+  {t:"eyebrow",v:{fr:"Sevrage 1 · Le cœur",ar:"الإقلاع ١ · القلب",en:"Withdrawal 1 · The heart"}},
+  {t:"h2",v:{fr:"La puissance de la croyance",ar:"قوة القناعة",en:"The power of belief"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"Une personne qui croit fortement à quelque chose devient <strong>assidue et disciplinée</strong> dans cette chose-là. Une personne qui aime énormément quelqu'un est capable de le défendre jusqu'à la mort.",
+      ar:"الشخص اللي مقتنع بحاجة بجد بيبقى <strong>مواظب ومنضبط</strong> فيها. والشخص اللي بيحب حد أوي يقدر يدافع عنه لحد الموت.",
+      en:"Someone who believes strongly in something becomes <strong>consistent and disciplined</strong> about it. Someone who loves another person deeply will defend them to the death."}},
+    {t:"p",v:{fr:"C'est cette force-là qu'on va déplacer : <strong>vers le dégoût de la chose qu'on arrête</strong>.",
+      ar:"القوة دي بالظبط هي اللي بننقلها: <strong>ناحية كره الحاجة اللي بتبطّلها</strong>.",
+      en:"That is the force we redirect: <strong>towards disgust for the thing being quit</strong>."}}
+  ],right:[
+    {t:"note",who:{fr:"Pourquoi commencer par là",ar:"ليه بنبدأ من هنا",en:"Why start here"},v:{
+      fr:"Tant que le client considère qu'il renonce à quelque chose de bien, il est en manque. Le sevrage du cœur retire le manque avant qu'il n'apparaisse.",
+      ar:"طول ما العميل شايف إنه بيتنازل عن حاجة حلوة، هيفضل حاسس بالحرمان. إقلاع القلب بيشيل الحرمان قبل ما يظهر أصلًا.",
+      en:"As long as the client feels they are giving up something good, they are in deprivation. The heart withdrawal removes the deprivation before it appears."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Le cœur",ar:"الفصل ٢ — القلب",en:"Chapter 2 — The heart"},blocks:[
+  {t:"eyebrow",v:{fr:"Règle n° 1 — à noter",ar:"القاعدة رقم ١ — سجّلها",en:"Rule no. 1 — write it down"}},
+  {t:"h2",v:{fr:"Ne jamais dire « j'arrête quelque chose que j'aime »",ar:"عمرك ما تقول «أنا ببطّل حاجة بحبها»",en:"Never say “I am quitting something I like”"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"Le client qui se dit <em>« j'aimerais bien un carré de sucre, mais j'ai fait mon laser, j'arrête »</em> se frustre. Il se le dira deux fois, trois fois — puis il craquera.",
+      ar:"العميل اللي بيقول لنفسه <em>«نفسي في حتة سكر، بس أنا عملت الليزر، خلاص بطّلت»</em> بيحسّ بالحرمان. هيقولها مرتين تلاتة — وبعدين هيقع.",
+      en:"A client who tells himself <em>“I would love a piece of sugar, but I had my laser, I am quitting”</em> builds frustration. He will say it twice, three times — then he will crack."}},
+    {t:"p",v:{fr:"Idem pour le fumeur : <em>« là je me ferais bien une petite clope, mais non, on a dit qu'on arrêtait »</em>. Il savoure l'idée en la refusant. Il finira par fumer.",
+      ar:"ونفس الحكاية مع المدخّن: <em>«نفسي في سجارة دلوقتي، بس لأ، احنا قلنا بطّلنا»</em>. هو بيتلذّذ بالفكرة وهو رافضها. وفي الآخر هيشرب.",
+      en:"The same for the smoker: <em>“I could really go for a cigarette, but no, we said we were quitting.”</em> He savours the idea while refusing it. He will end up smoking."}}
+  ],right:[
+    {t:"note",who:{fr:"Le renversement",ar:"القلب المطلوب",en:"The reversal"},v:{
+      fr:"Tu n'arrêtes pas quelque chose que tu aimes. <b>Tu arrêtes quelque chose que tu détestes.</b> Toute la suite du chapitre sert à installer cette phrase.",
+      ar:"إنت مش بتبطّل حاجة بتحبها. <b>إنت بتبطّل حاجة بتكرهها.</b> باقي الفصل كله موجود علشان يثبّت الجملة دي.",
+      en:"You are not quitting something you like. <b>You are quitting something you hate.</b> Everything that follows exists to install that sentence."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Le cœur",ar:"الفصل ٢ — القلب",en:"Chapter 2 — The heart"},blocks:[
+  {t:"eyebrow",v:{fr:"La méthode",ar:"الطريقة",en:"The method"}},
+  {t:"h2",v:{fr:"Au début, c'est du théâtre",ar:"في الأول، ده تمثيل",en:"At the start, it is theatre"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Au début, il faut que tu te mentes à toi-même, que tu fasses du théâtre. Même si au fond tu y penses fortement, tu dis à voix haute : ça me dégoûte, je suis anti-tabac. Tu fais écouter ton inconscient.",
+    ar:"في الأول لازم تكدب على نفسك، لازم تمثّل. حتى لو جواك بتفكر فيها بقوة، قول بصوت عالي: دي بتقرّفني، أنا ضد التدخين. خلّي اللاوعي بتاعك يسمع.",
+    en:"At the start you have to lie to yourself, you have to act. Even if deep down you are thinking about it hard, you say out loud: this disgusts me, I am anti-smoking. You let your unconscious hear it."}},
+  {t:"p",style:"margin-top:22px",v:{fr:"À force de se le suggérer, <strong>ça finit par vraiment dégoûter</strong>. C'est le même mécanisme que l'apprentissage qui a créé l'addiction — utilisé dans l'autre sens.",
+    ar:"ومن كتر الإيحاء ده، <strong>بيبقى فعلًا مقرِّف</strong>. ده نفس ميكانيزم التعليم اللي عمل الإدمان — بس مستخدم في الاتجاه العكسي.",
+    en:"Repeat the suggestion often enough and <strong>the disgust becomes real</strong>. It is the same learning mechanism that created the addiction — run in the opposite direction."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Le cœur",ar:"الفصل ٢ — القلب",en:"Chapter 2 — The heart"},blocks:[
+  {t:"eyebrow",v:{fr:"Exemple 1 · Pour le client croyant",ar:"مثال ١ · للعميل المتديّن",en:"Example 1 · For the observant client"}},
+  {t:"h2",v:{fr:"Aimer ce que Dieu aime, détester ce qu'Il déteste",ar:"تحب اللي ربنا بيحبه، وتكره اللي بيكرهه",en:"Love what God loves, hate what He hates"}},
+  {t:"script",who:{fr:"La question à poser",ar:"السؤال اللي بتسأله",en:"The question to ask"},q:{
+    fr:"Quand on est croyant, on aime tout ce que notre Seigneur aime, et on déteste tout ce qu'Il déteste. Alors : est-ce que Dieu aime que tu nuises à ta santé ? À partir d'aujourd'hui, tu ne détestes plus seulement à cause de ton laser — tu détestes parce que Dieu déteste.",
+    ar:"لما تكون مؤمن، بتحب كل اللي ربنا بيحبه، وبتكره كل اللي بيكرهه. طيب: ربنا بيحب إنك تضر صحتك؟ من النهارده، إنت مش بتكره علشان الليزر بس — إنت بتكره علشان ربنا كاره الحاجة دي.",
+    en:"When you are a believer, you love everything your Lord loves and hate everything He hates. So: does God want you to harm your health? From today, you do not hate it only because of your laser — you hate it because God hates it."}},
+  {t:"p",style:"margin-top:22px",v:{fr:"La même logique, en version conjugale : <strong>si ta femme ou ton mari n'aime pas quelqu'un, tu ne le fréquentes pas, tu l'évites</strong>. À plus forte raison si cette personne nuit à ta santé.",
+    ar:"ونفس المنطق، بس بصيغة الجواز: <strong>لو مراتك أو جوزك مش مستريح لحد، إنت مش هتقعد معاه، هتتجنّبه</strong>. ومن باب أولى لو الشخص ده بيضر صحتك.",
+    en:"The same logic, in marital form: <strong>if your wife or husband dislikes someone, you do not spend time with them, you avoid them</strong>. All the more so if that person is harming your health."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Image 5 : l'ex",ar:"الفصل ٢ — الصورة ٥: الطليقة",en:"Chapter 2 — Image 5: the ex"},blocks:[
+  {t:"eyebrow",v:{fr:"Image 5 · Celle qui t'a trompé",ar:"الصورة ٥ · اللي خانتك",en:"Image 5 · The one who cheated"}},
+  {t:"h2",v:{fr:"Ton addiction est une ex, pas une amie",ar:"إدمانك ده طليقة، مش صاحبة",en:"Your addiction is an ex, not a friend"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Prends ton addiction comme une femme ou un mari qui t'a trompé. Elle te faisait croire qu'elle t'accompagnait, qu'elle te calmait, qu'elle te déstressait quand tu étais énervé. Mais dans ton dos, elle nuisait à ta santé, elle te volait ton argent, elle nuisait à ta famille et à tes enfants. Tu la divorces. Ça devient ton ex.",
+    ar:"خد إدمانك على إنه مرات أو جوز خانك. كانت مأثّرة عليك إنها مؤنساك، وإنها بتهدّيك، وإنها بتفكّ التوتر لما تتعصّب. لكن من ورا ضهرك كانت بتضر صحتك، وبتسرق فلوسك، وبتأذي بيتك وعيالك. خلاص، إنت بتطلّقها. بقت طليقتك.",
+    en:"Take your addiction as a wife or a husband who cheated on you. She made you believe she kept you company, that she calmed you, that she took the stress away when you were angry. But behind your back she was harming your health, stealing your money, hurting your family and your children. You divorce her. She becomes your ex."}},
+  {t:"p",style:"margin-top:22px",v:{fr:"Quand quelqu'un vous trompe, vous le sortez de la maison, vous prenez ses affaires et c'est fini — <strong>même s'il reste des envies</strong>. Désormais, chaque fois que le client pense à sa cigarette, il pense à une ex qu'il déteste.",
+    ar:"لما حد يخونك، بتطلّعه من البيت، وبتلمّ حاجته وخلاص — <strong>حتى لو لسه فيه شوق</strong>. ومن دلوقتي، كل ما العميل يفتكر السجارة، يفتكرها كطليقة بيكرهها.",
+    en:"When someone cheats on you, you put them out of the house, you pack their things and it is over — <strong>even if some longing remains</strong>. From now on, every time the client thinks of the cigarette, he thinks of an ex he despises."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Le corps",ar:"الفصل ٢ — الجسم",en:"Chapter 2 — The body"},blocks:[
+  {t:"eyebrow",v:{fr:"Sevrage 2 · Le corps",ar:"الإقلاع ٢ · الجسم",en:"Withdrawal 2 · The body"}},
+  {t:"h2",v:{fr:"Qui contrôle qui ?",ar:"مين اللي بيتحكم في مين؟",en:"Who controls whom?"}},
+  {t:"script",who:{fr:"La phrase d'introduction",ar:"جملة الافتتاح",en:"The opening line"},q:{
+    fr:"Est-ce que c'est toi qui contrôles ton corps, oui ou non ? Si je te tends un gâteau, c'est toi qui décides de le prendre. C'est toi qui décides si tu fais ou si tu ne fais pas — pas le contraire. Ce n'est pas la cigarette qui te contrôle.",
+    ar:"إنت اللي بتتحكم في جسمك، أيوه ولا لأ؟ لو مديتلك قطعة كيك، إنت اللي بتقرر تاخدها. إنت اللي بتقرر تعمل ولا متعملش — مش العكس. مش السجارة هي اللي بتتحكم فيك.",
+    en:"Are you the one who controls your body, yes or no? If I hand you a cake, you are the one who decides to take it. You decide whether you do or you do not — not the other way round. The cigarette does not control you."}},
+  {t:"p",style:"margin-top:22px",v:{fr:"Le client doit se dire : <strong>« je ne suis pas une marionnette avec des automatismes »</strong>. C'est à partir de cette phrase-là qu'il reprend le contrôle et qu'il ne se laisse plus aller.",
+    ar:"العميل لازم يقول لنفسه: <strong>«أنا مش عروسة ماريونيت بتتحرك بالعادة»</strong>. من الجملة دي هو بيرجّع السيطرة ومبيسيبش نفسه.",
+    en:"The client has to tell himself: <strong>“I am not a puppet running on automatic.”</strong> That sentence is where he takes back control and stops letting himself drift."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Le corps",ar:"الفصل ٢ — الجسم",en:"Chapter 2 — The body"},blocks:[
+  {t:"eyebrow",v:{fr:"Sevrage du corps · Les deux étapes",ar:"إقلاع الجسم · الخطوتين",en:"Body withdrawal · The two steps"}},
+  {t:"h2",v:{fr:"Vider l'environnement, changer les trajets",ar:"فضّي البيئة، وغيّر الطرق",en:"Empty the environment, change the routes"}},
+  {t:"steps",items:[
+    {h:{fr:"Éliminer tout ce qui touche à l'addiction",ar:"شيل كل حاجة ليها علاقة بالإدمان",en:"Get rid of everything connected to the addiction"},
+     p:{fr:"Dans la voiture, à la maison : le cendrier, le briquet. Pas de « je garde au cas où des invités viennent » — c'est déjà une porte laissée ouverte.",
+        ar:"في العربية وفي البيت: الطفاية، والولاعة. ومفيش «هسيبها لو جالي ضيوف» — دي بقت باب مفتوح خلاص.",
+        en:"In the car, at home: the ashtray, the lighter. No “I will keep it in case guests come” — that is already a door left open."}},
+    {h:{fr:"Changer le chemin, pas seulement l'intention",ar:"غيّر الطريق، مش النية بس",en:"Change the route, not just the intention"},
+     p:{fr:"Le bureau de tabac où l'on s'arrêtait par habitude : on ne passe plus par là. Et si on n'a pas le choix, on ne le regarde même pas — on regarde de l'autre côté, parce que ça dégoûte.",
+        ar:"الكشك اللي كنت بتقف عنده بالعادة: مبقاش تعدّي منه. ولو مضطر تعدّي، متبصّلوش أصلًا — بص الناحية التانية، علشان الحاجة دي بتقرّفك.",
+        en:"The tobacco shop you used to stop at out of habit: you no longer go that way. And if you have no choice, you do not even look at it — you look the other way, because it disgusts you."}}
+  ]},
+  {t:"note",style:"margin-top:24px",who:{fr:"Le lien avec le cœur",ar:"الربط مع القلب",en:"The link back to the heart"},v:{
+    fr:"Ces deux étapes ne sont pas de la logistique : elles sont la <b>mise en pratique du dégoût</b> installé au sevrage du cœur.",
+    ar:"الخطوتين دول مش تنظيم وخلاص: دول <b>تطبيق عملي للكره</b> اللي اتزرع في إقلاع القلب.",
+    en:"These two steps are not logistics: they are the <b>practical application of the disgust</b> installed during the heart withdrawal."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — L'esprit",ar:"الفصل ٢ — العقل",en:"Chapter 2 — The mind"},blocks:[
+  {t:"eyebrow",v:{fr:"Sevrage 3 · L'esprit",ar:"الإقلاع ٣ · العقل",en:"Withdrawal 3 · The mind"}},
+  {t:"h2",v:{fr:"Ce n'est pas la détermination, c'est la discipline",ar:"مش الحماس، ده الانضباط",en:"It is not determination, it is discipline"}},
+  {t:"compare",
+    yes:{h:{fr:"La discipline — ce qui tient",ar:"الانضباط — اللي بيثبت",en:"Discipline — what holds"},items:[
+      {fr:"Une décision prise une fois, qui ne se rediscute plus",ar:"قرار اتاخد مرة واحدة، ومش بيتناقش تاني",en:"A decision taken once, never renegotiated"},
+      {fr:"Indépendante de l'humeur du jour",ar:"مش متعلق بمزاج اليوم",en:"Independent of the mood of the day"},
+      {fr:"Elle survit à la galère, au deuil, à la fête",ar:"بيصمد مع الضيق، والحزن، والفرح",en:"It survives hardship, grief, celebration"}]},
+    no:{h:{fr:"La détermination — ce qui lâche",ar:"الحماس — اللي بيقع",en:"Determination — what gives way"},items:[
+      {fr:"Elle monte et elle descend",ar:"بيطلع وبينزل",en:"It rises and it falls"},
+      {fr:"Elle tient un mois, deux mois",ar:"بيستحمل شهر، شهرين",en:"It holds for a month, two months"},
+      {fr:"Puis viennent les vacances, la fête, les amis — et la rechute",ar:"وبعدين تيجي الأجازة، والفرح، والأصحاب — وترجع تاني",en:"Then come the holiday, the party, the friends — and the relapse"}]}},
+  {t:"p",style:"margin-top:22px",v:{fr:"Le client qui vient payer sa séance est déterminé. <strong>C'est justement pour ça qu'il faut lui parler de discipline</strong> : dans deux mois, la détermination ne sera plus là.",
+    ar:"العميل اللي جاي يدفع تمن الجلسة متحمّس. <strong>وعلشان كده بالظبط لازم تكلمه عن الانضباط</strong>: بعد شهرين الحماس ده مش هيبقى موجود.",
+    en:"The client who comes and pays for the session is determined. <strong>That is precisely why you must talk to him about discipline</strong>: in two months the determination will be gone."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — L'esprit",ar:"الفصل ٢ — العقل",en:"Chapter 2 — The mind"},blocks:[
+  {t:"eyebrow",v:{fr:"Image 6 · La case du refuge",ar:"الصورة ٦ · خانة الملجأ",en:"Image 6 · The refuge slot"}},
+  {t:"h2",v:{fr:"Supprimer la case, pas résister à l'envie",ar:"امسح الخانة، مش تقاوم الرغبة",en:"Delete the slot, do not resist the urge"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"La discipline, c'est cette petite case dans ton cerveau qui te dit : quand je craque, quand je m'énerve, quand je stresse, quand je suis joyeux — j'ai ce refuge-là. Ce refuge, c'est la cigarette ou le sucre. Dès que tu sors de cette pièce, tu élimines cette case. Et peu importe ce qui t'arrive.",
+    ar:"الانضباط هو الخانة الصغيرة دي في مخك اللي بتقولك: لما أزهق، لما أتعصّب، لما أتوتر، لما أفرح — عندي الملجأ ده. والملجأ ده هو السجارة أو السكر. أول ما تخرج من الأوضة دي، تمسح الخانة دي. ومهما حصلك.",
+    en:"Discipline is that little slot in your brain that says: when I break down, when I get angry, when I am stressed, when I am happy — I have that refuge. That refuge is the cigarette or the sugar. The moment you walk out of this room, you delete that slot. Whatever happens to you."}},
+  {t:"cols3",items:[
+    {h:{fr:"Le soldat",ar:"الجندي",en:"The soldier"},p:{fr:"On lui dit : en face, c'est la guerre, tu y vas. Dans sa tête, il n'y a pas de choix — il est discipliné.",
+      ar:"بيقولوله: قدامك حرب، هتروح. في دماغه مفيش اختيار — هو منضبط.",
+      en:"He is told: ahead of you is the war, you are going. In his head there is no choice — he is disciplined."}},
+    {h:{fr:"La mère",ar:"الأم",en:"The mother"},p:{fr:"Elle vient d'accoucher, elle est KO, elle a dormi deux heures — elle se lève quand même pour ses enfants.",
+      ar:"لسه والدة، ومرهقة، ونامت ساعتين — وبرضه بتقوم علشان عيالها.",
+      en:"She has just given birth, she is exhausted, she slept two hours — she still gets up for her children."}},
+    {h:{fr:"Le père",ar:"الأب",en:"The father"},p:{fr:"Il travaille du matin jusqu'à minuit pour subvenir aux besoins des siens. Il n'a pas le choix — il y va.",
+      ar:"بيشتغل من الصبح لنص الليل علشان يصرف على بيته. مفيش اختيار — بيروح.",
+      en:"He works from morning to midnight to provide for his family. He has no choice — he goes."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — L'esprit",ar:"الفصل ٢ — العقل",en:"Chapter 2 — The mind"},blocks:[
+  {t:"eyebrow",v:{fr:"L'ancrage",ar:"التثبيت",en:"The anchor"}},
+  {t:"h2",v:{fr:"Le dire à voix haute, et en être fier",ar:"قولها بصوت عالي، وافتخر بيها",en:"Say it out loud, and take pride in it"}},
+  {t:"script",who:{fr:"À faire répéter au client",ar:"خلّي العميل يكرّرها",en:"Have the client repeat"},q:{
+    fr:"Je ne fume pas. Je ne suis pas fumeur. Je ne fumerai jamais de cigarettes.",
+    ar:"أنا مش بدخّن. أنا مش مدخّن. وعمري ما هدخّن سجاير.",
+    en:"I do not smoke. I am not a smoker. I will never smoke cigarettes."}},
+  {t:"p",style:"margin-top:22px",v:{fr:"On a tous une part de fierté. Le travail du praticien, c'est de la <strong>retourner du bon côté</strong> : le client devient fier de ne pas fumer, comme il était attaché à fumer. C'est ça, la discipline.",
+    ar:"كلنا فينا جزء بيحب يفتخر. وشغل الممارس إنه <strong>يلفّ الفخر ده للناحية الصح</strong>: العميل يبقى فخور إنه مش بيدخّن، زي ما كان متمسّك بالتدخين. ده هو الانضباط.",
+    en:"We all carry a share of pride. The practitioner's job is to <strong>turn it the right way round</strong>: the client becomes proud of not smoking, exactly as he was attached to smoking. That is discipline."}}
+]});
+
+S.push({ch:{fr:"Chapitre 2 — Récapitulatif",ar:"الفصل ٢ — الخلاصة",en:"Chapter 2 — Recap"},blocks:[
+  {t:"eyebrow",v:{fr:"Fin du chapitre 2",ar:"نهاية الفصل الثاني",en:"End of chapter 2"}},
+  {t:"h2",v:{fr:"Le sevrage tient sur trois appuis",ar:"الإقلاع قايم على تلات ركايز",en:"The quit plan rests on three supports"}},
+  {t:"recap",items:[
+    {fr:"Le cœur — tu n'arrêtes pas ce que tu aimes, tu arrêtes ce que tu détestes.",ar:"القلب — إنت مش بتبطّل اللي بتحبه، إنت بتبطّل اللي بتكرهه.",en:"The heart — you are not quitting what you love, you are quitting what you hate."},
+    {fr:"Le cœur — deux images : ce que Dieu déteste, et l'ex qui t'a trompé.",ar:"القلب — صورتين: اللي ربنا بيكرهه، والطليقة اللي خانتك.",en:"The heart — two images: what God hates, and the ex who cheated."},
+    {fr:"Le corps — c'est toi qui contrôles : on vide l'environnement et on change les trajets.",ar:"الجسم — إنت اللي متحكم: بنفضّي البيئة وبنغيّر الطرق.",en:"The body — you are in control: empty the environment, change the routes."},
+    {fr:"L'esprit — la discipline remplace la détermination, et on supprime la case du refuge.",ar:"العقل — الانضباط بيحل محل الحماس، وبنمسح خانة الملجأ.",en:"The mind — discipline replaces determination, and the refuge slot is deleted."},
+    {fr:"L'ancrage — le dire à voix haute, jusqu'à en être fier.",ar:"التثبيت — تقولها بصوت عالي، لحد ما تفتخر بيها.",en:"The anchor — say it out loud, until you are proud of it."}
+  ]},
+  {t:"next",k:{fr:"Chapitre 3",ar:"الفصل الثالث",en:"Chapter 3"},v:{
+    fr:"La récompense, puis la séance",ar:"المكافأة، وبعدها الجلسة",en:"The reward, then the session"}}
+]});
+
+/* ====================== CHAPITRE 3 ====================== */
+
+S.push({ch:{fr:"Chapitre 3 — La récompense",ar:"الفصل ٣ — المكافأة",en:"Chapter 3 — The reward"},section:{
+  eyebrow:{fr:"Chapitre 3",ar:"الفصل الثالث",en:"Chapter 3"},
+  h1:{fr:"La récompense,<br>puis on lance la séance",ar:"المكافأة،<br>وبعدين نبدأ الجلسة",en:"The reward,<br>then we start the session"},
+  lede:{fr:"On finit de combler le vide laissé par l'habitude, on nomme ce que le client gagne au bout de son combat — famille, argent, santé, religion — et on l'installe pour la séance.",
+        ar:"بنكمّل ملّي الفراغ اللي سابته العادة، وبنسمّي اللي العميل هيكسبه في آخر معركته — العيلة، والفلوس، والصحة، والدين — وبعدين بنجهّزه للجلسة.",
+        en:"You finish filling the gap the habit leaves, you name what the client wins at the end of the fight — family, money, health, faith — and you settle them in for the session."}}});
+
+S.push({ch:{fr:"Chapitre 3 — Combler le vide",ar:"الفصل ٣ — ملّي الفراغ",en:"Chapter 3 — Filling the gap"},blocks:[
+  {t:"eyebrow",v:{fr:"Fin du sevrage du corps",ar:"نهاية إقلاع الجسم",en:"Finishing the body withdrawal"}},
+  {t:"h2",v:{fr:"Refaire les habitudes, pas seulement les supprimer",ar:"تبني عادات جديدة، مش بس تشيل القديمة",en:"Rebuild the habits, do not only remove them"}},
+  {t:"p",v:{fr:"Supprimer le geste laisse un vide, et un vide se remplit tout seul — souvent par l'ancienne habitude. Le travail, c'est de <strong>donner au client de quoi le combler</strong>, geste par geste.",
+    ar:"لما تشيل الحركة بيفضل فراغ، والفراغ بيتملّي لوحده — وغالبًا بالعادة القديمة. الشغل هو إنك <strong>تدي العميل حاجة يملا بيها الفراغ</strong>، حركة بحركة.",
+    en:"Removing the gesture leaves a gap, and a gap fills itself — usually with the old habit. The work is to <strong>give the client something to fill it with</strong>, gesture by gesture."}},
+  {t:"cols3",items:[
+    {h:{fr:"L'envie de fumer",ar:"الرغبة في السجارة",en:"The urge to smoke"},p:{fr:"Des cacahuètes, des pistaches — quelque chose à faire avec les mains et la bouche.",ar:"سوداني، أو فُستق — حاجة تشغل الإيد والفم.",en:"Peanuts, pistachios — something for the hands and the mouth."}},
+    {h:{fr:"La cigarette en voiture",ar:"سجارة العربية",en:"The cigarette in the car"},p:{fr:"Un bâton de siwak, un bâton de réglisse : le même geste, sans la substance.",ar:"عود سواك، أو عود عرقسوس: نفس الحركة، من غير المادة.",en:"A siwak stick, a liquorice stick: the same gesture, without the substance."}},
+    {h:{fr:"Les moments de nervosité",ar:"لحظات العصبية",en:"Moments of tension"},p:{fr:"Le bâton de réglisse, en pharmacie, pour ses propriétés apaisantes.",ar:"عود العرقسوس من الصيدلية، علشان خواصه المهدّية.",en:"The liquorice stick, from the pharmacy, for its calming properties."}}
+  ]},
+  {t:"note",style:"margin-top:24px",who:{fr:"Astuce cabinet",ar:"نصيحة للعيادة",en:"Practice tip"},v:{
+    fr:"Achetez-en d'avance et donnez-les aux clients de ce profil. Le client repart avec la solution en poche, pas seulement avec le conseil.",
+    ar:"اشتريها قبلها وادّيها للعملاء اللي من النوع ده. العميل يخرج والحل في جيبه، مش مجرد نصيحة.",
+    en:"Buy them in advance and hand them to clients of that profile. They leave with the solution in their pocket, not just the advice."}}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Le cadre",ar:"الفصل ٣ — الإطار",en:"Chapter 3 — The frame"},blocks:[
+  {t:"eyebrow",v:{fr:"Le cadre du chapitre",ar:"إطار الفصل",en:"The frame of the chapter"}},
+  {t:"h2",v:{fr:"Ce combat n'est pas gratuit",ar:"المعركة دي مش ببلاش",en:"This fight is not for nothing"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Tout ça, tu ne le fais pas pour rien. Oui, pendant une semaine, pendant dix jours, tu vas devoir combattre. Mais derrière ce combat-là, il y a de fortes récompenses.",
+    ar:"كل ده مش بتعمله ببلاش. أيوه، أسبوع، عشر أيام، هتحارب. بس ورا المعركة دي فيه مكافآت كبيرة.",
+    en:"None of this is for nothing. Yes, for a week, for ten days, you will have to fight. But behind that fight there are real rewards."}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"Le client sait déjà ce qu'il perd. Ce chapitre existe pour lui dire, <strong>avant l'effort</strong>, ce qu'il gagne — sinon l'effort est le seul horizon qu'il voit.",
+      ar:"العميل عارف خلاص إيه اللي هيخسره. الفصل ده موجود علشان تقوله، <strong>قبل المجهود</strong>، هيكسب إيه — وإلا المجهود هيبقى هو الحاجة الوحيدة اللي شايفها.",
+      en:"The client already knows what he is losing. This chapter exists to tell him, <strong>before the effort</strong>, what he gains — otherwise the effort is the only horizon he sees."}}
+  ],right:[
+    {t:"note",who:{fr:"Les quatre récompenses",ar:"المكافآت الأربعة",en:"The four rewards"},v:{
+      fr:"<b>La famille. L'argent. La santé. La religion.</b> Ce sont les quatre objectifs qui reviennent — on les nomme, puis on les développe un par un.",
+      ar:"<b>العيلة. الفلوس. الصحة. الدين.</b> دي الأربع أهداف اللي بتتكرر — بتسمّيها، وبعدين تشرحها واحدة واحدة.",
+      en:"<b>Family. Money. Health. Faith.</b> These are the four goals that keep coming back — name them, then take each one in turn."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Récompense 1",ar:"الفصل ٣ — المكافأة ١",en:"Chapter 3 — Reward 1"},blocks:[
+  {t:"eyebrow",v:{fr:"Récompense 1 · La famille",ar:"المكافأة ١ · العيلة",en:"Reward 1 · Family"}},
+  {t:"h2",v:{fr:"Tu cesses de leur nuire",ar:"بتبطّل تأذيهم",en:"You stop harming them"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"Un fumeur ne nuit pas qu'à lui : <strong>ses enfants et ses parents sont exposés</strong>. Et sa famille, elle, ne veut pas qu'il nuise à sa santé.",
+      ar:"المدخّن مش بيأذي نفسه بس: <strong>عياله ووالديه معرّضين</strong>. وأهله أصلًا مش عايزينه يضر صحته.",
+      en:"A smoker does not only harm himself: <strong>his children and his parents are exposed</strong>. And his family does not want him harming his health."}},
+    {t:"p",v:{fr:"Le simple fait de faire plaisir à sa famille est déjà une récompense — et souvent la seule que le client n'avait pas comptée.",
+      ar:"مجرد إنه يفرّح أهله دي مكافأة لوحدها — وغالبًا هي المكافأة الوحيدة اللي مكانش حاططها في حسابه.",
+      en:"Simply making his family happy is already a reward — and often the one the client had not counted."}}
+  ],right:[
+    {t:"note",who:{fr:"Comment le dire",ar:"إزاي تقولها",en:"How to say it"},v:{
+      fr:"Nommez les personnes réelles : ses enfants, sa mère, son conjoint. Une récompense abstraite ne motive personne.",
+      ar:"سمّي الناس بأسمائهم: عياله، أمه، شريكه. المكافأة المجرّدة مش بتحرّك حد.",
+      en:"Name the actual people: his children, his mother, his partner. An abstract reward motivates no one."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Récompense 2",ar:"الفصل ٣ — المكافأة ٢",en:"Chapter 3 — Reward 2"},blocks:[
+  {t:"eyebrow",v:{fr:"Récompense 2 · L'argent",ar:"المكافأة ٢ · الفلوس",en:"Reward 2 · Money"}},
+  {t:"h2",v:{fr:"Le calcul, fait devant lui",ar:"الحسبة، قدّامه",en:"Do the maths in front of him"}},
+  {t:"cols3",items:[
+    {h:{fr:"1 paquet / jour",ar:"علبة / يوم",en:"1 pack / day"},p:{fr:"Le point de départ, à demander au client lui-même.",ar:"نقطة البداية، واسأله هو عليها.",en:"The starting point — ask the client for it."}},
+    {h:{fr:"≈ 350 € / mois",ar:"≈ ٣٥٠ يورو / شهر",en:"≈ €350 / month"},p:{fr:"Ce qu'il dépense sans jamais le voir passer.",ar:"اللي بيصرفه من غير ما ياخد باله.",en:"What he spends without ever noticing it."}},
+    {h:{fr:"≈ 3 700 € / an",ar:"≈ ٣٧٠٠ يورو / سنة",en:"≈ €3,700 / year"},p:{fr:"Un voyage magnifique — qu'il met dans la cigarette.",ar:"رحلة سفر جميلة — بيحطها في السجاير.",en:"A magnificent trip — that he puts into cigarettes."}}
+  ]},
+  {t:"script",style:"margin-top:24px",who:{fr:"Le renversement à dire",ar:"القلب اللي بتقوله",en:"The reversal to say"},q:{
+    fr:"Tu ne vas pas perdre 200 euros pour la séance. Tu vas gagner 3 500 euros dans l'année.",
+    ar:"إنت مش هتخسر ٢٠٠ يورو تمن الجلسة. إنت هتكسب ٣٥٠٠ يورو في السنة.",
+    en:"You are not going to lose 200 euros on the session. You are going to gain 3,500 euros over the year."}},
+  {t:"p",style:"margin-top:20px",v:{fr:"Le même calcul se fait pour le sucre, pour l'alcool, pour n'importe quelle addiction qui s'achète. <strong>Faites-le avec ses chiffres à lui, pas avec un exemple.</strong>",
+    ar:"نفس الحسبة تتعمل للسكر، وللكحول، ولأي إدمان بيتشترى. <strong>اعملها بأرقامه هو، مش بمثال جاهز.</strong>",
+    en:"The same calculation works for sugar, for alcohol, for any addiction that gets bought. <strong>Do it with his numbers, not with an example.</strong>"}}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Récompense 3",ar:"الفصل ٣ — المكافأة ٣",en:"Chapter 3 — Reward 3"},blocks:[
+  {t:"eyebrow",v:{fr:"Récompense 3 · La santé",ar:"المكافأة ٣ · الصحة",en:"Reward 3 · Health"}},
+  {t:"h2",v:{fr:"À partir de l'arrêt, la santé ne fait que s'améliorer",ar:"من ساعة ما تبطّل، الصحة بتتحسّن وبس",en:"From the moment you stop, health only improves"}},
+  {t:"lede",v:{fr:"Le repère utile, ce n'est pas un chiffre spectaculaire : c'est une progression que le client peut suivre. Voici la chronologie officielle de l'OMS.",
+    ar:"اللي بينفع مش رقم مبهر: اللي بينفع تدرّج العميل يقدر يتابعه. دي الجدول الزمني الرسمي لمنظمة الصحة العالمية.",
+    en:"The useful reference is not a spectacular figure: it is a progression the client can follow. This is the WHO's own timeline."}},
+  {t:"timeline",items:[
+    {k:{fr:"20 minutes",ar:"٢٠ دقيقة",en:"20 minutes"},p:{fr:"Le rythme cardiaque et la tension artérielle baissent.",ar:"نبض القلب وضغط الدم بينزلوا.",en:"Heart rate and blood pressure drop."}},
+    {k:{fr:"12 heures",ar:"١٢ ساعة",en:"12 hours"},p:{fr:"Le monoxyde de carbone dans le sang revient à la normale.",ar:"أول أكسيد الكربون في الدم بيرجع طبيعي.",en:"Carbon monoxide in the blood returns to normal."}},
+    {k:{fr:"2 à 12 semaines",ar:"٢ لـ ١٢ أسبوع",en:"2–12 weeks"},p:{fr:"La circulation s'améliore, la fonction pulmonaire augmente.",ar:"الدورة الدموية بتتحسن، وكفاءة الرئة بتزيد.",en:"Circulation improves and lung function increases."}},
+    {k:{fr:"1 à 9 mois",ar:"١ لـ ٩ شهور",en:"1–9 months"},p:{fr:"La toux et l'essoufflement diminuent.",ar:"الكحة وضيق النفس بيقلّوا.",en:"Coughing and shortness of breath decrease."}},
+    {k:{fr:"1 an",ar:"سنة",en:"1 year"},p:{fr:"<b>Le risque de maladie coronarienne est réduit de moitié</b> par rapport à un fumeur.",ar:"<b>خطر أمراض الشرايين التاجية بينزل للنص</b> مقارنة بالمدخّن.",en:"<b>The risk of coronary heart disease is about half</b> that of a smoker."}},
+    {k:{fr:"10 ans",ar:"١٠ سنين",en:"10 years"},p:{fr:"Le risque de cancer du poumon tombe à environ la moitié de celui d'un fumeur.",ar:"خطر سرطان الرئة بينزل لحوالي نص خطر المدخّن.",en:"The risk of lung cancer falls to about half that of a smoker."}},
+    {k:{fr:"15 ans",ar:"١٥ سنة",en:"15 years"},p:{fr:"Le risque coronarien rejoint celui d'un non-fumeur.",ar:"خطر الشرايين التاجية بيبقى زي غير المدخّن.",en:"Coronary risk becomes that of a non-smoker."}}
+  ]},
+  {t:"note",style:"margin-top:24px",who:{fr:"À ne pas dire",ar:"متقولش",en:"Do not say"},v:{
+    fr:"« Moins 50 % d'infarctus en 24 heures », « les poumons redeviennent blancs », « le sucre est la première cause de mortalité dans le monde » : ces trois formulations ne tiennent pas. Les chiffres ci-dessus sont vérifiables — <b>et ils suffisent</b>.",
+    ar:"«ناقص ٥٠٪ جلطات في ٢٤ ساعة»، «الرئة بترجع بيضا»، «السكر أول سبب للوفاة في العالم»: التلات جمل دول مش صح. الأرقام اللي فوق موثّقة — <b>وهي كفاية</b>.",
+    en:"“50% fewer heart attacks in 24 hours”, “the lungs turn white again”, “sugar is the world's leading cause of death”: none of these hold up. The figures above are verifiable — <b>and they are enough</b>."}}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Récompense 4",ar:"الفصل ٣ — المكافأة ٤",en:"Chapter 3 — Reward 4"},blocks:[
+  {t:"eyebrow",v:{fr:"Récompense 4 · Pour le client croyant",ar:"المكافأة ٤ · للعميل المتديّن",en:"Reward 4 · For the observant client"}},
+  {t:"h2",v:{fr:"Les mauvaises actions transformées en bonnes",ar:"السيئات بتتحوّل لحسنات",en:"Bad deeds turned into good ones"}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Allah transforme les mauvaises actions en bonnes actions — pour celui qui se repent. Et nuire à sa santé, dans la religion, c'est un péché. Si tu mets l'intention d'arrêter pour plaire à ton Seigneur, Il ne va pas seulement te pardonner les cigarettes que tu as fumées : Il va les transformer en bonnes actions.",
+    ar:"ربنا بيبدّل السيئات حسنات — لللي بيتوب. وإيذاء الصحة في الدين ذنب. لو حطّيت النية إنك تبطّل علشان ترضي ربنا، مش هيغفرلك السجاير اللي شربتها وبس: هيحوّلها لحسنات.",
+    en:"God turns bad deeds into good ones — for the one who repents. And harming your health is, in religion, a sin. If you set your intention to quit in order to please your Lord, He will not merely forgive the cigarettes you smoked: He will turn them into good deeds."}},
+  {t:"p",style:"margin-top:22px",v:{fr:"C'est ce qui motive le plus fortement ce profil de client : <strong>vingt ans de cigarettes qui changent de plateau</strong>. Et si le combat est difficile, c'est justement parce que la récompense est grande.",
+    ar:"ده أكتر حاجة بتحرّك النوع ده من العملاء: <strong>عشرين سنة سجاير بيتنقلوا من كفة لكفة</strong>. ولو المعركة صعبة، فده بالظبط علشان المكافأة كبيرة.",
+    en:"This is what motivates that profile of client most strongly: <strong>twenty years of cigarettes moving from one scale-pan to the other</strong>. And if the fight is hard, it is precisely because the reward is great."}}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Image 7 : la balance",ar:"الفصل ٣ — الصورة ٧: الميزان",en:"Chapter 3 — Image 7: the scales"},blocks:[
+  {t:"eyebrow",v:{fr:"Image 7 · La balance",ar:"الصورة ٧ · الميزان",en:"Image 7 · The scales"}},
+  {t:"h2",v:{fr:"Deux plateaux, et vingt ans qui changent de côté",ar:"كفّتين، وعشرين سنة بيغيّروا ناحية",en:"Two pans, and twenty years changing sides"}},
+  {t:"cols2",left:[
+    {t:"p",v:{fr:"On décrit la scène : la balance, ses deux plateaux. À gauche les mauvaises actions, à droite les bonnes — <strong>les anges ont tout noté</strong>, date et heure.",
+      ar:"بتوصف المشهد: الميزان وكفّتيه. على الشمال السيئات، وعلى اليمين الحسنات — <strong>والملايكة كاتبين كل حاجة</strong>، بالتاريخ والساعة.",
+      en:"You describe the scene: the scales, the two pans. On the left the bad deeds, on the right the good — <strong>the angels wrote everything down</strong>, date and hour."}},
+    {t:"p",v:{fr:"Puis la question qui personnalise tout : <strong>« ça fait combien de temps que tu fumes ? »</strong> Vingt ans ? Alors ce sont vingt ans de feuillets qui peuvent changer de plateau.",
+      ar:"وبعدين السؤال اللي بيخلّي الكلام شخصي: <strong>«بقالك قد إيه بتدخّن؟»</strong> عشرين سنة؟ يبقى دي عشرين سنة أوراق ممكن تغيّر كفّة.",
+      en:"Then the question that makes it personal: <strong>“how long have you been smoking?”</strong> Twenty years? Then that is twenty years of pages that can change pans."}}
+  ],right:[
+    {t:"note",who:{fr:"Pourquoi cette image marche",ar:"ليه الصورة دي بتشتغل",en:"Why this image works"},v:{
+      fr:"Elle transforme le passé — d'habitude un poids et une culpabilité — en <b>ressource</b>. Plus le client a fumé longtemps, plus la récompense est grande. C'est le seul argument du discours où l'ancienneté de l'addiction joue en sa faveur.",
+      ar:"بتحوّل الماضي — اللي عادةً حِمل وذنب — لـ<b>رصيد</b>. كل ما العميل يكون دخّن مدة أطول، كل ما المكافأة تكبر. وده الحجة الوحيدة في الكلام كله اللي فيها قِدَم الإدمان بيبقى في صالحه.",
+      en:"It turns the past — usually a weight and a guilt — into a <b>resource</b>. The longer the client smoked, the greater the reward. It is the only argument in the whole script where the age of the addiction works in his favour."}}
+  ]}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Lancer la séance",ar:"الفصل ٣ — بداية الجلسة",en:"Chapter 3 — Starting the session"},blocks:[
+  {t:"eyebrow",v:{fr:"Le passage à la séance",ar:"الانتقال للجلسة",en:"Moving into the session"}},
+  {t:"h2",v:{fr:"Installer, rassurer, commencer",ar:"جهّزه، طمّنه، وابدأ",en:"Settle, reassure, begin"}},
+  {t:"p",v:{fr:"On installe le client tranquillement — le petit coussin — puis on lève les deux seules inquiétudes qui restent : <strong>est-ce que c'est sérieux</strong>, et <strong>est-ce que ça fait mal</strong>.",
+    ar:"بتقعّد العميل مرتاح — المخدّة الصغيرة — وبعدين بتشيل آخر قلقين عنده: <strong>هل ده جدّي</strong>، و<strong>هل ده بيوجع</strong>.",
+    en:"You settle the client comfortably — the small cushion — then you lift the only two worries left: <strong>is this serious</strong>, and <strong>does it hurt</strong>."}},
+  {t:"script",who:{fr:"À dire au client",ar:"قول للعميل",en:"Say to the client"},q:{
+    fr:"Je te rassure : cette machine est brevetée, médicalisée, aux normes françaises. Il n'y a pas de douleur et pas d'effet secondaire. On peut commencer. N'hésite pas à me le dire si tu ressens quoi que ce soit.",
+    ar:"طمّنك: الجهاز ده مسجّل ببراءة اختراع، وطبي، ومطابق للمواصفات الفرنسية. مفيش وجع ومفيش أعراض جانبية. نقدر نبدأ. ولو حسّيت بأي حاجة قولّي على طول.",
+    en:"Let me reassure you: this machine is patented, medical-grade, and compliant with French standards. There is no pain and no side effect. We can begin. Do not hesitate to tell me if you feel anything at all."}},
+  {t:"note",style:"margin-top:22px",who:{fr:"Une formulation à retirer",ar:"صيغة لازم تتشال",en:"One phrase to drop"},v:{
+    fr:"« Reconnue par l'OMS » : l'OMS ne certifie, n'homologue ni ne recommande aucun appareil. La phrase est fausse et, en France, elle expose à une allégation trompeuse. <b>Brevetée, dispositif médical, marquage CE, conforme aux normes françaises</b> — si c'est vrai — suffit et se prouve.",
+    ar:"«معتمد من منظمة الصحة العالمية»: المنظمة مش بتعتمد ولا بتوصي بأي جهاز. الجملة دي غلط، وفي فرنسا بتعرّضك لادّعاء مضلّل. <b>براءة اختراع، جهاز طبي، علامة CE، مطابق للمواصفات الفرنسية</b> — لو ده صحيح — كفاية وبيتثبت.",
+    en:"“Recognised by the WHO”: the WHO neither certifies, approves nor recommends any device. The claim is false and, in France, exposes you to a misleading-advertising finding. <b>Patented, medical device, CE marking, compliant with French standards</b> — if true — is enough and can be proven."}}
+]});
+
+S.push({ch:{fr:"Chapitre 3 — Récapitulatif",ar:"الفصل ٣ — الخلاصة",en:"Chapter 3 — Recap"},blocks:[
+  {t:"eyebrow",v:{fr:"Fin du discours",ar:"نهاية الكلام",en:"End of the script"}},
+  {t:"h2",v:{fr:"Le discours complet, en une page",ar:"الكلام كله في صفحة واحدة",en:"The whole script, on one page"}},
+  {t:"recap",items:[
+    {fr:"Chapitre 1 — Recevoir : les cinq sens, puis l'addiction expliquée, le détecteur et le laser.",ar:"الفصل ١ — الاستقبال: الحواس الخمسة، وبعدين شرح الإدمان، والكاشف والليزر.",en:"Chapter 1 — Welcome: the five senses, then addiction explained, the detector and the laser."},
+    {fr:"Chapitre 2 — Le sevrage : le cœur (la croyance), le corps (le contrôle), l'esprit (la discipline).",ar:"الفصل ٢ — الإقلاع: القلب (القناعة)، الجسم (التحكّم)، العقل (الانضباط).",en:"Chapter 2 — The quit plan: the heart (belief), the body (control), the mind (discipline)."},
+    {fr:"Chapitre 3 — La récompense : combler le vide, puis famille, argent, santé, religion.",ar:"الفصل ٣ — المكافأة: ملّي الفراغ، وبعدين العيلة، والفلوس، والصحة، والدين.",en:"Chapter 3 — The reward: fill the gap, then family, money, health, faith."},
+    {fr:"Sept images à réutiliser : la tétine, le faux capteur, le tagine, le sentier, l'ex, la case du refuge, la balance.",ar:"سبع صور تستعملها: التتينة، الحسّاس الزيادة، الطاجن، الطريق في الزرع، الطليقة، خانة الملجأ، الميزان.",en:"Seven images to reuse: the pacifier, the false sensor, the tagine, the path, the ex, the refuge slot, the scales."},
+    {fr:"Puis on installe, on rassure, et on commence la séance.",ar:"وبعدين بتقعّده، وتطمّنه، وتبدأ الجلسة.",en:"Then you settle them, reassure them, and begin the session."}
+  ]},
+  {t:"next",k:{fr:"Le reste",ar:"الباقي",en:"What's left"},v:{
+    fr:"Le suivi après séance",ar:"المتابعة بعد الجلسة",en:"The follow-up after the session"}}
+]});
+
+/* ---------- figure (localised, mirrored in RTL) ---------- */
+var FIG = {
+  hunger:{fr:"Faim",ar:"الجوع",en:"Hunger"},
+  thirst:{fr:"Soif",ar:"العطش",en:"Thirst"},
+  cig:{fr:"Cigarette",ar:"السجارة",en:"Cigarette"},
+  real:{fr:"vrai capteur",ar:"حسّاس حقيقي",en:"real sensor"},
+  extra:{fr:"capteur en trop",ar:"حسّاس زيادة",en:"extra sensor"},
+  brain:{fr:"Le cerveau",ar:"المخ",en:"The brain"},
+  signal:{fr:"reçoit le signal",ar:"بيستقبل الإشارة",en:"receives the signal"},
+  laser:{fr:"LASER",ar:"ليزر",en:"LASER"},
+  cap:{fr:"Fréquence électrique très basse = capteur en trop",ar:"تردد كهربائي واطي جدًا = حسّاس زيادة",en:"Very low electrical frequency = extra sensor"}
+};
+
+function figure(L){
+  var rtl = L === "ar", W = 700;
+  function fx(x){ return rtl ? W - x : x; }
+  function rx(x,w){ return rtl ? W - (x + w) : x; }
+  var disp = rtl ? "Noto Kufi Arabic, sans-serif" : "Familjen Grotesk, sans-serif";
+  var mono = rtl ? "Noto Kufi Arabic, sans-serif" : "IBM Plex Mono, monospace";
+  function pill(y,name,sub,ember){
+    return '<rect x="'+rx(16,180)+'" y="'+y+'" width="180" height="50" rx="3" fill="'+(ember?"var(--ember-soft)":"none")+'" stroke="'+(ember?"var(--ember)":"var(--accent)")+'" stroke-width="1"></rect>'+
+      '<text x="'+fx(106)+'" y="'+(y+22)+'" text-anchor="middle" font-family="'+disp+'" font-size="14" font-weight="600" fill="var(--ink)">'+name+'</text>'+
+      '<text x="'+fx(106)+'" y="'+(y+39)+'" text-anchor="middle" font-family="'+mono+'" font-size="9.5" fill="'+(ember?"var(--ember)":"var(--muted)")+'">'+sub+'</text>';
+  }
+  return '<div class="figure" dir="ltr">'+
+    '<svg viewBox="0 0 700 215" role="img" aria-label="'+FIG.cap[L]+'">'+
+      '<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"></path></marker></defs>'+
+      '<rect x="'+rx(506,178)+'" y="10" width="178" height="186" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1"></rect>'+
+      '<text x="'+fx(595)+'" y="98" text-anchor="middle" font-family="'+disp+'" font-size="16" font-weight="600" fill="var(--ink)">'+FIG.brain[L]+'</text>'+
+      '<text x="'+fx(595)+'" y="119" text-anchor="middle" font-family="'+mono+'" font-size="10" fill="var(--muted)">'+FIG.signal[L]+'</text>'+
+      '<g fill="none" stroke="currentColor" stroke-width="1.4" color="var(--accent)">'+
+        '<line x1="'+fx(204)+'" y1="35" x2="'+fx(494)+'" y2="35" marker-end="url(#arw)"></line>'+
+        '<line x1="'+fx(204)+'" y1="103" x2="'+fx(494)+'" y2="103" marker-end="url(#arw)"></line>'+
+      '</g>'+
+      '<line x1="'+fx(204)+'" y1="171" x2="'+fx(352)+'" y2="171" fill="none" stroke="var(--ember)" stroke-width="1.4" stroke-dasharray="5 4"></line>'+
+      '<g stroke="var(--ember)" stroke-width="2" stroke-linecap="round">'+
+        '<line x1="'+fx(364)+'" y1="163" x2="'+fx(380)+'" y2="179"></line>'+
+        '<line x1="'+fx(380)+'" y1="163" x2="'+fx(364)+'" y2="179"></line>'+
+      '</g>'+
+      '<text x="'+fx(372)+'" y="199" text-anchor="middle" font-family="'+mono+'" font-size="9.5" fill="var(--ember)">'+FIG.laser[L]+'</text>'+
+      pill(10, FIG.hunger[L], FIG.real[L], false)+
+      pill(78, FIG.thirst[L], FIG.real[L], false)+
+      pill(146, FIG.cig[L], FIG.extra[L], true)+
+    '</svg>'+
+    '<div class="cap">'+FIG.cap[L]+'</div>'+
+  '</div>';
+}
+
+/* ---------- rendering ---------- */
+function block(b, L){
+  var st = b.style ? ' style="'+b.style+'"' : '';
+  switch(b.t){
+    case "eyebrow": return '<div class="eyebrow">'+b.v[L]+'</div>';
+    case "h2": return '<h2>'+b.v[L]+'</h2>';
+    case "lede": return '<p class="lede">'+b.v[L]+'</p>';
+    case "p":
+      if (b.cls === "muted") { return '<p style="color:var(--muted)"'+(b.style?'':'')+'>'+b.v[L]+'</p>'; }
+      if (b.cls === "tagline") { return '<p><strong class="tag">'+b.v[L]+'</strong></p>'; }
+      return '<p'+st+'>'+b.v[L]+'</p>';
+    case "note":
+      return '<div class="note"'+st+'><span class="who">'+b.who[L]+'</span>'+b.v[L]+'</div>';
+    case "script":
+      return '<div class="script"'+st+'><span class="who">'+b.who[L]+'</span><q>'+b.q[L]+'</q></div>';
+    case "cols2":
+      return '<div class="cols two"><div class="stack">'+b.left.map(function(x){return block(x,L);}).join("")+
+             '</div><div class="stack">'+b.right.map(function(x){return block(x,L);}).join("")+'</div></div>';
+    case "cols3":
+      return '<div class="cols">'+b.items.map(function(it){
+        return '<div><h3>'+it.h[L]+'</h3><p class="sub">'+it.p[L]+'</p></div>';
+      }).join("")+'</div>';
+    case "steps":
+      return '<ol class="steps">'+b.items.map(function(it){
+        return '<li><div><h3>'+it.h[L]+'</h3><p>'+it.p[L]+'</p></div></li>';
+      }).join("")+'</ol>';
+    case "senses":
+      return '<dl class="senses">'+b.items.map(function(it){
+        return '<div class="sense"><dt>'+it.dt[L]+'</dt><dd>'+it.dd[L]+'</dd></div>';
+      }).join("")+'</dl>';
+    case "compare":
+      return '<div class="compare"><div class="yes"><h3>'+b.yes.h[L]+'</h3><ul>'+
+        b.yes.items.map(function(x){return '<li>'+x[L]+'</li>';}).join("")+'</ul></div>'+
+        '<div class="no"><h3>'+b.no.h[L]+'</h3><ul>'+
+        b.no.items.map(function(x){return '<li>'+x[L]+'</li>';}).join("")+'</ul></div></div>';
+    case "timeline":
+      return '<div class="tl">'+b.items.map(function(it){
+        return '<div><span>'+it.k[L]+'</span><p>'+it.p[L]+'</p></div>';
+      }).join("")+'</div>';
+    case "recap":
+      return '<ul class="recap">'+b.items.map(function(x){return '<li>'+x[L]+'</li>';}).join("")+'</ul>';
+    case "next":
+      return '<div class="next"><span class="k">'+b.k[L]+'</span><span class="v">'+b.v[L]+'</span></div>';
+    case "figure":
+      return '<div style="margin-top:22px">'+figure(L)+'</div>';
+    default: return "";
+  }
+}
+
+function render(s, L){
+  if (s.title){
+    var m = s.title.meta.map(function(x){ return '<span>'+x.k[L]+' · <b>'+x.v[L]+'</b></span>'; }).join("");
+    return '<div class="title-slide"><div><div class="eyebrow">'+s.title.eyebrow[L]+'</div><h1>'+s.title.h1[L]+'</h1></div>'+
+           '<p class="lede" style="margin:0">'+s.title.lede[L]+'</p><div class="title-meta">'+m+'</div></div>';
+  }
+  if (s.section){
+    return '<div class="title-slide"><div><div class="eyebrow">'+s.section.eyebrow[L]+'</div><h1>'+s.section.h1[L]+'</h1></div>'+
+           '<p class="lede" style="margin:0">'+s.section.lede[L]+'</p></div>';
+  }
+  return s.blocks.map(function(b){ return block(b, L); }).join("");
+}
+
+/* ---------- chapters ---------- */
+var CH = [];
+for (var k=0;k<S.length;k++){ if (S[k].section){ CH.push({start:k, end:k}); } else if (CH.length){ CH[CH.length-1].end = k; } }
+for (var k2=0;k2<CH.length;k2++){ CH[k2].len = CH[k2].end - CH[k2].start + 1; CH[k2].meta = CH_META[k2]; }
+
+/* ---------- progress (per viewer, best effort) ---------- */
+var PKEY = "reset-discours-progress-v1";
+function loadP(){ try { return JSON.parse(localStorage.getItem(PKEY)) || {}; } catch(e){ return {}; } }
+function saveP(p){ try { localStorage.setItem(PKEY, JSON.stringify(p)); } catch(e){} }
+var P = loadP();
+function markSeen(c, idx){
+  var r = P["c"+c] || {seen:0, done:false};
+  if (idx+1 > r.seen){ r.seen = idx+1; }
+  if (idx === CH[c].len-1){ r.done = true; }
+  P["c"+c] = r; saveP(P);
+}
+
+/* ---------- home ---------- */
+function renderHome(L){
+  var m = HOME.meta.map(function(x){ return '<span>'+x.k[L]+' · <b>'+x.v[L]+'</b></span>'; }).join("");
+  var cards = CH.map(function(c, n){
+    var r = P["c"+n] || {seen:0, done:false};
+    var pct = Math.round(Math.min(r.seen, c.len) / c.len * 100);
+    var cta = r.done ? UI.doneL[L] : (r.seen > 0 ? UI.resume[L] : UI.start[L]);
+    var topics = c.meta.topics.map(function(t){ return '<li><span>'+t[L]+'</span></li>'; }).join("");
+    return '<button type="button" class="module" data-ch="'+n+'">'+
+      '<span class="num">'+UI.chap[L]+' '+(n+1)+'</span>'+
+      '<h3>'+c.meta.title[L]+'</h3>'+
+      '<p class="blurb">'+c.meta.blurb[L]+'</p>'+
+      '<ul>'+topics+'</ul>'+
+      '<span class="foot">'+
+        '<span class="bar"><i style="width:'+pct+'%"></i></span>'+
+        '<span class="meta"><span>'+c.len+' '+UI.seq[L]+(r.seen>0 && !r.done ? ' · '+Math.min(r.seen,c.len)+'/'+c.len : '')+'</span>'+
+        '<span class="cta'+(r.done?' done':'')+'">'+cta+' →</span></span>'+
+      '</span>'+
+    '</button>';
+  }).join("");
+  var any = CH.some(function(c,n){ var r=P["c"+n]; return r && r.seen>0; });
+  return '<div class="home"><div class="title-slide" style="gap:26px">'+
+    '<div><div class="eyebrow">'+HOME.eyebrow[L]+'</div><h1>'+HOME.h1[L]+'</h1></div>'+
+    '<p class="lede" style="margin:0">'+HOME.lede[L]+'</p></div>'+
+    '<div class="modules">'+cards+'</div>'+
+    '<div class="title-meta">'+m+(any ? '<button type="button" class="restart" id="reset">'+UI.restart[L]+'</button>' : '')+'</div>'+
+  '</div>';
+}
+
+/* ---------- controller ---------- */
+var app=document.getElementById("app"), slide=document.getElementById("slide"),
+    rail=document.getElementById("rail"), count=document.getElementById("count"),
+    chap=document.getElementById("chapterLabel"), brand=document.getElementById("brand"),
+    prev=document.getElementById("prev"), next=document.getElementById("next"),
+    homeBtn=document.getElementById("home"), chips=document.getElementById("chips"),
+    hint=document.getElementById("hint"), L="fr", view="home", c=0, i=0;
+
+function pad(n){ return n<10 ? "0"+n : ""+n; }
+
+function drawChrome(){
+  app.setAttribute("data-lang", L);
+  app.setAttribute("dir", L==="ar" ? "rtl" : "ltr");
+  document.documentElement.setAttribute("lang", L==="ar" ? "ar-EG" : L);
+  brand.innerHTML = UI.brand[L];
+  homeBtn.textContent = UI.home[L];
+  prev.textContent = UI.prev[L];
+  chips.innerHTML = CH.map(function(x, n){
+    return '<button type="button" data-ch="'+n+'" aria-current="'+(view==="slide" && n===c)+'">'+UI.chap[L].charAt(0)+(n+1)+'</button>';
+  }).join("");
+}
+
+function draw(){
+  drawChrome();
+  if (view === "home"){
+    slide.innerHTML = renderHome(L);
+    chap.textContent = "";
+    hint.textContent = UI.hintHome[L];
+    count.textContent = "";
+    rail.style.width = "0%";
+    homeBtn.hidden = true; prev.hidden = true; next.hidden = true;
+  } else {
+    var ch = CH[c], s = S[ch.start + i];
+    slide.innerHTML = render(s, L);
+    chap.textContent = s.ch[L];
+    hint.textContent = UI.hint[L];
+    count.textContent = pad(i+1)+" / "+pad(ch.len);
+    rail.style.width = ((i+1)/ch.len*100)+"%";
+    homeBtn.hidden = false; prev.hidden = false; next.hidden = false;
+    prev.disabled = (i===0 && c===0);
+    next.textContent = (i < ch.len-1) ? UI.next[L] : (c < CH.length-1 ? UI.nextCh[L] : UI.finish[L]);
+    markSeen(c, i);
+  }
+  window.scrollTo(0,0);
+}
+
+function openCh(n, at){ view="slide"; c=n; i=at||0; draw(); }
+function goHome(){ view="home"; draw(); }
+function fwd(){
+  if (view==="home"){ return; }
+  if (i < CH[c].len-1){ i++; draw(); }
+  else if (c < CH.length-1){ openCh(c+1, 0); }
+  else { goHome(); }
+}
+function back(){
+  if (view==="home"){ return; }
+  if (i > 0){ i--; draw(); }
+  else if (c > 0){ openCh(c-1, CH[c-1].len-1); }
+}
+
+slide.addEventListener("click", function(e){
+  var mod = e.target.closest ? e.target.closest(".module") : null;
+  if (mod){ var n = +mod.getAttribute("data-ch"); var r = P["c"+n]; openCh(n, (r && !r.done && r.seen>0) ? Math.min(r.seen-1, CH[n].len-1) : 0); return; }
+  if (e.target.id === "reset"){ P = {}; saveP(P); draw(); }
+});
+chips.addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button[data-ch]") : null;
+  if (b){ openCh(+b.getAttribute("data-ch"), 0); }
+});
+homeBtn.addEventListener("click", goHome);
+prev.addEventListener("click", back);
+next.addEventListener("click", fwd);
+
+Array.prototype.forEach.call(document.querySelectorAll(".langs button"), function(b){
+  b.addEventListener("click", function(){
+    L = b.getAttribute("data-lang");
+    Array.prototype.forEach.call(document.querySelectorAll(".langs button"), function(o){
+      o.setAttribute("aria-pressed", o===b ? "true" : "false");
+    });
+    draw();
+  });
+});
+document.addEventListener("keydown", function(e){
+  var f = L==="ar" ? "ArrowLeft" : "ArrowRight";
+  var bk = L==="ar" ? "ArrowRight" : "ArrowLeft";
+  if (e.key===f || e.key==="PageDown"){ fwd(); }
+  else if (e.key===bk || e.key==="PageUp"){ back(); }
+  else if (e.key==="Escape" || e.key==="Home"){ goHome(); }
+  else if (e.key==="End" && view==="slide"){ i = CH[c].len-1; draw(); }
+  else { return; }
+  e.preventDefault();
+});
+var x0=null;
+document.addEventListener("touchstart", function(e){ x0=e.changedTouches[0].clientX; }, {passive:true});
+document.addEventListener("touchend", function(e){
+  if (x0===null){ return; }
+  var dx = e.changedTouches[0].clientX - x0;
+  if (Math.abs(dx) > 55){
+    var forward = L==="ar" ? dx > 0 : dx < 0;
+    if (forward){ fwd(); } else { back(); }
+  }
+  x0=null;
+}, {passive:true});
+
+draw();
+})();
+</script>
+
+</body></html>
