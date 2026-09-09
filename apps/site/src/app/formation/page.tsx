@@ -3,20 +3,19 @@ import Link from 'next/link';
 import {
   ArrowRight,
   BookOpen,
-  Compass,
+  CheckCircle2,
+  Clock,
   GraduationCap,
+  Globe,
   Lock,
   Sparkles,
-  Stethoscope,
-  Users,
-  Wrench,
 } from 'lucide-react';
 
 // Contenu métier interne — pas d'indexation Google.
 export const metadata: Metadata = {
   title: 'Formation praticien',
   description:
-    'Espace de formation interne pour les praticiens Reset Egypt — modules pédagogiques trilingues (FR / مصري / EN).',
+    'Parcours de formation interne pour les praticiens Reset Egypt — trilingue FR / مصري / EN.',
   robots: {
     index: false,
     follow: false,
@@ -34,56 +33,17 @@ type Level = 'foundation' | 'intermediate' | 'advanced';
 
 interface Module {
   slug: string;
+  order: number; // Numéro d'affichage — l'ordre du parcours pédagogique
   title: string;
+  eyebrow: string; // petit tag catégorie/étape au-dessus du titre
   blurb: string;
   chapters: string[];
   href: string;
   status: 'available' | 'coming';
-  duration: string; // ex "45 min"
+  duration: string;
   level: Level;
   languages: Locale[];
-  category: CategorySlug;
 }
-
-type CategorySlug = 'fundamentals' | 'techniques' | 'clinical' | 'business';
-
-interface Category {
-  slug: CategorySlug;
-  title: string;
-  description: string;
-  Icon: typeof BookOpen;
-}
-
-const CATEGORIES: Category[] = [
-  {
-    slug: 'fundamentals',
-    title: 'Fondamentaux',
-    description:
-      "Les bases indispensables : le discours à tenir, la méthode auriculothérapique, l'appareil et son fonctionnement.",
-    Icon: Compass,
-  },
-  {
-    slug: 'techniques',
-    title: 'Techniques par addiction',
-    description:
-      'Protocoles spécifiques par service : tabac, drogues, alcool, sucre, stress. À utiliser en pratique quotidienne.',
-    Icon: Wrench,
-  },
-  {
-    slug: 'clinical',
-    title: 'Clinique & suivi',
-    description:
-      'Contre-indications, cas complexes, suivi post-séance, gestion des rechutes. Compléments cliniques.',
-    Icon: Stethoscope,
-  },
-  {
-    slug: 'business',
-    title: 'Cabinet & relation client',
-    description:
-      'Accueil, tarifs, éthique, communication patient, marketing. La partie non-clinique du métier.',
-    Icon: Users,
-  },
-];
 
 const LEVEL_LABEL: Record<Level, string> = {
   foundation: 'Fondamental',
@@ -97,29 +57,15 @@ const LANG_LABEL: Record<Locale, string> = {
   ar: 'AR',
 };
 
+// Ordre pédagogique : d'abord la connaissance (manuel), puis la relation (discours).
 const MODULES: Module[] = [
   {
-    slug: 'discours-praticien',
-    title: 'Le discours praticien',
-    blurb:
-      "Trois chapitres, du premier regard échangé au démarrage de la séance. Le script complet — accueil, définition de l'addiction, images pédagogiques (tétine, faux capteur, tagine), sevrage psychologique, récompense.",
-    chapters: [
-      "Recevoir le client & expliquer l'addiction",
-      'Établir le sevrage psychologique',
-      'La récompense et la séance',
-    ],
-    href: '/formation/discours-praticien.html',
-    status: 'available',
-    duration: '45 min',
-    level: 'foundation',
-    languages: ['fr', 'ar', 'en'],
-    category: 'fundamentals',
-  },
-  {
     slug: 'manuel-laser-anti-tabac',
+    order: 1,
     title: 'Manuel Laser Anti-Tabac',
+    eyebrow: 'Savoir · Le socle théorique',
     blurb:
-      "Le manuel complet ORYZEN, réorganisé en 4 parties : comprendre la méthode, connaître l'oreille, maîtriser les outils et les protocoles, accompagner le fumeur.",
+      "Le manuel de référence ORYZEN, réorganisé en quatre parties qui se suivent : comprendre la méthode auriculothérapique, connaître l'anatomie et la cartographie de l'oreille, maîtriser les outils et les protocoles, et accompagner le fumeur au quotidien.",
     chapters: [
       'Comprendre la méthode',
       "L'oreille : anatomie et cartographie",
@@ -131,21 +77,35 @@ const MODULES: Module[] = [
     duration: '2 h',
     level: 'foundation',
     languages: ['fr', 'ar', 'en'],
-    category: 'fundamentals',
+  },
+  {
+    slug: 'discours-praticien',
+    order: 2,
+    title: 'Le discours praticien',
+    eyebrow: 'Savoir-faire · La relation client',
+    blurb:
+      "Trois chapitres du premier regard échangé au démarrage de la séance : accueil et règle des cinq sens, définition de l'addiction avec ses images pédagogiques (tétine, faux capteur, tagine), et le sevrage psychologique en trois appuis — cœur, corps, esprit.",
+    chapters: [
+      "Recevoir le client & expliquer l'addiction",
+      'Établir le sevrage psychologique',
+      'La récompense et la séance',
+    ],
+    href: '/formation/discours-praticien.html',
+    status: 'available',
+    duration: '45 min',
+    level: 'foundation',
+    languages: ['fr', 'ar', 'en'],
   },
 ];
-
-// Groupement des modules par catégorie
-function modulesInCategory(slug: CategorySlug): Module[] {
-  return MODULES.filter((m) => m.category === slug);
-}
 
 export default function FormationIndex() {
   const totalModules = MODULES.filter((m) => m.status === 'available').length;
 
   return (
     <div className="bg-bg min-h-screen">
-      {/* HERO */}
+      {/* ============================================================
+          HERO
+      ============================================================ */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-[#160A99] to-[#100090] text-white">
         <div
           aria-hidden
@@ -161,90 +121,73 @@ export default function FormationIndex() {
             <span>Formation praticien — Reset Egypt</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.05] max-w-4xl">
-            L&apos;espace de formation
+            Le parcours <span className="text-secondary">praticien</span>
             <br />
-            des praticiens certifiés
+            Reset
           </h1>
           <p className="mt-6 text-base lg:text-lg text-white/85 max-w-2xl leading-relaxed">
-            Modules pédagogiques trilingues (français · مصري · english) pour maîtriser le discours,
-            l&apos;auriculothérapie laser, les protocoles et l&apos;accompagnement. Contenu métier
-            confidentiel — ne pas diffuser hors équipe.
+            Du socle théorique à la relation client, deux modules à suivre dans l&apos;ordre —
+            trilingues (français · مصري · english). Contenu métier confidentiel, réservé aux
+            praticiens certifiés Reset.
           </p>
 
           {/* Meta chips */}
-          <div className="mt-10 flex flex-wrap gap-6 text-sm">
+          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm">
             <div className="flex items-center gap-2 text-white/85">
               <BookOpen className="w-4 h-4 text-secondary" strokeWidth={1.75} />
               <span>
-                <strong className="text-white font-semibold">{totalModules}</strong> module
-                {totalModules > 1 ? 's' : ''} disponible{totalModules > 1 ? 's' : ''}
+                <strong className="text-white font-semibold">{totalModules}</strong> modules
               </span>
             </div>
             <div className="flex items-center gap-2 text-white/85">
-              <Sparkles className="w-4 h-4 text-secondary" strokeWidth={1.75} />
+              <Clock className="w-4 h-4 text-secondary" strokeWidth={1.75} />
               <span>
-                <strong className="text-white font-semibold">3</strong> langues (FR · AR · EN)
+                <strong className="text-white font-semibold">≈ 3 h</strong> de contenu
               </span>
+            </div>
+            <div className="flex items-center gap-2 text-white/85">
+              <Globe className="w-4 h-4 text-secondary" strokeWidth={1.75} />
+              <span>FR · AR · EN</span>
             </div>
             <div className="flex items-center gap-2 text-white/85">
               <Lock className="w-4 h-4 text-secondary" strokeWidth={1.75} />
-              <span>Accès réservé aux praticiens Reset</span>
+              <span>Accès réservé</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-        {CATEGORIES.map((cat) => {
-          const modules = modulesInCategory(cat.slug);
-          const CatIcon = cat.Icon;
-          const empty = modules.length === 0;
+      {/* ============================================================
+          PARCOURS — timeline verticale, un module par étape
+      ============================================================ */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+        <div className="mb-12 lg:mb-16">
+          <div className="text-[10px] tracking-[0.28em] font-bold text-primary uppercase mb-3">
+            Le parcours
+          </div>
+          <h2 className="text-2xl lg:text-3xl font-bold text-text tracking-tight leading-tight max-w-2xl">
+            Deux modules à suivre dans l&apos;ordre : d&apos;abord le savoir, puis le savoir-faire.
+          </h2>
+        </div>
 
-          return (
-            <div key={cat.slug} className="mb-16 last:mb-0">
-              {/* Category header */}
-              <div className="flex items-start gap-4 mb-8 pb-6 border-b border-border-light">
-                <div className="w-11 h-11 rounded-xl bg-primary-lightest text-primary flex items-center justify-center shrink-0">
-                  <CatIcon className="w-5 h-5" strokeWidth={1.75} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-baseline gap-3 flex-wrap">
-                    <h2 className="text-xl lg:text-2xl font-bold text-text tracking-tight">
-                      {cat.title}
-                    </h2>
-                    <span className="text-xs font-medium text-text-tertiary">
-                      {empty
-                        ? 'Bientôt'
-                        : `${modules.length} module${modules.length > 1 ? 's' : ''}`}
-                    </span>
-                  </div>
-                  <p className="text-sm text-text-secondary mt-1 max-w-2xl leading-relaxed">
-                    {cat.description}
-                  </p>
-                </div>
-              </div>
+        <ol className="relative space-y-14 lg:space-y-20">
+          {/* Ligne verticale connectant les étapes */}
+          <div
+            aria-hidden
+            className="absolute left-6 lg:left-8 top-6 bottom-6 w-px bg-gradient-to-b from-primary via-primary-light to-primary/20 pointer-events-none"
+          />
 
-              {/* Modules grid */}
-              {empty ? (
-                <div className="rounded-xl border-2 border-dashed border-border-light bg-surface/40 px-6 py-10 text-center">
-                  <p className="text-sm text-text-tertiary">
-                    Aucun module publié dans cette catégorie pour le moment.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  {modules.map((m) => (
-                    <ModuleCard key={m.slug} module={m} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+          {MODULES.map((m, i) => (
+            <li key={m.slug} className="relative">
+              <ModuleStep module={m} isLast={i === MODULES.length - 1} />
+            </li>
+          ))}
+        </ol>
       </section>
 
-      {/* FOOTER de la section — confidentiality notice */}
+      {/* ============================================================
+          FOOTER — confidentiality notice
+      ============================================================ */}
       <section className="border-t border-border-light bg-bg-secondary/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex items-start gap-3 max-w-3xl">
@@ -252,7 +195,7 @@ export default function FormationIndex() {
             <p className="text-xs text-text-secondary leading-relaxed">
               <strong className="text-text font-semibold">Confidentialité.</strong> Le contenu de
               cette section est destiné aux praticiens certifiés Reset. Ne le partagez pas hors
-              équipe, ne copiez pas les URLs à l&apos;extérieur : cela constitue votre savoir-faire
+              équipe, ne copiez pas les URLs à l&apos;extérieur : c&apos;est votre savoir-faire
               métier et notre différenciation clinique.
             </p>
           </div>
@@ -262,74 +205,108 @@ export default function FormationIndex() {
   );
 }
 
-function ModuleCard({ module: m }: { module: Module }) {
+function ModuleStep({ module: m, isLast: _isLast }: { module: Module; isLast: boolean }) {
   const isAvailable = m.status === 'available';
 
   return (
-    <article className="group rounded-xl bg-surface border border-border-light overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
-      <div className="p-6 lg:p-7 flex flex-col gap-4 h-full">
-        {/* Header : titre + status */}
-        <div className="flex items-start justify-between gap-4">
-          <h3 className="text-lg lg:text-xl font-bold text-text tracking-tight leading-tight">
-            {m.title}
-          </h3>
-          <span
-            className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider ${
-              isAvailable
-                ? 'bg-primary-lightest text-primary'
-                : 'bg-bg-secondary text-text-tertiary'
-            }`}
-          >
-            {isAvailable ? 'Disponible' : 'Bientôt'}
+    <div className="grid grid-cols-[auto_1fr] gap-5 lg:gap-8">
+      {/* Numéro d'étape (cercle sur la timeline) */}
+      <div className="relative">
+        <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-surface border-2 border-primary flex items-center justify-center shadow-md shadow-primary/10 relative z-10">
+          <span className="font-bold text-primary text-base lg:text-xl tabular-nums">
+            {String(m.order).padStart(2, '0')}
           </span>
-        </div>
-
-        {/* Meta chips */}
-        <div className="flex flex-wrap gap-2 text-[11px]">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-bg-secondary text-text-secondary">
-            {LEVEL_LABEL[m.level]}
-          </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-bg-secondary text-text-secondary">
-            {m.duration}
-          </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-bg-secondary text-text-secondary">
-            {m.languages.map((l) => LANG_LABEL[l]).join(' · ')}
-          </span>
-        </div>
-
-        {/* Blurb */}
-        <p className="text-sm text-text-secondary leading-relaxed">{m.blurb}</p>
-
-        {/* Chapters list */}
-        <ol className="space-y-1.5 mt-1">
-          {m.chapters.map((c, i) => (
-            <li key={c} className="flex items-baseline gap-2.5 text-sm text-text">
-              <span className="text-[10px] font-mono text-text-tertiary shrink-0 w-4">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span className="text-text-secondary">{c}</span>
-            </li>
-          ))}
-        </ol>
-
-        {/* CTA */}
-        <div className="mt-auto pt-4">
-          {isAvailable ? (
-            <Link
-              href={m.href}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark transition-colors group/cta"
-            >
-              Ouvrir le module
-              <ArrowRight
-                className="w-4 h-4 transition-transform group-hover/cta:translate-x-0.5"
-                strokeWidth={2}
-              />
-            </Link>
-          ) : (
-            <span className="text-sm text-text-tertiary italic">Bientôt disponible</span>
-          )}
         </div>
       </div>
-    </article>
+
+      {/* Carte contenu */}
+      <article
+        className={`group rounded-2xl bg-surface border transition-all ${
+          isAvailable
+            ? 'border-border-light hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10'
+            : 'border-border-light/50 opacity-70'
+        } overflow-hidden`}
+      >
+        {/* Barre supérieure décorative */}
+        <div className="h-1 bg-gradient-to-r from-primary via-secondary to-primary-light" />
+
+        <div className="p-6 lg:p-8 flex flex-col gap-5">
+          {/* Header */}
+          <header className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] tracking-[0.2em] font-bold text-primary uppercase mb-2">
+                {m.eyebrow}
+              </div>
+              <h3 className="text-xl lg:text-2xl font-bold text-text tracking-tight leading-tight">
+                {m.title}
+              </h3>
+            </div>
+            <span
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+                isAvailable
+                  ? 'bg-primary-lightest text-primary'
+                  : 'bg-bg-secondary text-text-tertiary'
+              }`}
+            >
+              {isAvailable && <CheckCircle2 className="w-3 h-3" strokeWidth={2.25} />}
+              {isAvailable ? 'Disponible' : 'Bientôt'}
+            </span>
+          </header>
+
+          {/* Blurb */}
+          <p className="text-sm lg:text-base text-text-secondary leading-relaxed">{m.blurb}</p>
+
+          {/* Chapters — grille de 2 colonnes en desktop */}
+          <div className="bg-bg-secondary/50 rounded-xl p-4 lg:p-5">
+            <div className="text-[10px] tracking-[0.2em] font-bold text-text-tertiary uppercase mb-3">
+              Au sommaire — {m.chapters.length} chapitre{m.chapters.length > 1 ? 's' : ''}
+            </div>
+            <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
+              {m.chapters.map((c, i) => (
+                <li key={c} className="flex items-baseline gap-2.5 text-sm">
+                  <span className="text-[10px] font-mono font-semibold text-primary shrink-0 w-5 tabular-nums">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-text">{c}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {/* Meta chips + CTA */}
+          <div className="flex items-center justify-between gap-4 flex-wrap pt-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+              <div className="flex items-center gap-1.5 text-text-secondary">
+                <Clock className="w-3.5 h-3.5 text-text-tertiary" strokeWidth={2} />
+                <span>{m.duration}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-text-secondary">
+                <Sparkles className="w-3.5 h-3.5 text-text-tertiary" strokeWidth={2} />
+                <span>{LEVEL_LABEL[m.level]}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-text-secondary">
+                <Globe className="w-3.5 h-3.5 text-text-tertiary" strokeWidth={2} />
+                <span>{m.languages.map((l) => LANG_LABEL[l]).join(' · ')}</span>
+              </div>
+            </div>
+
+            {isAvailable ? (
+              <Link
+                href={m.href}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary-dark transition-colors shadow-md shadow-primary/20 group/cta"
+              >
+                Ouvrir le module
+                <ArrowRight
+                  className="w-4 h-4 transition-transform group-hover/cta:translate-x-0.5"
+                  strokeWidth={2.25}
+                />
+              </Link>
+            ) : (
+              <span className="text-sm text-text-tertiary italic">Bientôt disponible</span>
+            )}
+          </div>
+        </div>
+      </article>
+    </div>
   );
 }
