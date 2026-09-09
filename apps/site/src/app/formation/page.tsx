@@ -13,6 +13,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react';
+import { ForceFrenchLtr } from './ForceFrenchLtr';
 
 // Contenu métier interne — pas d'indexation Google.
 export const metadata: Metadata = {
@@ -106,6 +107,7 @@ export default function FormationIndex() {
 
   return (
     <div className="bg-bg min-h-screen">
+      <ForceFrenchLtr />
       {/* ============================================================
           HERO
       ============================================================ */}
