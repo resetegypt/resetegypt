@@ -79,7 +79,7 @@ const MODULES: Module[] = [
     eyebrow: 'Le socle théorique',
     emoji: '📚',
     blurb:
-      "Le manuel de référence ORYZEN, réorganisé en quatre parties qui se suivent : comprendre la méthode auriculothérapique, connaître l'anatomie et la cartographie de l'oreille, maîtriser les outils et les protocoles, et accompagner le fumeur au quotidien.",
+      "Le manuel de référence complet, réorganisé en quatre parties qui se suivent : comprendre la méthode auriculothérapique, connaître l'anatomie et la cartographie de l'oreille, maîtriser les outils et les protocoles, et accompagner le fumeur au quotidien.",
     chapters: [
       'Comprendre la méthode',
       "L'oreille : anatomie et cartographie",

@@ -252,6 +252,36 @@ figure.fig ol.leg{list-style:none;margin:0;padding:0;display:grid;grid-template-
 figure.fig ol.leg li{display:grid;grid-template-columns:1.9em 1fr;gap:6px;align-items:baseline}
 figure.fig .ln{font-family:var(--mono);font-size:10.5px;color:var(--ochre);font-variant-numeric:tabular-nums}
 figure.fig figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:12px}
+
+/* ============================================================
+   Micro-animations ludiques (fade-in, hover, transitions)
+   ============================================================ */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-2deg)}75%{transform:rotate(2deg)}}
+@media (prefers-reduced-motion:no-preference){
+  .sheet{animation:fadeInUp .32s cubic-bezier(.2,.7,.3,1) both}
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .row:hover .n{animation:wiggle .4s ease-in-out}
+  h2.mt,h1{transition:letter-spacing .2s}
+}
+/* Bouton "Commencer" / "Continuer" plus ludique */
+.btn.primary,.rows .row:hover .mark:not(.todo){color:var(--accent);font-weight:700}
+/* Kicker (eyebrow) : gradient shimmer très subtil */
+.kicker{position:relative;overflow:hidden}
+.kicker::after{
+  content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);
+  animation:shimmer 4s infinite;pointer-events:none;
+}
+@keyframes shimmer{100%{left:100%}}
+/* Scrollbar custom (webkit) */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--ground)}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--ground)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+/* Selection colorée */
+::selection{background:var(--accent-tint);color:var(--ink)}
 </style>
 
 </head>
@@ -289,9 +319,9 @@ figure.fig figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.1em
 var DATA = {
  "meta": {
   "brand": {
-   "fr": "ORYZEN WELLNESS ACADEMY",
-   "ar": "ORYZEN WELLNESS ACADEMY",
-   "en": "ORYZEN WELLNESS ACADEMY"
+   "fr": "RESET · FORMATION PRATICIEN",
+   "ar": "RESET · تدريب الممارس",
+   "en": "RESET · PRACTITIONER TRAINING"
   },
   "title": {
    "fr": "Formation Laser Anti-Tabac",
@@ -323,9 +353,9 @@ var DATA = {
      "en": "Source"
     },
     "v": {
-     "fr": "Manuel ORYZEN, 15 sections",
-     "ar": "دليل ORYZEN، ١٥ قسمًا",
-     "en": "ORYZEN manual, 15 sections"
+     "fr": "Manuel de référence, 15 sections",
+     "ar": "الدليل المرجعي، ١٥ قسمًا",
+     "en": "Reference manual, 15 sections"
     }
    },
    {
@@ -4914,7 +4944,7 @@ var IMG = {"proto_deg": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBD
 (function(){
 "use strict";
 var UI = {
- brand:{fr:'<b>ORYZEN</b> · Wellness Academy',ar:'<b>ORYZEN</b> · أكاديمية',en:'<b>ORYZEN</b> · Wellness Academy'},
+ brand:{fr:'<b>RESET</b> · Formation praticien',ar:'<b>RESET</b> · تدريب الممارس',en:'<b>RESET</b> · Practitioner training'},
  home:{fr:"Sommaire",ar:"المحتويات",en:"Contents"},
  prev:{fr:"← Précédent",ar:"→ السابق",en:"← Previous"},
  next:{fr:"Suivant →",ar:"التالي ←",en:"Next →"},
@@ -4931,7 +4961,7 @@ var M = DATA.modules, PARTS = DATA.parts, META = DATA.meta;
 var byId = {}; M.forEach(function(m){ byId[m.id]=m; });
 var ORDER = []; PARTS.forEach(function(p){ p.modules.forEach(function(id){ ORDER.push(id); }); });
 
-var PKEY="oryzen-manuel-v1";
+var PKEY="reset-manuel-v1";
 function loadP(){ try{ return JSON.parse(localStorage.getItem(PKEY))||{}; }catch(e){ return {}; } }
 function saveP(p){ try{ localStorage.setItem(PKEY, JSON.stringify(p)); }catch(e){} }
 var P = loadP();

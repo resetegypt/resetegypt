@@ -330,6 +330,32 @@ strong{font-weight:600;color:var(--ink)}
 .restart{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:0;cursor:pointer}
 .restart:hover{color:var(--accent)}
 @media (max-width:700px){.chips{display:none}}
+
+/* ============================================================
+   Micro-animations ludiques
+   ============================================================ */
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-2deg)}75%{transform:rotate(2deg)}}
+@keyframes shimmerSlide{100%{left:100%}}
+@media (prefers-reduced-motion:no-preference){
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .module:hover h3{transform:translateX(3px);transition:transform .2s}
+  .steps li:hover::before{animation:wiggle .4s ease-in-out}
+}
+/* Eyebrow shimmer subtle */
+.eyebrow{position:relative;overflow:hidden}
+.eyebrow::after{
+  content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+  animation:shimmerSlide 5s infinite;pointer-events:none;
+}
+/* Scrollbar custom */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--ground)}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--ground)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+/* Selection */
+::selection{background:var(--accent-tint);color:var(--ink)}
 </style>
 
 <div class="app" id="app" data-lang="fr">
