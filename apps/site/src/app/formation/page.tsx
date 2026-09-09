@@ -9,6 +9,9 @@ import {
   Globe,
   Lock,
   Sparkles,
+  Stethoscope,
+  Users,
+  Wrench,
 } from 'lucide-react';
 
 // Contenu métier interne — pas d'indexation Google.
@@ -186,6 +189,49 @@ export default function FormationIndex() {
       </section>
 
       {/* ============================================================
+          À VENIR — 3 catégories futures avec placeholder discret
+      ============================================================ */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 lg:pb-24">
+        <div className="mb-8 lg:mb-10">
+          <div className="text-[10px] tracking-[0.28em] font-bold text-text-tertiary uppercase mb-2">
+            À venir
+          </div>
+          <h2 className="text-xl lg:text-2xl font-bold text-text tracking-tight leading-tight">
+            Les prochaines catégories du parcours
+          </h2>
+          <p className="text-sm text-text-secondary mt-2 max-w-2xl leading-relaxed">
+            La structure est prête pour recevoir les modules spécialisés à mesure qu&apos;ils sont
+            produits. En attendant, les fondamentaux couvrent l&apos;essentiel.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {UPCOMING_CATEGORIES.map((cat) => {
+            const Icon = cat.Icon;
+            return (
+              <div
+                key={cat.slug}
+                className="rounded-xl border-2 border-dashed border-border-light bg-surface/40 p-5 flex flex-col gap-3"
+              >
+                <div className="w-9 h-9 rounded-lg bg-bg-secondary text-text-tertiary flex items-center justify-center">
+                  <Icon className="w-4 h-4" strokeWidth={1.75} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text tracking-tight leading-tight mb-1">
+                    {cat.title}
+                  </h3>
+                  <p className="text-xs text-text-secondary leading-relaxed">{cat.blurb}</p>
+                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-bg-secondary text-text-tertiary self-start mt-auto">
+                  Bientôt
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ============================================================
           FOOTER — confidentiality notice
       ============================================================ */}
       <section className="border-t border-border-light bg-bg-secondary/40">
@@ -204,6 +250,27 @@ export default function FormationIndex() {
     </div>
   );
 }
+
+const UPCOMING_CATEGORIES = [
+  {
+    slug: 'techniques',
+    title: 'Techniques par addiction',
+    blurb: 'Protocoles tabac, drogues, alcool, sucre, stress — un module par service.',
+    Icon: Wrench,
+  },
+  {
+    slug: 'clinical',
+    title: 'Clinique & suivi',
+    blurb: 'Contre-indications, cas complexes, gestion des rechutes.',
+    Icon: Stethoscope,
+  },
+  {
+    slug: 'business',
+    title: 'Cabinet & relation client',
+    blurb: 'Accueil, tarifs, communication patient, éthique, marketing.',
+    Icon: Users,
+  },
+];
 
 function ModuleStep({ module: m, isLast: _isLast }: { module: Module; isLast: boolean }) {
   const isAvailable = m.status === 'available';
