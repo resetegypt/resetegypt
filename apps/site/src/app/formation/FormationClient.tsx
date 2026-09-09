@@ -315,7 +315,10 @@ const HREFS = ['/formation/manuel-laser-anti-tabac.html', '/formation/discours-p
 function detectLocale(pathname: string): Locale {
   const seg = pathname.split('/').filter(Boolean)[0];
   if (seg === 'fr' || seg === 'en' || seg === 'ar') return seg;
-  return 'fr'; // default fr, pas ar (contenu métier disponible d'abord en fr)
+  // Aucun préfixe = AR (default du site, cohérent avec Header/LangSwitcher).
+  // Le LangSwitcher redirige AR vers /formation (car AR = default), FR vers
+  // /fr/formation, EN vers /en/formation.
+  return 'ar';
 }
 
 export function FormationClient() {

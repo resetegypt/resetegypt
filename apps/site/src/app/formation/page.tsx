@@ -9,10 +9,11 @@ const nunito = Nunito({
   variable: '--font-nunito',
 });
 
+// /formation (sans préfixe) = AR par défaut (cohérent avec DEFAULT_LOCALE du site).
+// Le rendu bascule automatiquement selon la locale via FormationClient.
 export const metadata: Metadata = {
-  title: 'Formation praticien',
-  description:
-    'Parcours de formation interne pour les praticiens Reset Egypt — trilingue FR / مصري / EN.',
+  title: 'تدريب الممارس',
+  description: 'مسار التدريب الداخلي لممارسي Reset Egypt — بثلاث لغات FR / مصري / EN.',
   robots: {
     index: false,
     follow: false,
