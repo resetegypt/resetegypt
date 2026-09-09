@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
-import { FormationClient } from './FormationClient';
+import { FormationClient } from '../../formation/FormationClient';
 
 const nunito = Nunito({
   subsets: ['latin'],
@@ -10,22 +10,18 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'Formation praticien',
+  title: 'Practitioner training',
   description:
-    'Parcours de formation interne pour les praticiens Reset Egypt — trilingue FR / مصري / EN.',
+    'Internal training pathway for Reset Egypt practitioners — trilingual FR / مصري / EN.',
   robots: {
     index: false,
     follow: false,
     nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
-    },
+    googleBot: { index: false, follow: false, noimageindex: true },
   },
 };
 
-export default function FormationIndex() {
+export default function FormationEN() {
   return (
     <div className={nunito.className}>
       <FormationClient />

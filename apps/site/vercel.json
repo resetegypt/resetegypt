@@ -9,8 +9,10 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/:locale(fr|en|ar)/formation", "destination": "/formation" },
-    { "source": "/:locale(fr|en|ar)/formation/:path*", "destination": "/formation/:path*" },
+    {
+      "source": "/:locale(fr|en|ar)/formation/:path*.html",
+      "destination": "/formation/:path*.html"
+    },
     { "source": "/:locale(fr|en|ar)/legal", "destination": "/legal" },
     { "source": "/:locale(fr|en|ar)/privacy", "destination": "/privacy" }
   ],

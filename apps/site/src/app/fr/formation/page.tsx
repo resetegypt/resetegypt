@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
-import { FormationClient } from './FormationClient';
+import { FormationClient } from '../../formation/FormationClient';
 
 const nunito = Nunito({
   subsets: ['latin'],
@@ -17,15 +17,11 @@ export const metadata: Metadata = {
     index: false,
     follow: false,
     nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
-    },
+    googleBot: { index: false, follow: false, noimageindex: true },
   },
 };
 
-export default function FormationIndex() {
+export default function FormationFR() {
   return (
     <div className={nunito.className}>
       <FormationClient />
