@@ -40,6 +40,20 @@ const MODULES: Module[] = [
     href: '/formation/discours-praticien.html',
     status: 'available',
   },
+  {
+    slug: 'manuel-laser-anti-tabac',
+    title: 'Manuel Laser Anti-Tabac',
+    blurb:
+      "Le manuel complet ORYZEN, réorganisé en 4 parties qui se suivent : comprendre la méthode, connaître l'oreille, maîtriser les outils et les protocoles, accompagner le fumeur. 17 modules · trilingue.",
+    chapters: [
+      'Comprendre la méthode',
+      "L'oreille : anatomie et cartographie",
+      'Outils et protocoles',
+      "Le tabac et l'accompagnement",
+    ],
+    href: '/formation/manuel-laser-anti-tabac.html',
+    status: 'available',
+  },
 ];
 
 export default function FormationIndex() {
